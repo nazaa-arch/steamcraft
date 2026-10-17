@@ -1,0 +1,25 @@
+{
+  "name": "steam-craft",
+  "version": "1.0.0",
+  "description": "STEAM-Craft — Platform Workspace Riset dan Kolaborasi Multidisiplin Mahasiswa & Dosen",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "keywords": [
+    "steam",
+    "science",
+    "technology",
+    "engineering",
+    "art",
+    "mathematics",
+    "research",
+    "education"
+  ],
+  "author": "STEAM-Craft Team",
+  "license": "MIT"
+}

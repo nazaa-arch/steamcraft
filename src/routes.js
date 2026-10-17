@@ -1,0 +1,1283 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { db, DEFAULT_TEMPLATES } = require('./db');
+const { generateGuidance, answerUserQuery } = require('./ai');
+
+// In-memory active session for simplicity and instant presentation
+let currentSessionUser = null;
+
+function getCurrentUser() {
+  if (!currentSessionUser) {
+    // Default to Budi Santoso (student) on initial launch
+    currentSessionUser = db.prepare("SELECT * FROM users WHERE username = 'budi'").get();
+  }
+  return currentSessionUser;
+}
+
+function handleApiRequest(req, res, url, body) {
+  const method = req.method;
+  const pathname = url.pathname;
+  const user = getCurrentUser();
+
+  // Helper senders
+  const json = (data, status = 200) => {
+    res.writeHead(status, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+  };
+  const error = (msg, status = 400) => json({ error: msg }, status);
+
+  // ===================== AUTH ROUTES =====================
+  if (pathname === '/api/auth/me' && method === 'GET') {
+    return json({ user });
+  }
+
+  if (pathname === '/api/auth/switch-demo' && method === 'POST') {
+    const { role, username } = body || {};
+    let targetUser = null;
+    if (username) {
+      targetUser = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+    } else if (role === 'lecturer') {
+      targetUser = db.prepare("SELECT * FROM users WHERE role = 'lecturer'").get();
+    } else {
+      targetUser = db.prepare("SELECT * FROM users WHERE role = 'student'").get();
+    }
+    if (targetUser) {
+      currentSessionUser = targetUser;
+      return json({ success: true, user: targetUser });
+    }
+    return error('User tidak ditemukan');
+  }
+
+  if (pathname === '/api/auth/login' && method === 'POST') {
+    const { username, password } = body || {};
+    const found = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+    if (!found) return error('Username atau identitas tidak terdaftar', 401);
+    if (found.password !== password && password !== 'demo') {
+      return error('Kata sandi salah', 401);
+    }
+    currentSessionUser = found;
+    return json({ success: true, user: found });
+  }
+
+  if (pathname === '/api/auth/register' && method === 'POST') {
+    const { username, name, role, identifier, study_program, password } = body || {};
+    if (!username || !name || !role || !identifier) {
+      return error('Semua field wajib diisi');
+    }
+    try {
+      const colors = ['#2878d7', '#37b6a0', '#8060d5', '#ed7b64', '#f4b33e'];
+      const avatarColor = colors[Math.floor(Math.random() * colors.length)];
+      const insert = db.prepare(`
+        INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const info = insert.run(username, name, role, identifier, study_program || 'Sains Terapan', avatarColor, password || 'password123');
+      const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+      currentSessionUser = newUser;
+      return json({ success: true, user: newUser });
+    } catch (e) {
+      return error('Username sudah terpakai');
+    }
+  }
+
+  if (pathname === '/api/auth/profile' && method === 'POST') {
+    if (!user) return error('Sesi pengguna tidak valid', 401);
+    const {
+      name,
+      identifier,
+      study_program,
+      faculty,
+      university,
+      research_interests,
+      bio,
+      avatar_color,
+      academic_links
+    } = body || {};
+
+    if (!name || !identifier) {
+      return error('Nama Lengkap dan Nomor Identitas (NIM/NIP) wajib diisi');
+    }
+
+    try {
+      db.prepare(`
+        UPDATE users
+        SET name = ?,
+            identifier = ?,
+            study_program = ?,
+            faculty = ?,
+            university = ?,
+            research_interests = ?,
+            bio = ?,
+            avatar_color = ?,
+            academic_links = ?
+        WHERE id = ?
+      `).run(
+        name.trim(),
+        identifier.trim(),
+        study_program || user.study_program || 'Sains Data',
+        faculty || user.faculty || 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)',
+        university || user.university || 'Universitas Indonesia',
+        research_interests !== undefined ? research_interests.trim() : (user.research_interests || ''),
+        bio !== undefined ? bio.trim() : (user.bio || ''),
+        avatar_color || user.avatar_color || '#2878d7',
+        academic_links !== undefined ? academic_links.trim() : (user.academic_links || ''),
+        user.id
+      );
+
+      // Refresh current session user from DB
+      currentSessionUser = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+      return json({ success: true, user: currentSessionUser, message: 'Profil dan identitas berhasil diperbarui' });
+    } catch (e) {
+      return error('Gagal memperbarui profil: ' + e.message, 500);
+    }
+  }
+
+  // ===================== PROJECTS ROUTES =====================
+  if (pathname === '/api/projects' && method === 'GET') {
+    const search = url.searchParams.get('q') || '';
+    const study = url.searchParams.get('study') || '';
+    const status = url.searchParams.get('status') || '';
+
+    let query = 'SELECT * FROM projects WHERE 1=1';
+    const params = [];
+
+    if (search) {
+      query += ' AND (name LIKE ? OR desc LIKE ? OR goal LIKE ?)';
+      const s = `%${search}%`;
+      params.push(s, s, s);
+    }
+    if (study) {
+      query += ' AND study = ?';
+      params.push(study);
+    }
+    if (status) {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+
+    query += ' ORDER BY archived ASC, updated_at DESC, id DESC';
+    const projects = db.prepare(query).all(...params);
+
+    // Attach checkpoints and team members array for compatibility
+    for (const p of projects) {
+      const cps = db.prepare('SELECT is_completed, completed_by, completed_at FROM checkpoints WHERE project_id = ? ORDER BY stage_index ASC').all(p.id);
+      p.checks = cps.map(c => Boolean(c.is_completed));
+      p.members = db.prepare('SELECT id, name, identifier, study_program, role, is_lead, avatar_color FROM project_members WHERE project_id = ? ORDER BY is_lead DESC, id ASC').all(p.id);
+      p.leader = p.members.find(m => m.is_lead) || p.members[0] || null;
+    }
+
+    return json({ projects });
+  }
+
+  if (pathname.match(/^\/api\/projects\/(\d+)$/) && method === 'GET') {
+    const id = pathname.match(/^\/api\/projects\/(\d+)$/)[1];
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!project) return error('Proyek tidak ditemukan', 404);
+
+    const checkpoints = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? ORDER BY stage_index ASC').all(id);
+    const journals = db.prepare('SELECT * FROM journals WHERE project_id = ? ORDER BY id DESC').all(id);
+    const versions = db.prepare('SELECT * FROM versions WHERE project_id = ? ORDER BY version_number DESC').all(id);
+    const activity = db.prepare('SELECT * FROM activity_logs WHERE project_id = ? ORDER BY id DESC LIMIT 50').all(id);
+    const applications = db.prepare('SELECT * FROM recruitment_applications WHERE project_id = ? ORDER BY id DESC').all(id);
+    const rubric = db.prepare('SELECT * FROM rubrics WHERE project_id = ?').get(id) || null;
+    const members = db.prepare('SELECT id, name, identifier, study_program, role, is_lead, avatar_color, joined_at FROM project_members WHERE project_id = ? ORDER BY is_lead DESC, id ASC').all(id);
+
+    project.checks = checkpoints.map(c => Boolean(c.is_completed));
+    project.leader = members.find(m => m.is_lead) || members[0] || null;
+
+    return json({
+      project,
+      checkpoints,
+      journals,
+      versions,
+      activity,
+      applications,
+      rubric,
+      members
+    });
+  }
+
+  if (pathname === '/api/projects' && method === 'POST') {
+    const { name, desc, study, steam, template, goal, tools, repo_url, recruitment_roles, open_recruitment } = body || {};
+    if (!name || !desc) return error('Nama dan deskripsi proyek wajib diisi');
+
+    const insert = db.prepare(`
+      INSERT INTO projects (
+        name, desc, study, steam, template, status, progress, members_count, open_recruitment,
+        recruitment_roles, goal, tools, repo_url, lecturer, creator_id, versions_count, blocker
+      ) VALUES (
+        ?, ?, ?, ?, ?, 'Aktif', 0, 1, ?,
+        ?, ?, ?, ?, 'Dr. Rahmat Wijaya, M.Sc.', ?, 1, 0
+      )
+    `);
+
+    const info = insert.run(
+      name, desc, study || 'Sains Data', steam || 'Science + Data', template || 'data',
+      open_recruitment ? 1 : 0, recruitment_roles || 'Peneliti Muda, Analis',
+      goal || '', tools || '', repo_url || '', user.id
+    );
+
+    const newId = info.lastInsertRowid;
+
+    // Add creator as lead in project_members
+    db.prepare(`
+      INSERT INTO project_members (project_id, user_id, name, identifier, study_program, role, is_lead, avatar_color)
+      VALUES (?, ?, ?, ?, ?, 'Ketua Tim & Peneliti Utama', 1, ?)
+    `).run(newId, user.id, user.name, user.identifier, user.study_program || 'Sains Data', user.avatar_color || '#2878d7');
+
+    // Checkpoint templates
+    const tplConfig = db.prepare('SELECT checkpoints_json FROM template_configs WHERE template_key = ?').get(template || 'data');
+    let cps = DEFAULT_TEMPLATES[template || 'data']?.cp || DEFAULT_TEMPLATES.data.cp;
+    if (tplConfig && tplConfig.checkpoints_json) {
+      try { cps = JSON.parse(tplConfig.checkpoints_json); } catch (e) {}
+    }
+
+    const insertCP = db.prepare(`
+      INSERT INTO checkpoints (project_id, stage_index, title, description, is_completed)
+      VALUES (?, ?, ?, ?, 0)
+    `);
+
+    cps.forEach((cp, idx) => {
+      insertCP.run(newId, idx, cp[0], cp[1]);
+    });
+
+    db.prepare('INSERT INTO versions (project_id, version_number, note, artifact_url) VALUES (?, 1, ?, ?)').run(
+      newId, 'Inisialisasi repositori dan rencana kerja proyek', repo_url || ''
+    );
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      newId, user.name, 'Membuat workspace proyek baru.'
+    );
+
+    return json({ success: true, projectId: newId });
+  }
+
+  // Manage Project Members
+  if (pathname.match(/^\/api\/projects\/(\d+)\/members$/) && method === 'POST') {
+    const id = pathname.match(/^\/api\/projects\/(\d+)\/members$/)[1];
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!p) return error('Proyek tidak ditemukan', 404);
+    const { name, identifier, study_program, role, avatar_color } = body || {};
+    if (!name || !identifier) return error('Nama dan NIM/Identitas anggota wajib diisi');
+
+    const colors = ['#2878d7', '#37b6a0', '#8060d5', '#ed7b64', '#10b981', '#ea580c'];
+    const color = avatar_color || colors[Math.floor(Math.random() * colors.length)];
+
+    const res = db.prepare(`
+      INSERT INTO project_members (project_id, name, identifier, study_program, role, is_lead, avatar_color)
+      VALUES (?, ?, ?, ?, ?, 0, ?)
+    `).run(id, name.trim(), identifier.trim(), study_program || 'Sains Terapan', role || 'Peneliti Anggota', color);
+
+    const total = db.prepare('SELECT COUNT(*) as c FROM project_members WHERE project_id = ?').get(id).c;
+    db.prepare('UPDATE projects SET members_count = ? WHERE id = ?').run(total, id);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      id, user.name, `Menambahkan anggota baru ke tim: ${name} (${role || 'Peneliti Anggota'})`
+    );
+
+    const newMember = db.prepare('SELECT * FROM project_members WHERE id = ?').get(res.lastInsertRowid);
+    return json({ success: true, member: newMember, members_count: total });
+  }
+
+  if (pathname.match(/^\/api\/projects\/(\d+)\/members\/(\d+)$/) && method === 'DELETE') {
+    const [, projId, memberId] = pathname.match(/^\/api\/projects\/(\d+)\/members\/(\d+)$/);
+    const m = db.prepare('SELECT * FROM project_members WHERE id = ? AND project_id = ?').get(memberId, projId);
+    if (!m) return error('Anggota tim tidak ditemukan', 404);
+    if (m.is_lead) return error('Ketua tim tidak dapat dihapus');
+
+    db.prepare('DELETE FROM project_members WHERE id = ?').run(memberId);
+    const total = db.prepare('SELECT COUNT(*) as c FROM project_members WHERE project_id = ?').get(projId).c;
+    db.prepare('UPDATE projects SET members_count = ? WHERE id = ?').run(total, projId);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, `Menghapus anggota dari tim: ${m.name}`
+    );
+
+    return json({ success: true, members_count: total });
+  }
+
+  // Toggle Checkpoint (Submit by Student / Manage by Lecturer)
+  if (pathname.match(/^\/api\/projects\/(\d+)\/checkpoints\/(\d+)\/toggle$/) && method === 'POST') {
+    const [, projId, stageIdx] = pathname.match(/^\/api\/projects\/(\d+)\/checkpoints\/(\d+)\/toggle$/);
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projId);
+    if (!p) return error('Proyek tidak ditemukan', 404);
+    if (p.archived) return error('Workspace sudah diarsipkan');
+
+    const cp = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? AND stage_index = ?').get(projId, stageIdx);
+    if (!cp) return error('Checkpoint tidak valid');
+
+    const { notes } = body || {};
+
+    // RULE: Mahasiswa TIDAK BISA membatalkan checkpoint yang sudah diserahkan
+    if (cp.is_completed && user.role !== 'lecturer') {
+      return error('Tugas checkpoint ini telah diserahkan dan terkunci. Tindakan ini tidak bisa dibatalkan kecuali dikonfirmasi atau dibuka kembali oleh Dosen Pembimbing.', 403);
+    }
+
+    const newStatus = cp.is_completed ? 0 : 1;
+    const completedAt = newStatus ? new Date().toISOString() : null;
+    let completedBy = null;
+    let confirmedByLecturer = cp.confirmed_by_lecturer || 0;
+
+    if (newStatus) {
+      completedBy = `${user.name} (${user.study_program || (user.role === 'student' ? 'Mahasiswa' : 'Dosen')})`;
+      if (user.role === 'lecturer') confirmedByLecturer = 1;
+    } else {
+      // Dibuka kembali oleh dosen
+      confirmedByLecturer = 0;
+    }
+
+    db.prepare(`
+      UPDATE checkpoints
+      SET is_completed = ?,
+          completed_at = ?,
+          completed_by = ?,
+          submission_notes = ?,
+          confirmed_by_lecturer = ?
+      WHERE id = ?
+    `).run(
+      newStatus,
+      completedAt,
+      completedBy,
+      newStatus ? (notes || cp.submission_notes || '') : null,
+      confirmedByLecturer,
+      cp.id
+    );
+
+    // Recompute progress
+    const allCps = db.prepare('SELECT is_completed FROM checkpoints WHERE project_id = ?').all(projId);
+    const doneCount = allCps.filter(c => c.is_completed).length;
+    const progress = Math.round((doneCount / allCps.length) * 100);
+
+    db.prepare("UPDATE projects SET progress = ?, updated_at = datetime('now', 'localtime') WHERE id = ?").run(progress, projId);
+
+    const actionMsg = newStatus
+      ? `${user.role === 'lecturer' ? 'Dosen' : 'Mahasiswa'} menyerahkan tugas checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title}${notes ? ' - Catatan: ' + notes : ''}`
+      : `Dosen Pembimbing membatalkan/membuka kembali penyerahan checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title} untuk revisi tim mahasiswa`;
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, actionMsg
+    );
+
+    return json({
+      success: true,
+      progress,
+      is_completed: Boolean(newStatus),
+      completed_by: completedBy,
+      confirmed_by_lecturer: Boolean(confirmedByLecturer),
+      message: newStatus
+        ? 'Tugas checkpoint berhasil diserahkan kepada Dosen Pembimbing!'
+        : 'Penyerahan checkpoint berhasil dibatalkan dan dibuka kembali untuk revisi tim.'
+    });
+  }
+
+  // Confirm Checkpoint (Lecturer official confirmation)
+  if (pathname.match(/^\/api\/projects\/(\d+)\/checkpoints\/(\d+)\/confirm$/) && method === 'POST') {
+    const [, projId, stageIdx] = pathname.match(/^\/api\/projects\/(\d+)\/checkpoints\/(\d+)\/confirm$/);
+    if (user.role !== 'lecturer') {
+      return error('Hanya Dosen Pembimbing yang memiliki wewenang mengonfirmasi checkpoint secara resmi', 403);
+    }
+    const cp = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? AND stage_index = ?').get(projId, stageIdx);
+    if (!cp) return error('Checkpoint tidak ditemukan', 404);
+
+    db.prepare('UPDATE checkpoints SET is_completed = 1, confirmed_by_lecturer = 1 WHERE id = ?').run(cp.id);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, `Dosen Pembimbing memberikan konfirmasi persetujuan resmi untuk checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title}`
+    );
+
+    return json({ success: true, confirmed: true, message: 'Checkpoint resmi disetujui dan dikonfirmasi Dosen Pembimbing!' });
+  }
+
+  // Upload File Artifact
+  if (pathname === '/api/upload' && method === 'POST') {
+    const { filename, base64Data } = body || {};
+    if (!filename || !base64Data) return error('File tidak valid');
+
+    const cleanName = Date.now() + '_' + path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const uploadsDir = path.join(__dirname, '..', 'public', 'uploads');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+    const targetPath = path.join(uploadsDir, cleanName);
+    const pureBase64 = base64Data.replace(/^data:[^;]+;base64,/, '');
+    fs.writeFileSync(targetPath, Buffer.from(pureBase64, 'base64'));
+
+    return json({
+      success: true,
+      fileName: filename,
+      fileUrl: '/uploads/' + cleanName
+    });
+  }
+
+  // Add Research Journal
+  if (pathname.match(/^\/api\/projects\/(\d+)\/journals$/) && method === 'POST') {
+    const projId = pathname.match(/^\/api\/projects\/(\d+)\/journals$/)[1];
+    const { content, tag, file_name, file_url } = body || {};
+    if (!content || !content.trim()) return error('Catatan jurnal tidak boleh kosong');
+
+    db.prepare('INSERT INTO journals (project_id, author_name, tag, content, file_name, file_url) VALUES (?, ?, ?, ?, ?, ?)').run(
+      projId, user.name, tag || 'Catatan Umum', content.trim(), file_name || null, file_url || null
+    );
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, `Menambahkan catatan jurnal kategori [${tag || 'Catatan Umum'}]${file_name ? ' dengan lampiran: ' + file_name : ''}.`
+    );
+
+    const journals = db.prepare('SELECT * FROM journals WHERE project_id = ? ORDER BY id DESC').all(projId);
+    return json({ success: true, journals });
+  }
+
+  // Add Version Iteration
+  if (pathname.match(/^\/api\/projects\/(\d+)\/versions$/) && method === 'POST') {
+    const projId = pathname.match(/^\/api\/projects\/(\d+)\/versions$/)[1];
+    const { note, repo_url, file_name, file_url } = body || {};
+
+    const p = db.prepare('SELECT versions_count, repo_url FROM projects WHERE id = ?').get(projId);
+    const nextVer = (p.versions_count || 1) + 1;
+    const finalRepo = (repo_url && repo_url.trim()) ? repo_url.trim() : (p.repo_url || '');
+
+    db.prepare('UPDATE projects SET versions_count = ?, repo_url = ? WHERE id = ?').run(
+      nextVer, finalRepo, projId
+    );
+
+    db.prepare('INSERT INTO versions (project_id, version_number, note, artifact_url, file_name, file_url) VALUES (?, ?, ?, ?, ?, ?)').run(
+      projId, nextVer, note || `Iterasi pengembangan build v${nextVer}.0`, repo_url || '', file_name || null, file_url || null
+    );
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, `Merilis iterasi baru v${nextVer}.0: ${note || 'Pembaruan artefak riset'}`
+    );
+
+    return json({ success: true, versions_count: nextVer });
+  }
+
+  // Connect External Repository
+  if (pathname.match(/^\/api\/projects\/(\d+)\/repo$/) && method === 'POST') {
+    const projId = pathname.match(/^\/api\/projects\/(\d+)\/repo$/)[1];
+    const { repo_url } = body || {};
+
+    db.prepare('UPDATE projects SET repo_url = ? WHERE id = ?').run(repo_url || '', projId);
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, `Menghubungkan repositori eksternal: ${repo_url}`
+    );
+
+    return json({ success: true, repo_url });
+  }
+
+  // Toggle Blocker
+  if (pathname.match(/^\/api\/projects\/(\d+)\/blocker$/) && method === 'POST') {
+    const projId = pathname.match(/^\/api\/projects\/(\d+)\/blocker$/)[1];
+    const { blocker, reason } = body || {};
+
+    const isBlocker = blocker ? 1 : 0;
+    db.prepare('UPDATE projects SET blocker = ?, blocker_reason = ? WHERE id = ?').run(
+      isBlocker, reason || '', projId
+    );
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, isBlocker ? `Menandai kendala metodologis (Blocker): ${reason || 'Membutuhkan klinik dosen'}` : 'Kendala teknis (Blocker) telah diselesaikan.'
+    );
+
+    return json({ success: true, blocker: Boolean(isBlocker), reason });
+  }
+
+  // Submit Review to Lecturer
+  if (pathname.match(/^\/api\/projects\/(\d+)\/submit-review$/) && method === 'POST') {
+    const projId = pathname.match(/^\/api\/projects\/(\d+)\/submit-review$/)[1];
+    db.prepare("UPDATE projects SET status = 'Review diajukan', blocker = 0 WHERE id = ?").run(projId);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projId, user.name, 'Mengajukan dokumen proyek untuk review resmi dosen pembimbing.'
+    );
+
+    return json({ success: true, status: 'Review diajukan' });
+  }
+
+  // ===================== AI RESEARCH COPILOT =====================
+  if (pathname === '/api/ai/guidance' && method === 'GET') {
+    const projId = url.searchParams.get('projectId');
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projId);
+    if (!p) return error('Proyek tidak ditemukan');
+
+    const cps = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? ORDER BY stage_index ASC').all(projId);
+    const activeStage = cps.findIndex(c => !c.is_completed);
+
+    const guidance = generateGuidance(p, activeStage === -1 ? 4 : activeStage);
+    return json({ guidance });
+  }
+
+  if (pathname === '/api/ai/chat' && method === 'POST') {
+    const { question, projectId } = body || {};
+    if (!question) return error('Pertanyaan wajib diisi');
+
+    let p = null;
+    if (projectId) {
+      p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    }
+    const answer = answerUserQuery(question, p);
+    return json({ answer });
+  }
+
+  // ===================== RECRUITMENT ROUTES =====================
+  if (pathname === '/api/recruitment' && method === 'GET') {
+    const study = url.searchParams.get('study') || '';
+    let query = "SELECT * FROM projects WHERE open_recruitment = 1 AND archived = 0 AND status != 'Selesai'";
+    const params = [];
+    if (study) {
+      query += ' AND study = ?';
+      params.push(study);
+    }
+    query += ' ORDER BY id DESC';
+    const listings = db.prepare(query).all(...params);
+
+    for (const p of listings) {
+      p.applications = db.prepare('SELECT * FROM recruitment_applications WHERE project_id = ?').all(p.id);
+    }
+
+    return json({ listings });
+  }
+
+  if (pathname === '/api/recruitment/apply' && method === 'POST') {
+    const { projectId, role, message } = body || {};
+    if (!projectId || !role) return error('Proyek dan peran wajib ditentukan');
+
+    db.prepare(`
+      INSERT INTO recruitment_applications (project_id, applicant_name, applicant_study, applicant_role, message)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(projectId, user.name, user.study_program || 'Sains Terapan', role, message || '');
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, `Mengajukan diri bergabung sebagai: ${role}`
+    );
+
+    return json({ success: true });
+  }
+
+  if (pathname === '/api/recruitment/resolve' && method === 'POST') {
+    const { applicationId, status } = body || {};
+    const app = db.prepare('SELECT * FROM recruitment_applications WHERE id = ?').get(applicationId);
+    if (!app) return error('Lamaran tidak ditemukan');
+
+    db.prepare('UPDATE recruitment_applications SET status = ? WHERE id = ?').run(status, applicationId);
+    if (status === 'Diterima') {
+      db.prepare('UPDATE projects SET members_count = members_count + 1 WHERE id = ?').run(app.project_id);
+    }
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      app.project_id, user.name, `Menanggapi lamaran ${app.applicant_name} (${app.applicant_role}): ${status}`
+    );
+
+    return json({ success: true });
+  }
+
+  // ===================== CONSULTATION ROUTES =====================
+  if (pathname === '/api/consultations' && method === 'GET') {
+    const consultations = db.prepare(`
+      SELECT c.*, p.name as project_name, p.study as project_study
+      FROM consultations c
+      JOIN projects p ON c.project_id = p.id
+      ORDER BY c.date ASC, c.time ASC
+    `).all();
+
+    return json({ consultations });
+  }
+
+  if (pathname === '/api/consultations/request' && method === 'POST') {
+    const { projectId, topic, type, mode, date, time, note } = body || {};
+    if (!projectId || !topic || !date || !time) return error('Isi topik, tanggal, dan waktu bimbingan');
+
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    const lecturerName = p ? p.lecturer : 'Dr. Rahmat Wijaya, M.Sc.';
+
+    db.prepare(`
+      INSERT INTO consultations (project_id, student_name, lecturer_name, topic, type, mode, date, time, note, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu respons')
+    `).run(projectId, user.name, lecturerName, topic, type || 'Review checkpoint', mode || 'Online', date, time, note || '');
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, `Mengajukan jadwal bimbingan: "${topic}" (${date} ${time})`
+    );
+
+    return json({ success: true });
+  }
+
+  if (pathname === '/api/consultations/resolve' && method === 'POST') {
+    const { id, status, feedback } = body || {};
+    db.prepare('UPDATE consultations SET status = ?, feedback = COALESCE(?, feedback) WHERE id = ?').run(
+      status, feedback || null, id
+    );
+
+    const c = db.prepare('SELECT * FROM consultations WHERE id = ?').get(id);
+    if (c) {
+      db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+        c.project_id, user.name, `Dosen memperbarui status bimbingan menjadi: ${status}`
+      );
+    }
+
+    return json({ success: true });
+  }
+
+  if (pathname === '/api/consultations/cancel' && method === 'POST') {
+    const { id } = body || {};
+    db.prepare("UPDATE consultations SET status = 'Dibatalkan mahasiswa' WHERE id = ?").run(id);
+    return json({ success: true });
+  }
+
+  // ===================== ANNOUNCEMENTS ROUTES =====================
+  if (pathname === '/api/announcements' && method === 'GET') {
+    const announcements = db.prepare(`
+      SELECT a.*,
+             COALESCE(i.is_read, 0) as is_read,
+             COALESCE(i.is_saved, 0) as is_saved
+      FROM announcements a
+      LEFT JOIN announcement_interactions i ON a.id = i.announcement_id AND i.user_id = ?
+      ORDER BY a.pinned DESC, a.id DESC
+    `).all(user.id);
+
+    return json({ announcements });
+  }
+
+  if (pathname === '/api/announcements' && method === 'POST') {
+    const { title, category, target, body: content, pinned } = body || {};
+    if (!title || !content) return error('Judul dan isi pengumuman wajib diisi');
+
+    db.prepare(`
+      INSERT INTO announcements (author_name, title, category, target, body, pinned)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(user.name, title, category || 'Metodologi', target || 'all', content, pinned ? 1 : 0);
+
+    return json({ success: true });
+  }
+
+  if (pathname.match(/^\/api\/announcements\/(\d+)\/toggle-read$/) && method === 'POST') {
+    const annId = pathname.match(/^\/api\/announcements\/(\d+)\/toggle-read$/)[1];
+    const cur = db.prepare('SELECT is_read FROM announcement_interactions WHERE announcement_id = ? AND user_id = ?').get(annId, user.id);
+    const newRead = cur && cur.is_read ? 0 : 1;
+
+    db.prepare(`
+      INSERT INTO announcement_interactions (announcement_id, user_id, is_read, is_saved)
+      VALUES (?, ?, ?, 0)
+      ON CONFLICT(announcement_id, user_id) DO UPDATE SET is_read = ?
+    `).run(annId, user.id, newRead, newRead);
+
+    return json({ success: true, is_read: Boolean(newRead) });
+  }
+
+  if (pathname.match(/^\/api\/announcements\/(\d+)\/toggle-save$/) && method === 'POST') {
+    const annId = pathname.match(/^\/api\/announcements\/(\d+)\/toggle-save$/)[1];
+    const cur = db.prepare('SELECT is_saved FROM announcement_interactions WHERE announcement_id = ? AND user_id = ?').get(annId, user.id);
+    const newSaved = cur && cur.is_saved ? 0 : 1;
+
+    db.prepare(`
+      INSERT INTO announcement_interactions (announcement_id, user_id, is_read, is_saved)
+      VALUES (?, ?, 0, ?)
+      ON CONFLICT(announcement_id, user_id) DO UPDATE SET is_saved = ?
+    `).run(annId, user.id, newSaved, newSaved);
+
+    return json({ success: true, is_saved: Boolean(newSaved) });
+  }
+
+  if (pathname.match(/^\/api\/announcements\/(\d+)$/) && method === 'DELETE') {
+    const annId = pathname.match(/^\/api\/announcements\/(\d+)$/)[1];
+    db.prepare('DELETE FROM announcements WHERE id = ?').run(annId);
+    return json({ success: true });
+  }
+
+  // ===================== LAB & RESOURCE REQUESTS =====================
+  if (pathname === '/api/resources' && method === 'GET') {
+    const requests = db.prepare(`
+      SELECT r.*, p.name as project_name, p.study as project_study
+      FROM resource_requests r
+      JOIN projects p ON r.project_id = p.id
+      ORDER BY r.id DESC
+    `).all();
+
+    return json({ requests });
+  }
+
+  if (pathname === '/api/resources/request' && method === 'POST') {
+    const { projectId, resourceName, dateNeeded, note } = body || {};
+    if (!projectId || !resourceName || !dateNeeded) return error('Lengkapi data fasilitas yang diajukan');
+
+    db.prepare(`
+      INSERT INTO resource_requests (project_id, student_name, resource_name, date_needed, note, status)
+      VALUES (?, ?, ?, ?, ?, 'Menunggu')
+    `).run(projectId, user.name, resourceName, dateNeeded, note || '');
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, `Mengajukan peminjaman fasilitas: ${resourceName} untuk tanggal ${dateNeeded}`
+    );
+
+    return json({ success: true });
+  }
+
+  if (pathname === '/api/resources/resolve' && method === 'POST') {
+    const { id, status, feedback } = body || {};
+    db.prepare('UPDATE resource_requests SET status = ?, feedback = COALESCE(?, feedback) WHERE id = ?').run(
+      status, feedback || null, id
+    );
+
+    const r = db.prepare('SELECT * FROM resource_requests WHERE id = ?').get(id);
+    if (r) {
+      db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+        r.project_id, user.name, `Status pengajuan fasilitas [${r.resource_name}] diubah menjadi: ${status}`
+      );
+    }
+
+    return json({ success: true });
+  }
+
+  // ===================== MISSION CONTROL (DOSEN) =====================
+  if (pathname === '/api/mission/stats' && method === 'GET') {
+    const totalProjects = db.prepare('SELECT COUNT(*) as c FROM projects WHERE archived = 0').get().c;
+    const pendingReview = db.prepare("SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0").get().c;
+    const activeBlockers = db.prepare('SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0').get().c;
+    const completedProjects = db.prepare("SELECT COUNT(*) as c FROM projects WHERE status = 'Selesai'").get().c;
+
+    const templates = db.prepare('SELECT * FROM template_configs').all();
+
+    return json({
+      stats: {
+        totalProjects,
+        pendingReview,
+        activeBlockers,
+        completedProjects
+      },
+      templates
+    });
+  }
+
+  if (pathname === '/api/mission/feedback' && method === 'POST') {
+    const { projectId, note, status, openBlockerClinic, resolveBlocker } = body || {};
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    if (!p) return error('Proyek tidak ditemukan');
+
+    let updateStatus = status || p.status;
+    let isBlocker = p.blocker;
+
+    if (openBlockerClinic) isBlocker = 1;
+    if (resolveBlocker) isBlocker = 0;
+
+    db.prepare('UPDATE projects SET status = ?, blocker = ? WHERE id = ?').run(updateStatus, isBlocker, projectId);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, `Catatan Dosen/Reviewer: "${note || 'Pembaruan status review'}" (Status: ${updateStatus})`
+    );
+
+    return json({ success: true });
+  }
+
+  if (pathname === '/api/mission/evaluate' && method === 'POST') {
+    const { projectId, scoreCompleteness, scoreEvidence, scoreContribution, scoreReproducibility, feedback } = body || {};
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    if (!p) return error('Proyek tidak ditemukan');
+
+    const total = (Number(scoreCompleteness) + Number(scoreEvidence) + Number(scoreContribution) + Number(scoreReproducibility)) / 4;
+    let grade = 'A (Sangat Memuaskan)';
+    if (total < 70) grade = 'C (Cukup)';
+    else if (total < 85) grade = 'B (Baik)';
+
+    db.prepare(`
+      INSERT INTO rubrics (project_id, score_completeness, score_evidence, score_contribution, score_reproducibility, total_score, feedback, evaluator_name)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(project_id) DO UPDATE SET
+        score_completeness = excluded.score_completeness,
+        score_evidence = excluded.score_evidence,
+        score_contribution = excluded.score_contribution,
+        score_reproducibility = excluded.score_reproducibility,
+        total_score = excluded.total_score,
+        feedback = excluded.feedback,
+        evaluator_name = excluded.evaluator_name,
+        updated_at = datetime('now', 'localtime')
+    `).run(projectId, scoreCompleteness, scoreEvidence, scoreContribution, scoreReproducibility, total, feedback || '', user.name);
+
+    db.prepare(`
+      UPDATE projects SET
+        final_score = ?, final_grade = ?, final_note = ?,
+        evaluation_recorded = 1, status = 'Dinilai'
+      WHERE id = ?
+    `).run(total, grade, feedback || '', projectId);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, `Memberikan penilaian rubrik STEAM resmi: Nilai ${total.toFixed(1)} (${grade}).`
+    );
+
+    return json({ success: true, totalScore: total, grade });
+  }
+
+  if (pathname === '/api/mission/reproducibility' && method === 'POST') {
+    const { projectId } = body || {};
+    const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    if (!p) return error('Proyek tidak ditemukan');
+
+    const cleanName = p.name.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
+    const filename = `steamcraft-reproducibility-${cleanName}.json`;
+
+    db.prepare('UPDATE projects SET package_compiled = 1, package_filename = ? WHERE id = ?').run(filename, projectId);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, `Mengompilasi STEAM-Craft Reproducibility Package resmi [${filename}].`
+    );
+
+    return json({ success: true, filename });
+  }
+
+  if (pathname === '/api/mission/archive' && method === 'POST') {
+    const { projectId } = body || {};
+    db.prepare("UPDATE projects SET archived = 1, status = 'Diarsipkan' WHERE id = ?").run(projectId);
+
+    db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
+      projectId, user.name, 'Mengarsipkan workspace riset dan mengunci seluruh perubahan.'
+    );
+
+    return json({ success: true });
+  }
+
+  // Get Template Configurations
+  if (pathname === '/api/mission/templates' && method === 'GET') {
+    const templates = db.prepare('SELECT * FROM template_configs').all();
+    return json({ templates });
+  }
+
+  // Update Template Configuration
+  if (pathname.match(/^\/api\/mission\/templates\/([a-z_]+)$/) && method === 'POST') {
+    const tplKey = pathname.match(/^\/api\/mission\/templates\/([a-z_]+)$/)[1];
+    const { checkpoints, rubricCompleteness, rubricEvidence, rubricContribution, rubricReproducibility } = body || {};
+
+    const total = Number(rubricCompleteness) + Number(rubricEvidence) + Number(rubricContribution) + Number(rubricReproducibility);
+    if (total !== 100) {
+      return error(`Total bobot rubrik harus tepat 100% (saat ini: ${total}%)`);
+    }
+
+    db.prepare(`
+      UPDATE template_configs SET
+        checkpoints_json = ?,
+        rubric_completeness = ?,
+        rubric_evidence = ?,
+        rubric_contribution = ?,
+        rubric_reproducibility = ?
+      WHERE template_key = ?
+    `).run(
+      JSON.stringify(checkpoints),
+      rubricCompleteness,
+      rubricEvidence,
+      rubricContribution,
+      rubricReproducibility,
+      tplKey
+    );
+
+    return json({ success: true, message: 'Template checkpoint dan bobot berhasil diperbarui!' });
+  }
+
+  // Real-time Notification Badges
+  if (pathname === '/api/notifications' && method === 'GET') {
+    const pendingConsultations = db.prepare("SELECT COUNT(*) as c FROM consultations WHERE status = 'Menunggu respons'").get().c;
+    const activeBlockers = db.prepare("SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0").get().c;
+    const pendingReviews = db.prepare("SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0").get().c;
+    
+    let unreadAnnouncements = 0;
+    try {
+      unreadAnnouncements = db.prepare(`
+        SELECT COUNT(*) as c FROM announcements a
+        LEFT JOIN announcement_interactions i ON a.id = i.announcement_id AND i.user_id = ?
+        WHERE COALESCE(i.is_read, 0) = 0
+      `).get(user.id).c;
+    } catch (e) {}
+
+    return json({
+      pendingConsultations,
+      activeBlockers,
+      pendingReviews,
+      unreadAnnouncements
+    });
+  }
+
+  // Official Printable Scientific Dossier (PDF/Print View)
+  if (pathname.match(/^\/api\/projects\/(\d+)\/dossier$/) && method === 'GET') {
+    const id = pathname.match(/^\/api\/projects\/(\d+)\/dossier$/)[1];
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!project) return error('Proyek tidak ditemukan', 404);
+
+    const checkpoints = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? ORDER BY stage_index ASC').all(id);
+    const journals = db.prepare('SELECT * FROM journals WHERE project_id = ? ORDER BY id ASC').all(id);
+    const versions = db.prepare('SELECT * FROM versions WHERE project_id = ? ORDER BY version_number ASC').all(id);
+    const rubric = db.prepare('SELECT * FROM rubrics WHERE project_id = ?').get(id) || null;
+
+    let scores = { S: 85, T: 85, E: 80, A: 75, M: 85 };
+    if (project.steam_scores) {
+      try { scores = JSON.parse(project.steam_scores); } catch (e) {}
+    }
+
+    const html = generateDossierHTML(project, checkpoints, journals, versions, rubric, scores);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(html);
+  }
+
+  // ===================== ANALYTICS =====================
+  if (pathname === '/api/analytics' && method === 'GET') {
+    const projects = db.prepare('SELECT * FROM projects').all();
+    const disciplines = {};
+    let totalProgress = 0;
+    let completedCheckpoints = 0;
+    let totalBlockers = 0;
+
+    for (const p of projects) {
+      disciplines[p.study] = (disciplines[p.study] || 0) + 1;
+      totalProgress += p.progress;
+      if (p.blocker) totalBlockers++;
+      const done = db.prepare('SELECT COUNT(*) as c FROM checkpoints WHERE project_id = ? AND is_completed = 1').get(p.id).c;
+      completedCheckpoints += done;
+    }
+
+    const avgProgress = projects.length ? Math.round(totalProgress / projects.length) : 0;
+
+    return json({
+      totalProjects: projects.length,
+      avgProgress,
+      completedCheckpoints,
+      totalBlockers,
+      disciplines,
+      projects
+    });
+  }
+
+  // ===================== EXPORT DOWNLOADS =====================
+  if (pathname.match(/^\/api\/projects\/(\d+)\/export\/json$/) && method === 'GET') {
+    const id = pathname.match(/^\/api\/projects\/(\d+)\/export\/json$/)[1];
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!project) return error('Proyek tidak ditemukan', 404);
+
+    const checkpoints = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? ORDER BY stage_index ASC').all(id);
+    const journals = db.prepare('SELECT * FROM journals WHERE project_id = ? ORDER BY id ASC').all(id);
+    const versions = db.prepare('SELECT * FROM versions WHERE project_id = ? ORDER BY version_number ASC').all(id);
+    const rubric = db.prepare('SELECT * FROM rubrics WHERE project_id = ?').get(id) || null;
+
+    const reproducibilityPkg = {
+      packageName: 'STEAM-Craft Verified Reproducibility Package',
+      schemaVersion: '1.0',
+      compiledAt: new Date().toISOString(),
+      evaluator: project.lecturer,
+      project: {
+        id: project.id,
+        name: project.name,
+        studyProgram: project.study,
+        steamDiscipline: project.steam,
+        template: project.template,
+        goal: project.goal,
+        tools: project.tools,
+        repositoryUrl: project.repo_url,
+        versionsCount: project.versions_count,
+        finalScore: project.final_score,
+        finalGrade: project.final_grade,
+        evaluationNote: project.final_note
+      },
+      checkpoints,
+      scientificJournals: journals,
+      versionHistory: versions,
+      rubricEvaluation: rubric
+    };
+
+    const filename = project.package_filename || `steamcraft-project-${project.id}.json`;
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Content-Disposition': `attachment; filename="${filename}"`
+    });
+    return res.end(JSON.stringify(reproducibilityPkg, null, 2));
+  }
+
+  if (pathname === '/api/analytics/export.csv' && method === 'GET') {
+    const projects = db.prepare('SELECT * FROM projects').all();
+    const headers = ['ID', 'Nama Proyek', 'Program Studi', 'Pilar STEAM', 'Status', 'Progres (%)', 'Anggota', 'Blocker', 'Versi', 'Nilai Akhir', 'Predikat'];
+    const rows = projects.map(p => [
+      p.id,
+      `"${(p.name || '').replace(/"/g, '""')}"`,
+      `"${p.study || ''}"`,
+      `"${p.steam || ''}"`,
+      `"${p.status || ''}"`,
+      p.progress,
+      p.members_count,
+      p.blocker ? 'Ya' : 'Tidak',
+      `v${p.versions_count}.0`,
+      p.final_score !== null ? p.final_score.toFixed(1) : '-',
+      `"${p.final_grade || '-'}"`
+    ].join(','));
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    res.writeHead(200, {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="steamcraft-cohort-analytics.csv"'
+    });
+    return res.end(csvContent);
+  }
+
+  // Fallback 404
+  return error('Endpoint tidak ditemukan', 404);
+}
+
+function generateDossierHTML(p, cps, journals, versions, rubric, scores) {
+  const cx = 170, cy = 160, maxR = 90;
+  const angles = [-Math.PI / 2, -Math.PI / 2 + (2 * Math.PI / 5), -Math.PI / 2 + (4 * Math.PI / 5), -Math.PI / 2 + (6 * Math.PI / 5), -Math.PI / 2 + (8 * Math.PI / 5)];
+  const axes = ['Science (S)', 'Technology (T)', 'Engineering (E)', 'Art (A)', 'Mathematics (M)'];
+  const values = [scores.S || 80, scores.T || 80, scores.E || 80, scores.A || 80, scores.M || 80];
+
+  const gridCircles = [25, 50, 75, 100].map(pct => {
+    const r = (pct / 100) * maxR;
+    const pts = angles.map(a => `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`).join(' ');
+    return `<polygon points="${pts}" fill="none" stroke="#cbd5e1" stroke-width="1" />`;
+  }).join('');
+
+  const axisLines = angles.map((a, i) => {
+    const x = cx + maxR * Math.cos(a);
+    const y = cy + maxR * Math.sin(a);
+    return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2" />`;
+  }).join('');
+
+  const polyPoints = values.map((val, i) => {
+    const r = (val / 100) * maxR;
+    return `${cx + r * Math.cos(angles[i])},${cy + r * Math.sin(angles[i])}`;
+  }).join(' ');
+
+  const labels = angles.map((a, i) => {
+    const lx = cx + (maxR + 26) * Math.cos(a);
+    const ly = cy + (maxR + 14) * Math.sin(a);
+    return `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3656">${axes[i]}: ${values[i]}</text>`;
+  }).join('');
+
+  const svgRadar = `
+    <svg width="340" height="320" viewBox="0 0 340 320" style="margin: auto; display: block;">
+      ${gridCircles}
+      ${axisLines}
+      <polygon points="${polyPoints}" fill="rgba(40, 120, 215, 0.25)" stroke="#2878d7" stroke-width="2.5" />
+      ${values.map((val, i) => {
+        const r = (val / 100) * maxR;
+        const px = cx + r * Math.cos(angles[i]);
+        const py = cy + r * Math.sin(angles[i]);
+        return `<circle cx="${px}" cy="${py}" r="4" fill="#2878d7" stroke="#ffffff" stroke-width="2" />`;
+      }).join('')}
+      ${labels}
+    </svg>
+  `;
+
+  const finalScore = p.final_score ? p.final_score.toFixed(1) : (rubric ? rubric.total_score.toFixed(1) : '88.5');
+  const finalGrade = p.final_grade || 'A (Sangat Memuaskan)';
+  const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>STEAM-Craft Dossier — ${p.name}</title>
+  <style>
+    @page { size: A4; margin: 16mm 14mm; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b; background: #fff; margin: 0; padding: 0; }
+    .toolbar { background: #0f172a; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .btn { background: #2878d7; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 13px; }
+    .btn:hover { background: #1d65be; }
+    .dossier-wrap { max-width: 800px; margin: 0 auto; padding: 24px; }
+    .header-table { width: 100%; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px; }
+    .header-table td { vertical-align: middle; }
+    .inst-title { font-size: 11pt; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; }
+    .doc-title { font-size: 15pt; font-weight: 900; color: #2878d7; margin: 4px 0; }
+    .meta-grid { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 10pt; }
+    .meta-grid td { padding: 6px 10px; border: 1px solid #cbd5e1; }
+    .meta-grid td.label { background: #f8fafc; font-weight: 700; width: 28%; color: #475569; }
+    .section-title { font-size: 12pt; font-weight: 800; color: #0f172a; border-left: 4px solid #2878d7; padding-left: 8px; margin: 18px 0 8px; text-transform: uppercase; }
+    .table-custom { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 9.5pt; }
+    .table-custom th { background: #f1f5f9; padding: 8px; border: 1px solid #cbd5e1; text-align: left; }
+    .table-custom td { padding: 8px; border: 1px solid #cbd5e1; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 8.5pt; font-weight: 700; }
+    .badge-done { background: #dcfce7; color: #15803d; }
+    .badge-pending { background: #fef3c7; color: #b45309; }
+    .radar-box { border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px; margin: 12px 0; background: #fafcff; }
+    .signatures { width: 100%; margin-top: 36px; border-collapse: collapse; text-align: center; font-size: 10pt; }
+    .signatures td { width: 33.3%; vertical-align: top; padding: 0 10px; }
+    .sig-space { height: 60px; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+      .dossier-wrap { padding: 0; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <div><strong>STEAM-Craft — Berkas Verifikasi & Laporan Riset Resmi</strong></div>
+    <div style="display: flex; gap: 8px;">
+      <a href="javascript:window.close()" class="btn" style="background: #475569;">Tutup</a>
+      <button onclick="window.print()" class="btn">🖨️ Cetak Berkas / Simpan PDF</button>
+    </div>
+  </div>
+
+  <div class="dossier-wrap">
+    <table class="header-table">
+      <tr>
+        <td style="width: 70px;">
+          <img src="/logo.jpg" alt="Logo" style="width: 60px; height: 60px; border-radius: 10px; object-fit: cover;">
+        </td>
+        <td style="padding-left: 14px;">
+          <div class="inst-title">Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi</div>
+          <div class="doc-title">STEAM-CRAFT SCIENTIFIC RESEARCH DOSSIER</div>
+          <div style="font-size: 9pt; color: #64748b;">Standar Akreditasi & Verifikasi Hasil Inovasi Kompetisi STEAM Mahasiswa 2026</div>
+        </td>
+        <td style="text-align: right; font-size: 9pt; color: #64748b;">
+          No. Registrasi: <strong>SC-2026-${String(p.id).padStart(4, '0')}</strong><br>
+          Tanggal: <strong>${dateStr}</strong>
+        </td>
+      </tr>
+    </table>
+
+    <table class="meta-grid">
+      <tr>
+        <td class="label">Judul Proyek</td>
+        <td colspan="3"><strong style="font-size: 11pt; color: #0f172a;">${p.name}</strong></td>
+      </tr>
+      <tr>
+        <td class="label">Program Studi Utama</td>
+        <td>${p.study}</td>
+        <td class="label">Pilar STEAM</td>
+        <td><strong>${p.steam}</strong></td>
+      </tr>
+      <tr>
+        <td class="label">Dosen Pembimbing</td>
+        <td>${p.lecturer || 'Dr. Rahmat Wijaya, M.Sc.'}</td>
+        <td class="label">Status Progres</td>
+        <td><strong style="color: #2878d7;">${p.progress}% (${p.status})</strong></td>
+      </tr>
+      <tr>
+        <td class="label">Repositori Eksternal</td>
+        <td colspan="3"><a href="${p.repo_url || '#'}" target="_blank">${p.repo_url || 'Belum ditautkan'}</a></td>
+      </tr>
+      <tr>
+        <td class="label">Rumusan Masalah / Target</td>
+        <td colspan="3">${p.goal || p.desc}</td>
+      </tr>
+    </table>
+
+    <div class="section-title">1. Verifikasi Alur Metode Ilmiah (5 Tahap Checkpoint)</div>
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Tahap</th>
+          <th style="width: 30%;">Nama Checkpoint</th>
+          <th>Deskripsi Standar & Verifikasi</th>
+          <th style="width: 15%;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${cps.map((cp, idx) => `
+          <tr>
+            <td style="font-weight: 700;">Tahap ${idx + 1}</td>
+            <td><strong>${cp.title}</strong></td>
+            <td>${cp.description}</td>
+            <td>
+              ${cp.is_completed ? '<span class="badge badge-done">✓ Terverifikasi</span>' : '<span class="badge badge-pending">Proses</span>'}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="section-title">2. Keseimbangan Pilar STEAM (Radar Chart)</div>
+    <div class="radar-box">
+      ${svgRadar}
+    </div>
+
+    <div class="section-title">3. Catatan Jurnal Riset Ilmiah & Lampiran Bukti</div>
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th style="width: 18%;">Tanggal & Peneliti</th>
+          <th style="width: 15%;">Kategori</th>
+          <th>Catatan Temuan & Keputusan Metodologis</th>
+          <th style="width: 25%;">Lampiran Berkas</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${journals.map(j => `
+          <tr>
+            <td><strong>${j.author_name}</strong><br><small style="color:#64748b;">${j.created_at ? j.created_at.slice(0, 10) : ''}</small></td>
+            <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${j.tag}</span></td>
+            <td>${j.content}</td>
+            <td>${j.file_name ? `<a href="${j.file_url}" target="_blank" style="color: #2878d7; font-weight: 700;">📎 ${j.file_name}</a>` : '<span style="color:#94a3b8;">-</span>'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="section-title">4. Lembar Evaluasi Dewan Juri & Predikat Kelulusan</div>
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Pilar Rubrik Evaluasi</th>
+          <th style="width: 15%;">Bobot</th>
+          <th style="width: 20%;">Skor Tercapai (0-100)</th>
+          <th style="width: 25%;">Status Verifikasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Kelengkapan 5 Tahap Checkpoint</td>
+          <td>25%</td>
+          <td><strong>${rubric ? rubric.score_completeness : '85.0'}</strong></td>
+          <td><span class="badge badge-done">Memenuhi Standar</span></td>
+        </tr>
+        <tr>
+          <td>Kualitas Data Mentah & Bukti Eksperimen</td>
+          <td>25%</td>
+          <td><strong>${rubric ? rubric.score_evidence : '90.0'}</strong></td>
+          <td><span class="badge badge-done">Memenuhi Standar</span></td>
+        </tr>
+        <tr>
+          <td>Kontribusi Kolaborasi Multidisiplin</td>
+          <td>25%</td>
+          <td><strong>${rubric ? rubric.score_contribution : '88.0'}</strong></td>
+          <td><span class="badge badge-done">Memenuhi Standar</span></td>
+        </tr>
+        <tr>
+          <td>Reproduksibilitas Hasil & Open Science</td>
+          <td>25%</td>
+          <td><strong>${rubric ? rubric.score_reproducibility : '92.0'}</strong></td>
+          <td><span class="badge badge-done">Memenuhi Standar</span></td>
+        </tr>
+        <tr style="background: #f8fafc; font-weight: 800; font-size: 11pt;">
+          <td colspan="2">NILAI AKHIR / PREDIKAT KELULUSAN</td>
+          <td colspan="2" style="color: #2878d7; font-size: 13pt;">
+            ${finalScore} &mdash; ${finalGrade}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size: 9.5pt; color: #475569; margin-top: 6px;">
+      <strong>Catatan Evaluator:</strong> <em>"${p.final_note || (rubric ? rubric.feedback : 'Karya riset inovatif dengan metodologi teruji dan logbook terdokumentasi sangat baik.')}"</em>
+    </div>
+
+    <table class="signatures">
+      <tr>
+        <td>
+          Ketua Tim Mahasiswa,<br><br>
+          <div class="sig-space"></div>
+          <strong>Budi Santoso</strong><br>
+          NIM. 202610101
+        </td>
+        <td>
+          Dosen Pembimbing Riset,<br><br>
+          <div class="sig-space"></div>
+          <strong>${p.lecturer || 'Dr. Rahmat Wijaya, M.Sc.'}</strong><br>
+          NIP. 198504122010121002
+        </td>
+        <td>
+          Ketua Dewan Juri STEAM,<br><br>
+          <div class="sig-space"></div>
+          <strong>Prof. Dr. Ir. Dewi Kartika</strong><br>
+          NIP. 197908252005012001
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>`;
+}
+
+module.exports = {
+  handleApiRequest
+};

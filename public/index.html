@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STEAM-Craft — Ruang Kolaborasi Multidisiplin</title>
+  <link rel="icon" type="image/jpeg" href="/logo.jpg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- ==================== LOGIN SCREEN ==================== -->
+  <div id="loginScreen" class="login-screen">
+    <section class="login-showcase">
+      <div class="login-topline">
+        <span class="login-mark">S</span>
+        <span>Platform Kolaborasi Riset Ilmiah & Inovasi Mahasiswa</span>
+      </div>
+
+      <div class="login-brand-image">
+        <img src="/logo.jpg" alt="SteamCraft Logo">
+      </div>
+
+      <div class="login-copy">
+        <div class="eyebrow">Science · Technology · Engineering · Art · Mathematics</div>
+        <h1>Ruang untuk Rasa Ingin Tahu <span>Lintas Disiplin.</span></h1>
+        <p>Integrasikan eksplorasi sains, implementasi teknologi, rancang bangun rekayasa, ekspresi estetika seni, dan ketelitian matematika dalam satu alur kerja berbasis reproducible research.</p>
+
+        <div class="login-discipline">
+          <span class="disc-pill"><span class="dot dot-blue"></span> Science</span>
+          <span class="disc-pill"><span class="dot dot-teal"></span> Technology</span>
+          <span class="disc-pill"><span class="dot dot-orange"></span> Engineering</span>
+          <span class="disc-pill"><span class="dot dot-rose"></span> Art</span>
+          <span class="disc-pill"><span class="dot dot-purple"></span> Mathematics</span>
+        </div>
+      </div>
+
+      <div style="font-size: 11px; color: var(--muted);">
+        STEAM-Craft &copy; 2026. Standar Inovasi Pendidikan Tinggi Nasional.
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="auth-card">
+        <div class="eyebrow" style="margin-bottom: 6px;">Autentikasi Terintegrasi</div>
+        <h2 style="font-size: 24px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Masuk ke Workspace</h2>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Pilih peran Anda untuk mengakses ruang kerja atau gunakan akun demo cepat.</p>
+
+        <div class="auth-role-tabs">
+          <button type="button" class="active" id="tabStudent" onclick="setAuthRole('student')">Mahasiswa</button>
+          <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">Dosen / Juri</button>
+        </div>
+
+        <form id="authForm" onsubmit="handleLoginSubmit(event)">
+          <div class="auth-field">
+            <label id="authIdLabel">NIM (Nomor Induk Mahasiswa)</label>
+            <input type="text" id="authUsername" placeholder="Contoh: 202610101 atau budi" required>
+          </div>
+
+          <div class="auth-field">
+            <label>Kata Sandi</label>
+            <input type="password" id="authPassword" placeholder="••••••••" required>
+          </div>
+
+          <div class="auth-error" id="authError"></div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+            <span>Masuk ke Ruang Kerja</span>
+            <span>&rarr;</span>
+          </button>
+        </form>
+
+        <div class="demo-box">
+          <h4>⚡ Akses Demo 1-Klik</h4>
+          <div class="demo-btns" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('student')">
+              <span>👤 Mahasiswa (Budi Santoso — Sains Data)</span>
+              <span>&rarr;</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('tiara')">
+              <span>👤 Mahasiswa (Tiara Safitri — Pendidikan Fisika)</span>
+              <span>&rarr;</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('dimas')">
+              <span>👤 Mahasiswa (Dimas Anggara — Kimia Murni)</span>
+              <span>&rarr;</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('fitri')">
+              <span>👤 Mahasiswa (Fitri Handayani — Biologi Murni)</span>
+              <span>&rarr;</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('laila')">
+              <span>👤 Mahasiswa (Laila Munawaroh — Pendidikan Matematika)</span>
+              <span>&rarr;</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('prof_hartono')">
+              <span>👨‍🏫 Dosen Pembimbing (Prof. Dr. Hartono, M.Si. — FMIPA / Pendidikan Sains)</span>
+              <span>&rarr;</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('lecturer')">
+              <span>👨‍🏫 Dosen Pembimbing (Dr. Rahmat Wijaya, M.Sc.)</span>
+              <span>&rarr;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== MAIN APPLICATION APP ==================== -->
+  <div id="workspaceApp" style="display: none;">
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <a href="#" class="brand" onclick="showPage('dashboard'); return false;">
+        <img src="/logo.jpg" alt="Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <h2>SteamCraft</h2>
+          <span>Ruang Kolaborasi Multidisiplin</span>
+        </div>
+      </a>
+
+      <!-- Role-Separated Navigation -->
+      <nav class="nav" id="mainNav">
+        <!-- Student Pages -->
+        <button class="active" data-page="dashboard" data-roles="student">Dashboard</button>
+        <button data-page="projects" data-roles="student">Katalog Proyek</button>
+        <button data-page="workspace" data-roles="student">Ruang Kerja</button>
+        <button data-page="recruitment" data-roles="student">Open Recruitment</button>
+        <button data-page="studentConsultations" data-roles="student">
+          <span>Jadwal & Bimbingan</span>
+          <span class="nav-badge" id="badgeStudentConsult"></span>
+        </button>
+        <button data-page="studentAnnouncements" data-roles="student">
+          <span>Papan Pengumuman</span>
+          <span class="nav-badge" id="badgeStudentAnn"></span>
+        </button>
+        <button data-page="studentResources" data-roles="student">Ajukan Fasilitas</button>
+        <button data-page="studentPortfolio" data-roles="student">Portofolio Saya</button>
+
+        <!-- Lecturer Pages -->
+        <button data-page="mission" data-roles="lecturer">
+          <span>Mission Control</span>
+          <span class="nav-badge warning" id="badgeMission"></span>
+        </button>
+        <button data-page="consultations" data-roles="lecturer">
+          <span>Bimbingan</span>
+          <span class="nav-badge" id="badgeLecturerConsult"></span>
+        </button>
+        <button data-page="announcements" data-roles="lecturer">Pengumuman</button>
+        <button data-page="resources" data-roles="lecturer">Lab & Fasilitas</button>
+        <button data-page="analytics" data-roles="lecturer">Analitik Kohort</button>
+      </nav>
+
+      <!-- User Controls -->
+      <div class="user-controls">
+        <div class="user-badge" id="topUserBadge" onclick="openEditProfileModal()" title="Klik untuk mengedit identitas & profil peneliti STEAM" tabindex="0" role="button">
+          <div class="user-avatar" id="userAvatar">B</div>
+          <div class="user-info">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <strong id="userName">Budi Santoso</strong>
+              <span class="profile-edit-indicator" title="Edit Profil">✏️</span>
+            </div>
+            <small id="userRoleBadge">Mahasiswa · Sains Data</small>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary btn-sm" onclick="toggleRoleSwitch()" title="Beralih peran Mahasiswa / Dosen">
+          <span>🔄 Tukar Peran</span>
+        </button>
+
+        <button class="btn btn-ghost btn-sm" onclick="logout()" title="Keluar">
+          <span>Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="wrap">
+
+      <!-- ================= 1. STUDENT DASHBOARD ================= -->
+      <section id="dashboard" class="page active">
+        <div class="hero-card">
+          <div>
+            <div class="eyebrow">Workspace Overview</div>
+            <h2>Selamat Datang di SteamCraft</h2>
+            <p>Rancang proyek inovasi lintas disiplin, kumpulkan bukti empiris, lakukan simulasi terkontrol, dan susun laporan ilmiah yang siap diverifikasi dalam satu workspace terintegrasi.</p>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" onclick="openNewProjectModal()">
+                <span>+ Buat Proyek Baru</span>
+              </button>
+              <button class="btn btn-secondary" onclick="showPage('projects')">
+                <span>Jelajahi Katalog Proyek</span>
+              </button>
+            </div>
+          </div>
+          <div class="orbit-box">
+            <span class="orbit-pill op1">🔬 Science + Tech</span>
+            <div class="orbit-center">S</div>
+            <span class="orbit-pill op2">📐 Math + Art</span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Proyek Aktif</div>
+            <div class="stat-value" id="statProjects">0</div>
+            <div class="stat-sub">Terdaftar di workspace</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Checkpoint Selesai</div>
+            <div class="stat-value" id="statChecks" style="color: var(--accent-teal);">0%</div>
+            <div class="stat-sub">Rata-rata progres ilmiah</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Kolaborator Terlibat</div>
+            <div class="stat-value" id="statPeople">0</div>
+            <div class="stat-sub">Mahasiswa & Dosen</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Kendala (Blocker)</div>
+            <div class="stat-value" id="statBlockers" style="color: var(--accent-orange);">0</div>
+            <div class="stat-sub">Memerlukan klinik dosen</div>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top: 36px;">
+          <div>
+            <div class="eyebrow">Akses Cepat Proyek</div>
+            <h2 class="h1">Proyek Terkini</h2>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('projects')">Lihat Semua &rarr;</button>
+        </div>
+
+        <div class="projects-grid" id="dashboardProjectsList">
+          <!-- Loaded via app.js -->
+        </div>
+      </section>
+
+      <!-- ================= 2. PROJECT CATALOG ================= -->
+      <section id="projects" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Koleksi Riset Mahasiswa</div>
+            <h1 class="h1">Katalog Proyek STEAM</h1>
+            <p class="sub">Jelajahi ide riset, temukan mitra multidisiplin, dan pantau progres proyek terkini.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openNewProjectModal()">
+            <span>+ Buat Proyek Baru</span>
+          </button>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px; padding: 16px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <input type="text" id="searchProjects" placeholder="Cari nama proyek, masalah riset, atau kata kunci..." style="flex: 1; min-width: 240px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;" oninput="filterProjects()">
+            <select id="filterStudy" style="padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;" onchange="filterProjects()">
+              <option value="">Semua Program Studi (13 Prodi MIPA & Pendidikan)</option>
+              <optgroup label="Sains Murni (MIPA)">
+                <option value="Biologi">Biologi (Murni)</option>
+                <option value="Kimia">Kimia (Murni)</option>
+                <option value="Fisika">Fisika (Murni)</option>
+                <option value="Matematika">Matematika (Murni)</option>
+              </optgroup>
+              <optgroup label="Pendidikan Sains & STEAM (FKIP/FPMIPA)">
+                <option value="Pendidikan Biologi">Pendidikan Biologi</option>
+                <option value="Pendidikan Kimia">Pendidikan Kimia</option>
+                <option value="Pendidikan Fisika">Pendidikan Fisika</option>
+                <option value="Pendidikan Matematika">Pendidikan Matematika</option>
+              </optgroup>
+              <optgroup label="Sains Terapan & Komputasi">
+                <option value="Sains Data">Sains Data</option>
+                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                <option value="Sains Aktuaria">Sains Aktuaria</option>
+                <option value="Bioteknologi">Bioteknologi</option>
+                <option value="Teknik Biomedis & Komputer">Teknik Biomedis & Komputer</option>
+              </optgroup>
+            </select>
+            <select id="filterStatus" style="padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;" onchange="filterProjects()">
+              <option value="">Semua Status</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Review diajukan">Review diajukan</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="allProjectsList">
+          <!-- Loaded via app.js -->
+        </div>
+      </section>
+
+      <!-- ================= 3. RUANG KERJA (WORKSPACE) ================= -->
+      <section id="workspace" class="page">
+        <div class="workspace-header">
+          <div class="ws-top">
+            <div>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <span class="badge badge-blue" id="wsStudyBadge">Sains Data</span>
+                <span class="badge badge-teal" id="wsSteamBadge">Science + Data</span>
+                <span class="badge badge-gray" id="wsStatusBadge">Aktif</span>
+              </div>
+              <h1 id="wsTitle" style="font-size: 26px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Nama Proyek</h1>
+              <p id="wsDesc" style="color: var(--muted); font-size: 13px; max-width: 760px;">Deskripsi proyek dan pertanyaan riset utama.</p>
+            </div>
+            <div class="ws-actions">
+              <button class="btn btn-secondary btn-sm" onclick="openPrintableDossier()" title="Buka berkas resmi PDF/Cetak">
+                <span>📄 Cetak Dossier (PDF)</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="openConnectRepoModal()">
+                <span>🔗 Repositori</span>
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="openFlagBlockerModal()">
+                <span>🚩 Tandai Blocker</span>
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="submitProjectReview()">
+                <span>📤 Ajukan Review</span>
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="exportProjectSummary()">
+                <span>📥 Ekspor Ringkasan</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="progress-bar-wrap" style="margin-top: 20px;">
+            <div class="progress-label-row">
+              <span style="color: var(--navy); font-weight: 800;">Alur Ilmiah (5 Tahap Checkpoint)</span>
+              <span id="wsPercentText" style="color: var(--primary); font-weight: 900;">0% Selesai</span>
+            </div>
+            <div class="progress-track" style="height: 10px;">
+              <div class="progress-fill" id="wsProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Team Metadata Strip -->
+          <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-light); font-size: 13px;">
+            <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--muted); font-size: 12px;">👥 Kelompok Riset:</span>
+                <strong id="wsTeamCountBadge" style="color: var(--navy);">4 Mahasiswa</strong>
+                <div id="wsTeamAvatarsStrip" class="avatar-stack">
+                  <!-- Avatars populated via JS -->
+                </div>
+              </div>
+              <div style="border-left: 1px solid var(--line); padding-left: 16px; display: flex; align-items: center; gap: 6px;">
+                <span style="color: var(--muted); font-size: 12px;">👨‍🏫 Pembimbing:</span>
+                <strong id="wsLecturerName" style="color: var(--primary);">Dr. Rahmat Wijaya, M.Sc.</strong>
+              </div>
+              <div style="border-left: 1px solid var(--line); padding-left: 16px; display: flex; align-items: center; gap: 6px;">
+                <span style="color: var(--muted); font-size: 12px;">👑 Ketua Tim:</span>
+                <strong id="wsTeamLeaderName" style="color: var(--navy);">Budi Santoso</strong>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('wsTeamMembersCard').scrollIntoView({ behavior: 'smooth' })" style="font-size: 11px;">
+                <span>Lihat Anggota & Tugas &darr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="workspace-layout">
+          <!-- Left Column: Team Roster, Checkpoints & Scientific Method -->
+          <div>
+            <!-- Team Members Roster Card -->
+            <div class="card" id="wsTeamMembersCard" style="margin-bottom: 24px;">
+              <div class="section-head" style="margin-bottom: 12px;">
+                <div>
+                  <div class="eyebrow">Multidisciplinary Collaboration</div>
+                  <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+                    <span>👥 Anggota Tim Kelompok</span>
+                    <span class="badge badge-blue" id="wsTeamCardCount">4 Peneliti</span>
+                  </h3>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openAddTeamMemberModal()">
+                  <span>+ Tambah Anggota Tim</span>
+                </button>
+              </div>
+              <p style="font-size: 12px; color: var(--muted); margin-bottom: 14px;">
+                Daftar mahasiswa peneliti dalam kelompok ini beserta peran spesifik dan kontribusinya pada pengerjaan tugas proyek.
+              </p>
+              <div class="team-roster-grid" id="wsTeamMembersList">
+                <!-- Loaded via JS -->
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px;">
+              <div class="section-head" style="margin-bottom: 16px;">
+                <div>
+                  <div class="eyebrow">Scientific Method Pipeline</div>
+                  <h3 style="font-size: 18px; font-weight: 800; color: var(--navy);">5 Tahapan Checkpoint Proyek</h3>
+                </div>
+              </div>
+
+              <div id="checkpointsList">
+                <!-- Checkpoints rendered via JS -->
+              </div>
+            </div>
+
+            <!-- Research Journal -->
+            <div class="card">
+              <div class="section-head" style="margin-bottom: 16px;">
+                <div>
+                  <div class="eyebrow">Audit Trail & Logbook</div>
+                  <h3 style="font-size: 18px; font-weight: 800; color: var(--navy);">Jurnal Riset Ilmiah</h3>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openAddJournalModal()">
+                  <span>+ Tambah Catatan</span>
+                </button>
+              </div>
+
+              <div id="journalFeed">
+                <!-- Journal entries -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: AI Copilot & Versioning -->
+          <div>
+            <!-- AI Research Copilot -->
+            <div class="ai-copilot-card">
+              <div class="ai-copilot-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="ai-badge">🤖 AI Copilot</span>
+                  <strong style="font-size: 13px; color: var(--navy);">Asisten Riset STEAM</strong>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="refreshAiGuidance()" title="Perbarui saran riset">🔄</button>
+              </div>
+
+              <div class="ai-guidance-box" id="aiGuidanceContent">
+                Memuat rekomendasi metodologi cerdas...
+              </div>
+
+              <div class="ai-chat-input-row">
+                <input type="text" id="aiChatInput" placeholder="Tanyakan metodologi, dataset, atau blocker..." onkeypress="if(event.key==='Enter') sendAiChat()">
+                <button class="btn btn-primary btn-sm" onclick="sendAiChat()">Kirim</button>
+              </div>
+            </div>
+
+            <!-- Versioning & Artifacts -->
+            <div class="card" style="margin-bottom: 24px;">
+              <div class="section-head" style="margin-bottom: 14px;">
+                <div>
+                  <div class="eyebrow">Reproducible Artifacts</div>
+                  <h4 style="font-size: 16px; font-weight: 800; color: var(--navy);">Iterasi & Snapshot Versi</h4>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="openAddVersionModal()">+ Rilis vIterasi</button>
+              </div>
+
+              <div style="display: flex; gap: 14px; margin-bottom: 14px; background: var(--surface-alt); padding: 12px; border-radius: 12px;">
+                <div>
+                  <small style="color: var(--muted); display: block;">Versi Terkini</small>
+                  <strong id="wsVersionCount" style="font-size: 18px; color: var(--navy);">v1.0</strong>
+                </div>
+                <div style="border-left: 1px solid var(--line); padding-left: 14px; flex: 1;">
+                  <small style="color: var(--muted); display: block;">Repositori Eksternal</small>
+                  <a id="wsRepoLink" href="#" target="_blank" style="font-size: 12px; color: var(--primary); text-decoration: underline; word-break: break-all;">Belum terhubung</a>
+                </div>
+              </div>
+
+              <div id="versionsList">
+                <!-- Versions list -->
+              </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="card">
+              <div class="eyebrow" style="margin-bottom: 8px;">Aktivitas Terkini</div>
+              <div id="activityLogFeed" style="max-height: 240px; overflow-y: auto; font-size: 12px;">
+                <!-- Activity logs -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. OPEN RECRUITMENT ================= -->
+      <section id="recruitment" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Team Matching & Kolaborasi</div>
+            <h1 class="h1">Open Recruitment Proyek STEAM</h1>
+            <p class="sub">Bergabunglah dengan tim lintas disiplin ilmu untuk memperkaya dimensi riset dan kompetisi Anda.</p>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="recruitmentList">
+          <!-- Loaded via JS -->
+        </div>
+      </section>
+
+      <!-- ================= 5. STUDENT BIMBINGAN ================= -->
+      <section id="studentConsultations" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Mentorship & Klinik Riset</div>
+            <h1 class="h1">Jadwal & Pengajuan Bimbingan</h1>
+            <p class="sub">Konsultasikan validasi data, metodologi, dan penanganan blocker bersama dosen pembimbing.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openRequestConsultModal()">
+            <span>+ Ajukan Jadwal Bimbingan</span>
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div class="card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Sesi Terjadwal & Menunggu</h3>
+            <div id="studentConsultPendingList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Riwayat Catatan Bimbingan</h3>
+            <div id="studentConsultDoneList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. STUDENT ANNOUNCEMENTS ================= -->
+      <section id="studentAnnouncements" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Pemberitahuan Resmi</div>
+            <h1 class="h1">Papan Pengumuman & Panduan</h1>
+            <p class="sub">Informasi tenggat pengumpulan, standar dokumentasi, dan panduan fasilitas.</p>
+          </div>
+        </div>
+
+        <div id="studentAnnouncementsList" style="display: grid; gap: 16px;">
+          <!-- Loaded via JS -->
+        </div>
+      </section>
+
+      <!-- ================= 7. STUDENT RESOURCES ================= -->
+      <section id="studentResources" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Infrastruktur & Laboratorium</div>
+            <h1 class="h1">Ajukan Akses Fasilitas Riset</h1>
+            <p class="sub">Dapatkan akses GPU Workstation (NVIDIA RTX), Printer 3D, Lab Spektrofotometri, dan perangkat sensor IoT.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openRequestResourceModal()">
+            <span>+ Ajukan Peminjaman Fasilitas</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div id="studentResourceRequestsList">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 8. STUDENT PORTFOLIO ================= -->
+      <section id="studentPortfolio" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Academic Showcase</div>
+            <h1 class="h1">Portofolio Riset Mahasiswa</h1>
+            <p class="sub">Rekam jejak kompetensi STEAM, hasil evaluasi rubrik, dan artefak riset yang dapat diunduh.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="exportPortfolioCSV()">
+              <span>📥 Ekspor CSV</span>
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="exportPortfolioJSON()">
+              <span>📥 Ekspor JSON</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);">
+          <div style="display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+            <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+              <div class="user-avatar" id="pfAvatar" style="width: 64px; height: 64px; font-size: 24px; cursor: pointer; transition: transform 0.2s;" onclick="openEditProfileModal()" title="Klik untuk mengedit identitas & profil">B</div>
+              <div>
+                <h2 style="font-size: 22px; font-weight: 900; color: var(--navy); display: flex; align-items: center; gap: 10px; margin-bottom: 2px;">
+                  <span id="pfStudentName">Budi Santoso</span>
+                  <span class="badge badge-teal" id="pfRoleBadge" style="font-size: 11px;">Peneliti STEAM</span>
+                </h2>
+                <p style="color: var(--muted); font-size: 13px;" id="pfStudentMeta">NIM: 202610101 · Program Studi: Sains Data</p>
+                <div style="font-size: 12px; color: var(--navy); font-weight: 600; margin-top: 3px;" id="pfAffiliation">Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA) · Universitas Indonesia</div>
+                <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;" id="pfTagsContainer">
+                  <span class="badge badge-blue">STEAM Inovator Muda</span>
+                  <span class="badge badge-teal">Verified Researcher</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-secondary btn-sm" onclick="openEditProfileModal()" style="display: inline-flex; align-items: center; gap: 6px;" title="Buka formulir pengisian data identitas & profil">
+                <span>✏️ Kelola Identitas & Profil</span>
+              </button>
+            </div>
+          </div>
+          <div id="pfBioSection" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-size: 13px; color: var(--ink-secondary); line-height: 1.6;">
+            <!-- Bio, Research Interests, and Academic Links populated by JS -->
+          </div>
+        </div>
+
+        <!-- STEAM Competency Radar & Pillars -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+          <div class="card" style="text-align: center;">
+            <div class="eyebrow" style="margin-bottom: 6px;">STEAM Competency Radar</div>
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">Keseimbangan 5 Pilar STEAM Mahasiswa</h3>
+            <div id="portfolioRadarChart" style="display: flex; justify-content: center; align-items: center; min-height: 280px;">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="card">
+            <div class="eyebrow" style="margin-bottom: 6px;">Analisis Penguasaan Dimensi</div>
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 14px;">Indeks Kinerja per Pilar Riset</h3>
+            <div id="portfolioDimensionScores" style="display: grid; gap: 12px;">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Daftar Proyek & Nilai Akhir</h3>
+          <div id="portfolioProjectsList">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 9. MISSION CONTROL (DOSEN) ================= -->
+      <section id="mission" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Faculty & Jury Command</div>
+            <h1 class="h1">Mission Control Dosen & Juri</h1>
+            <p class="sub">Pusat kendali evaluasi rubrik 4 pilar STEAM, pembimbingan checkpoint, pengelolaan template, dan verifikasi paket reproducibility.</p>
+          </div>
+        </div>
+
+        <!-- 4 Mission Tabs -->
+        <div class="mission-tabs">
+          <button class="mission-tab-btn active" onclick="setMissionTab('supervision')">
+            <span class="mission-mode-num">1</span>
+            <div>
+              <strong style="font-size: 13px; color: var(--navy); display: block;">Bimbingan & Blocker</strong>
+              <small style="color: var(--muted); font-size: 11px;">Klinik kendala & feedback</small>
+            </div>
+          </button>
+          <button class="mission-tab-btn" onclick="setMissionTab('evaluation')">
+            <span class="mission-mode-num">2</span>
+            <div>
+              <strong style="font-size: 13px; color: var(--navy); display: block;">Evaluasi & Rubrik STEAM</strong>
+              <small style="color: var(--muted); font-size: 11px;">Penilaian 4 pilar (100%)</small>
+            </div>
+          </button>
+          <button class="mission-tab-btn" onclick="setMissionTab('reproducibility')">
+            <span class="mission-mode-num">3</span>
+            <div>
+              <strong style="font-size: 13px; color: var(--navy); display: block;">Reproducibility Package</strong>
+              <small style="color: var(--muted); font-size: 11px;">Kompilasi paket resmi & arsip</small>
+            </div>
+          </button>
+          <button class="mission-tab-btn" onclick="setMissionTab('templates')">
+            <span class="mission-mode-num">4</span>
+            <div>
+              <strong style="font-size: 13px; color: var(--navy); display: block;">Editor Template & Bobot</strong>
+              <small style="color: var(--muted); font-size: 11px;">Kustomisasi checkpoint</small>
+            </div>
+          </button>
+        </div>
+
+        <!-- Mission Tab Contents -->
+        <div id="missionTabContent">
+          <!-- Loaded via JS -->
+        </div>
+      </section>
+
+      <!-- ================= 10. DOSEN CONSULTATIONS ================= -->
+      <section id="consultations" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Manajemen Bimbingan</div>
+            <h1 class="h1">Antrean Konsultasi & Bimbingan</h1>
+            <p class="sub">Tinjau permohonan bimbingan mahasiswa, jadwalkan sesi tatap muka atau daring, dan berikan catatan evaluasi.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="lecturerConsultationsList">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 11. DOSEN ANNOUNCEMENTS ================= -->
+      <section id="announcements" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Broadcasting Center</div>
+            <h1 class="h1">Kelola Pengumuman Dosen</h1>
+            <p class="sub">Siarkan instruksi tugas, panduan metodologi, dan pengingat tenggat kepada seluruh peserta.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; align-items: start;">
+          <div class="card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Buat Pengumuman Baru</h3>
+            <form onsubmit="handleCreateAnnouncement(event)">
+              <div class="field" style="margin-bottom: 14px;">
+                <label>Judul Pengumuman</label>
+                <input type="text" id="annTitle" placeholder="Contoh: Standar format penulisan jurnal..." required>
+              </div>
+              <div class="field" style="margin-bottom: 14px;">
+                <label>Kategori</label>
+                <select id="annCategory">
+                  <option value="Metodologi">Metodologi & Riset</option>
+                  <option value="Tenggat">Tenggat & Jadwal</option>
+                  <option value="Fasilitas">Fasilitas & Lab</option>
+                  <option value="Panduan">Panduan Kompetisi</option>
+                  <option value="Umum">Umum</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom: 14px;">
+                <label>Target Penerima</label>
+                <select id="annTarget">
+                  <option value="all">Semua Mahasiswa & Tim</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom: 14px;">
+                <label>Isi Pesan Pengumuman</label>
+                <textarea id="annBody" rows="5" placeholder="Tulis instruksi secara rinci..." required></textarea>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                <input type="checkbox" id="annPinned" style="width: 16px; height: 16px;">
+                <label for="annPinned" style="font-size: 13px; font-weight: 600;">Sematkan di bagian atas (Pinned)</label>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Publikasikan Pengumuman</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Daftar Pengumuman Aktif</h3>
+            <div id="lecturerAnnouncementsFeed">
+              <!-- Loaded via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 12. DOSEN RESOURCES ================= -->
+      <section id="resources" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Lab Management</div>
+            <h1 class="h1">Manajemen Fasilitas & Alat Lab</h1>
+            <p class="sub">Setujui atau tolak permohonan penggunaan workstation GPU, printer 3D, dan peralatan laboratorium.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="lecturerResourceRequestsList">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 13. DOSEN ANALYTICS ================= -->
+      <section id="analytics" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Cohort Intelligence</div>
+            <h1 class="h1">Analitik Kohort STEAM</h1>
+            <p class="sub">Statistik komprehensif perkembangan riset seluruh mahasiswa lintas program studi.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="exportAnalyticsCSV()">
+            <span>📥 Ekspor Data Kohort (CSV)</span>
+          </button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Proyek Terdaftar</div>
+            <div class="stat-value" id="anTotalProjects">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Rata-rata Progres Ilmiah</div>
+            <div class="stat-value" id="anAvgProgress" style="color: var(--primary);">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Checkpoint Selesai</div>
+            <div class="stat-value" id="anCompletedCps" style="color: var(--accent-teal);">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Blocker Aktif</div>
+            <div class="stat-value" id="anActiveBlockers" style="color: var(--accent-orange);">0</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
+          <div class="card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Distribusi Disiplin Program Studi</h3>
+            <div id="analyticsDisciplineBars">
+              <!-- Discipline bars rendered via JS -->
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Pilar Evaluasi STEAM Terintegrasi</h3>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 14px;">Evaluasi dilakukan secara seimbang pada kelima pilar utama:</p>
+            <div style="display: grid; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface-alt); border-radius: 8px;">
+                <span>🔬 <strong>Science (Sains)</strong>: Hipotesis & Observasi</span>
+                <span class="badge badge-blue">25%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface-alt); border-radius: 8px;">
+                <span>💻 <strong>Technology (Teknologi)</strong>: Implementasi & Komputasi</span>
+                <span class="badge badge-teal">25%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface-alt); border-radius: 8px;">
+                <span>⚙️ <strong>Engineering (Rekayasa)</strong>: Rancang Bangun & SOP</span>
+                <span class="badge badge-orange">25%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface-alt); border-radius: 8px;">
+                <span>🎨 <strong>Art (Seni)</strong>: Human-Centered Design & UI/UX</span>
+                <span class="badge badge-rose">12.5%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface-alt); border-radius: 8px;">
+                <span>📐 <strong>Mathematics (Matematika)</strong>: Model Analitik & Statistik</span>
+                <span class="badge badge-purple">12.5%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+  <!-- New Project Wizard Modal -->
+  <div class="modal-overlay" id="newProjectModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('newProjectModal')">&times;</button>
+      <div class="eyebrow">Wizard Inisialisasi</div>
+      <h2 style="font-size: 22px; font-weight: 900; color: var(--navy); margin-bottom: 16px;">Buat Proyek STEAM Baru</h2>
+
+      <form onsubmit="handleCreateProjectSubmit(event)">
+        <div class="field">
+          <label>Nama Proyek</label>
+          <input type="text" id="newProjName" placeholder="Contoh: Sistem Klasifikasi Citra Sampah Mandiri" required>
+        </div>
+        <div class="field">
+          <label>Deskripsi Singkat</label>
+          <textarea id="newProjDesc" rows="3" placeholder="Jelaskan latar belakang dan fokus inovasi..." required></textarea>
+        </div>
+        <div class="field">
+          <label>Program Studi Utama</label>
+          <select id="newProjStudy">
+            <optgroup label="Sains Murni (MIPA)">
+              <option value="Biologi">Biologi (Murni)</option>
+              <option value="Kimia">Kimia (Murni)</option>
+              <option value="Fisika">Fisika (Murni)</option>
+              <option value="Matematika">Matematika (Murni)</option>
+            </optgroup>
+            <optgroup label="Pendidikan Sains & STEAM (FKIP/FPMIPA)">
+              <option value="Pendidikan Biologi">Pendidikan Biologi</option>
+              <option value="Pendidikan Kimia">Pendidikan Kimia</option>
+              <option value="Pendidikan Fisika">Pendidikan Fisika</option>
+              <option value="Pendidikan Matematika">Pendidikan Matematika</option>
+            </optgroup>
+            <optgroup label="Sains Terapan & Komputasi">
+              <option value="Sains Data" selected>Sains Data</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Sains Aktuaria">Sains Aktuaria</option>
+              <option value="Bioteknologi">Bioteknologi</option>
+              <option value="Teknik Biomedis & Komputer">Teknik Biomedis & Komputer</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <label>Template Alur Kerja Ilmiah</label>
+          <select id="newProjTemplate" onchange="previewTemplateRecommendation()">
+            <option value="data">Analisis Data / AI (Sains Data & Machine Learning)</option>
+            <option value="experiment">Eksperimen / Laboratorium (Sains Eksperimental & Prototipe)</option>
+            <option value="actuary">Model Risiko / Aktuaria (Matematika & Finansial)</option>
+            <option value="free">Proyek Bebas / Lintas Disiplin (Human-Centered Design)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pertanyaan Riset / Target Utama</label>
+          <input type="text" id="newProjGoal" placeholder="Contoh: Bagaimana mengoptimalkan akurasi deteksi pada kondisi pencahayaan rendah?">
+        </div>
+        <div class="field">
+          <label>Peralatan / Software / Tools yang Direncanakan</label>
+          <input type="text" id="newProjTools" placeholder="Contoh: Python, YOLOv8, OpenCV, Jetson Nano">
+        </div>
+        <div class="field">
+          <label>Repositori Proyek (GitHub / GitLab / Google Drive)</label>
+          <input type="url" id="newProjRepo" placeholder="https://github.com/username/repo">
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 14px; margin-bottom: 20px;">
+          <input type="checkbox" id="newProjOpenRecruit" checked style="width: 18px; height: 18px;">
+          <label for="newProjOpenRecruit" style="font-size: 13px; font-weight: 600;">Buka recruitment untuk mahasiswa program studi lain (Open Recruitment)</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Inisialisasi Workspace Proyek</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Journal Modal -->
+  <div class="modal-overlay" id="addJournalModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('addJournalModal')">&times;</button>
+      <div class="eyebrow">Audit Trail</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 16px;">Tambah Catatan Jurnal Riset</h2>
+      <form onsubmit="handleAddJournalSubmit(event)">
+        <div class="field">
+          <label>Kategori Catatan</label>
+          <select id="journalTag">
+            <option value="Observasi">Observasi Empiris</option>
+            <option value="Metodologi">Metodologi & Prosedur</option>
+            <option value="Eksperimen">Hasil Eksperimen & Replikasi</option>
+            <option value="Evaluasi">Evaluasi & Metrik Kinerja</option>
+            <option value="Blocker">Kendala Teknis (Roadblock)</option>
+            <option value="Catatan Umum">Catatan Diskusi Umum</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Isi Catatan Jurnal</label>
+          <textarea id="journalContent" rows="4" placeholder="Catat temuan, nilai parameter, deviasi pengukuran, atau keputusan teknis..." required></textarea>
+        </div>
+        <div class="field">
+          <label>Unggah Lampiran Berkas (Opsional: .csv, .pdf, .ipynb, .png, .jpg)</label>
+          <input type="file" id="journalFileInput" style="padding: 8px; border: 1px dashed var(--primary); background: #f0f7ff; border-radius: 10px;">
+          <small style="color: var(--muted); font-size: 11px;">Mendukung dataset, foto lab, notebook, atau dokumen riset</small>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan ke Jurnal Riset</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Version Iteration Modal -->
+  <div class="modal-overlay" id="addVersionModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('addVersionModal')">&times;</button>
+      <div class="eyebrow">Artifact Release</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 16px;">Rilis Iterasi & Artefak Versi Baru</h2>
+      <form onsubmit="handleAddVersionSubmit(event)">
+        <div class="field">
+          <label>Catatan Rilis Iterasi</label>
+          <input type="text" id="versionNoteInput" placeholder="Contoh: Optimasi model dengan hyperparameter tuning..." required>
+        </div>
+        <div class="field">
+          <label>Tautan Repositori / Release Build (Opsional)</label>
+          <input type="url" id="versionRepoInput" placeholder="https://github.com/steamcraft/my-project/releases/tag/v2.0">
+        </div>
+        <div class="field">
+          <label>Unggah Paket Artefak / Kode / Laporan (Opsional)</label>
+          <input type="file" id="versionFileInput" style="padding: 8px; border: 1px dashed var(--primary); background: #f0f7ff; border-radius: 10px;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Publikasikan Iterasi Versi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Flag Blocker Modal -->
+  <div class="modal-overlay" id="flagBlockerModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('flagBlockerModal')">&times;</button>
+      <div class="eyebrow">Roadblock Alert</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 16px;">Tandai Kendala Ilmiah (Blocker)</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 14px;">Menandai blocker akan memberi notifikasi pada dosen pembimbing untuk membuka sesi klinik metodologi terfokus.</p>
+      <form onsubmit="handleFlagBlockerSubmit(event)">
+        <div class="field">
+          <label>Deskripsi Kendala yang Dihadapi</label>
+          <textarea id="blockerReason" rows="4" placeholder="Jelaskan masalah data, error simulasi, atau kebingungan teoretis..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger" style="width: 100%;">Aktifkan Status Blocker & Minta Klinik</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Request Consultation Modal -->
+  <div class="modal-overlay" id="requestConsultModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('requestConsultModal')">&times;</button>
+      <div class="eyebrow">Mentorship Slot</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 16px;">Ajukan Jadwal Bimbingan</h2>
+      <form onsubmit="handleRequestConsultSubmit(event)">
+        <div class="field">
+          <label>Pilih Proyek</label>
+          <select id="consultProjectSelect" required></select>
+        </div>
+        <div class="field">
+          <label>Topik Bimbingan</label>
+          <input type="text" id="consultTopic" placeholder="Contoh: Validasi matriks evaluasi & review Checkpoint 3" required>
+        </div>
+        <div class="field">
+          <label>Tipe Sesi</label>
+          <select id="consultType">
+            <option value="Review checkpoint">Review Checkpoint</option>
+            <option value="Klinik metodologi">Klinik Metodologi & Blocker</option>
+            <option value="Validasi data">Validasi Data & Eksperimen</option>
+            <option value="Konsultasi umum">Konsultasi Umum</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Mode Pertemuan</label>
+          <select id="consultMode">
+            <option value="Online (Google Meet)">Online (Google Meet)</option>
+            <option value="Ruang Dosen (Fakultas)">Ruang Dosen (Tatap Muka)</option>
+            <option value="Laboratorium Riset">Laboratorium Terpadu</option>
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="field">
+            <label>Tanggal</label>
+            <input type="date" id="consultDate" required>
+          </div>
+          <div class="field">
+            <label>Waktu (WIB)</label>
+            <input type="time" id="consultTime" value="10:00" required>
+          </div>
+        </div>
+        <div class="field">
+          <label>Catatan Persiapan Mahasiswa</label>
+          <textarea id="consultNote" rows="3" placeholder="Bahan atau slide yang sudah disiapkan..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Kirim Permohonan Jadwal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Request Resource Modal -->
+  <div class="modal-overlay" id="requestResourceModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('requestResourceModal')">&times;</button>
+      <div class="eyebrow">Lab Facility</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 16px;">Pengajuan Akses Fasilitas Riset</h2>
+      <form onsubmit="handleRequestResourceSubmit(event)">
+        <div class="field">
+          <label>Pilih Proyek</label>
+          <select id="resourceProjectSelect" required></select>
+        </div>
+        <div class="field">
+          <label>Fasilitas / Alat yang Dibutuhkan</label>
+          <select id="resourceChoice">
+            <option value="GPU Workstation (NVIDIA RTX 4090)">GPU Workstation (NVIDIA RTX 4090 - Komputasi CUDA)</option>
+            <option value="Printer 3D & Rapid Prototyping">Printer 3D & Rapid Prototyping (PLA/PETG)</option>
+            <option value="Laboratorium Sensor & IoT">Laboratorium Sensor & IoT (LoRa, ESP32, Osiloskop)</option>
+            <option value="Spektrofotometer UV-Vis">Spektrofotometer UV-Vis & Furnace</option>
+            <option value="Kit Mikrokontroler & FPGA">Kit Mikrokontroler & FPGA Xilinx</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tanggal Dibutuhkan</label>
+          <input type="date" id="resourceDateNeeded" required>
+        </div>
+        <div class="field">
+          <label>Tujuan & Kebutuhan Spesifik</label>
+          <textarea id="resourceNote" rows="3" placeholder="Jelaskan durasi pemakaian dan rincian eksperimen..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Kirim Permohonan Fasilitas</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Apply Recruitment Modal -->
+  <div class="modal-overlay" id="applyRecruitModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('applyRecruitModal')">&times;</button>
+      <div class="eyebrow">Kolaborasi Multidisiplin</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 8px;" id="applyModalProjTitle">Gabung ke Tim Proyek</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Ajukan keahlian Anda untuk berkontribusi pada proyek ini.</p>
+      <form onsubmit="handleApplyRecruitmentSubmit(event)">
+        <input type="hidden" id="applyProjId">
+        <div class="field">
+          <label>Peran yang Diajukan</label>
+          <input type="text" id="applyRole" placeholder="Contoh: Data Analyst / UI/UX Designer / Hardware Specialist" required>
+        </div>
+        <div class="field">
+          <label>Pengalaman / Motivasi Singkat</label>
+          <textarea id="applyMessage" rows="4" placeholder="Ceritakan ketertarikan dan portofolio keahlian Anda..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Kirim Pengajuan Kolaborasi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mission Review Modal (Dosen) -->
+  <div class="modal-overlay" id="missionReviewModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('missionReviewModal')">&times;</button>
+      <div class="eyebrow">Supervisory Action</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 8px;" id="reviewModalProjTitle">Tinjauan Pembimbing</h2>
+      <form onsubmit="handleMissionFeedbackSubmit(event)">
+        <input type="hidden" id="reviewProjId">
+        <div class="field">
+          <label>Status Proyek</label>
+          <select id="reviewStatusSelect">
+            <option value="Aktif">Aktif (Lanjutkan Progres)</option>
+            <option value="Revisi rencana">Revisi Rencana (Perlu Perbaikan Metodologi)</option>
+            <option value="Review diajukan">Review Diajukan</option>
+            <option value="Selesai">Selesai (Siap Dinilai Akhir)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Catatan Masukan Ilmiah & Arahan Dosen</label>
+          <textarea id="reviewNoteText" rows="4" placeholder="Berikan umpan balik terstruktur..." required></textarea>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="quickResolveBlocker()">Tandai Blocker Terselesaikan</button>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Kirim Umpan Balik Resmi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mission Evaluate Rubric Modal (Dosen) -->
+  <div class="modal-overlay" id="missionEvaluateModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('missionEvaluateModal')">&times;</button>
+      <div class="eyebrow">Final Grading</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 6px;" id="evalModalProjTitle">Evaluasi Akhir Rubrik STEAM</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Penilaian 4 pilar terstandarisasi skala 0 - 100.</p>
+      <form onsubmit="handleMissionEvaluateSubmit(event)">
+        <input type="hidden" id="evalProjId">
+        <div class="rubric-row">
+          <div>
+            <strong style="display: block;">1. Kelengkapan Checkpoint (25%)</strong>
+            <small style="color: var(--muted);">Seluruh 5 tahap metode ilmiah terselesaikan</small>
+          </div>
+          <input type="number" id="evalCompleteness" min="0" max="100" value="85" required oninput="calcEvalTotal()">
+        </div>
+        <div class="rubric-row">
+          <div>
+            <strong style="display: block;">2. Bukti Empiris & Jurnal (25%)</strong>
+            <small style="color: var(--muted);">Dokumentasi data mentah, galat, dan foto eksperimen</small>
+          </div>
+          <input type="number" id="evalEvidence" min="0" max="100" value="90" required oninput="calcEvalTotal()">
+        </div>
+        <div class="rubric-row">
+          <div>
+            <strong style="display: block;">3. Kontribusi Multidisiplin (25%)</strong>
+            <small style="color: var(--muted);">Keseimbangan integrasi Sains, Rekayasa, Seni, & Matematika</small>
+          </div>
+          <input type="number" id="evalContribution" min="0" max="100" value="88" required oninput="calcEvalTotal()">
+        </div>
+        <div class="rubric-row">
+          <div>
+            <strong style="display: block;">4. Reproducibility & Open Science (25%)</strong>
+            <small style="color: var(--muted);">Repositori kode, dataset, dan parameter dapat dijalankan ulang</small>
+          </div>
+          <input type="number" id="evalReproducibility" min="0" max="100" value="92" required oninput="calcEvalTotal()">
+        </div>
+
+        <div style="background: var(--primary-light); padding: 14px; border-radius: 12px; margin: 18px 0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 800; color: var(--navy);">Total Skor Akhir:</span>
+          <span id="evalTotalScoreText" style="font-size: 20px; font-weight: 900; color: var(--primary);">88.8 (A)</span>
+        </div>
+
+        <div class="field">
+          <label>Catatan Keputusan Dewan Juri / Dosen Pembimbing</label>
+          <textarea id="evalFeedback" rows="3" placeholder="Komentar kelebihan dan saran pengembangan lanjutan..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Penilaian Akhir & Terbitkan Sertifikasi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Profile / Pengisian Identitas Peneliti Modal -->
+  <div class="modal-overlay" id="editProfileModal">
+    <div class="modal-box" style="max-width: 620px;">
+      <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
+      <div class="eyebrow">Identitas & Hak Akses Peneliti</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Kelola Profil & Identitas STEAM</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">
+        Lengkapi data akademik, institusi perguruan tinggi, bidang fokus riset, dan tautan publik portofolio Anda.
+      </p>
+
+      <form id="editProfileForm" onsubmit="handleEditProfileSubmit(event)">
+        <!-- Avatar Preview & Color Selector -->
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding: 14px; background: var(--surface-alt); border: 1px solid var(--line); border-radius: 12px;">
+          <div class="user-avatar" id="profileModalAvatarPreview" style="width: 52px; height: 52px; font-size: 20px; font-weight: 800;">B</div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 6px;">Warna Tema Avatar</label>
+            <div style="display: flex; gap: 8px; align-items: center;" id="avatarColorPickerList">
+              <button type="button" class="color-dot-btn active" data-color="#2878d7" style="background: #2878d7;" onclick="selectAvatarColor('#2878d7')"></button>
+              <button type="button" class="color-dot-btn" data-color="#37b6a0" style="background: #37b6a0;" onclick="selectAvatarColor('#37b6a0')"></button>
+              <button type="button" class="color-dot-btn" data-color="#8060d5" style="background: #8060d5;" onclick="selectAvatarColor('#8060d5')"></button>
+              <button type="button" class="color-dot-btn" data-color="#ed7b64" style="background: #ed7b64;" onclick="selectAvatarColor('#ed7b64')"></button>
+              <button type="button" class="color-dot-btn" data-color="#10b981" style="background: #10b981;" onclick="selectAvatarColor('#10b981')"></button>
+              <button type="button" class="color-dot-btn" data-color="#ea580c" style="background: #ea580c;" onclick="selectAvatarColor('#ea580c')"></button>
+              <button type="button" class="color-dot-btn" data-color="#1e3656" style="background: #1e3656;" onclick="selectAvatarColor('#1e3656')"></button>
+              <input type="hidden" id="profileAvatarColor" value="#2878d7">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="field">
+            <label>Nama Lengkap & Gelar *</label>
+            <input type="text" id="profileName" placeholder="Contoh: Budi Santoso, S.Si." required oninput="updateProfileAvatarPreview()">
+          </div>
+          <div class="field">
+            <label>NIM / NIP / Nomor Identitas *</label>
+            <input type="text" id="profileIdentifier" placeholder="Contoh: 202610101 / 1985..." required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="field">
+            <label>Program Studi Spesialisasi</label>
+            <select id="profileStudy" required>
+              <optgroup label="Kelompok MIPA (Sains Murni)">
+                <option value="Biologi">Biologi (Murni)</option>
+                <option value="Kimia">Kimia (Murni)</option>
+                <option value="Fisika">Fisika (Murni)</option>
+                <option value="Matematika">Matematika (Murni)</option>
+              </optgroup>
+              <optgroup label="Kelompok Pendidikan Sains (Pedagogi STEAM)">
+                <option value="Pendidikan Biologi">Pendidikan Biologi</option>
+                <option value="Pendidikan Kimia">Pendidikan Kimia</option>
+                <option value="Pendidikan Fisika">Pendidikan Fisika</option>
+                <option value="Pendidikan Matematika">Pendidikan Matematika</option>
+              </optgroup>
+              <optgroup label="Kelompok Sains Terapan & Komputasi">
+                <option value="Sains Data">Sains Data</option>
+                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                <option value="Sains Aktuaria">Sains Aktuaria</option>
+                <option value="Bioteknologi">Bioteknologi</option>
+                <option value="Fakultas Sains & Teknologi">Fakultas Sains & Teknologi</option>
+                <option value="Departemen Teknik Komputer">Departemen Teknik Komputer</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field">
+            <label>Peran dalam Sistem</label>
+            <input type="text" id="profileRoleDisplay" readonly style="background: var(--surface-alt); cursor: not-allowed; font-weight: 700; color: var(--navy);">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="field">
+            <label>Fakultas / Departemen</label>
+            <input type="text" id="profileFaculty" placeholder="Contoh: Fakultas MIPA / FKIP">
+          </div>
+          <div class="field">
+            <label>Universitas / Institusi Riset</label>
+            <input type="text" id="profileUniversity" placeholder="Contoh: Universitas Indonesia">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Bidang Minat & Keahlian Riset STEAM</label>
+          <input type="text" id="profileInterests" placeholder="Contoh: IoT Presisi, Etnomatematika, Kitosan Bioplastik, Chladni Plate">
+        </div>
+
+        <div class="field">
+          <label>Bio Singkat / Pernyataan Peneliti</label>
+          <textarea id="profileBio" rows="3" placeholder="Deskripsikan fokus studi, keahlian khusus, atau misi ilmiah Anda..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Tautan Profil Akademik & Portofolio Publik</label>
+          <input type="text" id="profileLinks" placeholder="Contoh: GitHub: github.com/user · Scholar: scholar.google.com/user · ORCID">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editProfileModal')">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveProfile">
+            <span>💾 Simpan Identitas & Perbarui Profil</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Team Member Modal -->
+  <div class="modal-overlay" id="addTeamMemberModal">
+    <div class="modal-box" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeModal('addTeamMemberModal')">&times;</button>
+      <div class="eyebrow">Kolaborasi Multidisiplin</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Tambah Anggota Tim Kelompok</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">
+        Daftarkan mahasiswa peneliti baru ke dalam kelompok proyek STEAM ini.
+      </p>
+
+      <form id="addTeamMemberForm" onsubmit="handleAddTeamMemberSubmit(event)">
+        <div class="field" style="margin-bottom: 12px;">
+          <label>Nama Lengkap Mahasiswa *</label>
+          <input type="text" id="newMemberName" placeholder="Contoh: Andi Pratama" required>
+        </div>
+
+        <div class="field" style="margin-bottom: 12px;">
+          <label>NIM (Nomor Induk Mahasiswa) *</label>
+          <input type="text" id="newMemberIdentifier" placeholder="Contoh: 202610115" required>
+        </div>
+
+        <div class="field" style="margin-bottom: 12px;">
+          <label>Program Studi</label>
+          <select id="newMemberStudy" required>
+            <optgroup label="Kelompok MIPA (Sains Murni)">
+              <option value="Biologi">Biologi (Murni)</option>
+              <option value="Kimia">Kimia (Murni)</option>
+              <option value="Fisika">Fisika (Murni)</option>
+              <option value="Matematika">Matematika (Murni)</option>
+            </optgroup>
+            <optgroup label="Kelompok Pendidikan Sains">
+              <option value="Pendidikan Biologi">Pendidikan Biologi</option>
+              <option value="Pendidikan Kimia">Pendidikan Kimia</option>
+              <option value="Pendidikan Fisika">Pendidikan Fisika</option>
+              <option value="Pendidikan Matematika">Pendidikan Matematika</option>
+            </optgroup>
+            <optgroup label="Kelompok Sains Terapan & Komputasi">
+              <option value="Sains Data">Sains Data</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Sains Aktuaria">Sains Aktuaria</option>
+              <option value="Bioteknologi">Bioteknologi</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom: 18px;">
+          <label>Peran & Spesialisasi Tugas dalam Tim *</label>
+          <input type="text" id="newMemberRole" placeholder="Contoh: Instrumentasi IoT, Sintesis Senyawa, Pemodelan Galat" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')">Batal</button>
+          <button type="submit" class="btn btn-primary">
+            <span>+ Daftarkan ke Tim</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Submit Checkpoint Confirmation Modal -->
+  <div class="modal-overlay" id="submitCheckpointModal">
+    <div class="modal-box" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeModal('submitCheckpointModal')">&times;</button>
+      <div class="eyebrow" style="color: var(--primary);">Alur Ilmiah 5 Tahap STEAM</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Konfirmasi Penyerahan Tugas Checkpoint</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+        Pastikan capaian riset telah diverifikasi oleh tim kelompok sebelum diserahkan ke Dosen Pembimbing.
+      </p>
+
+      <div style="background: var(--surface-alt); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span class="badge badge-blue" id="submitCpStageBadge">Tahap 1</span>
+          <span style="font-size: 11px; color: var(--muted);">Status: Belum Diserahkan</span>
+        </div>
+        <strong style="font-size: 14px; color: var(--navy); display: block; margin-bottom: 4px;" id="submitCpStageTitle">Judul Tahap Checkpoint</strong>
+        <p style="font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4;" id="submitCpStageDesc">Deskripsi indikator capaian tahap riset.</p>
+        
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 11px; color: var(--ink-secondary);">
+          <span>Mahasiswa Penyerah: <strong id="submitCpStudentName">Budi Santoso (Sains Data)</strong></span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom: 14px;">
+        <label style="font-size: 12px; font-weight: 700;">Catatan / Ringkasan Bukti Riset (Opsional)</label>
+        <textarea id="submitCpNotes" rows="3" placeholder="Tuliskan ringkasan hasil uji coba, tautan repositori/notebook, atau catatan penting untuk dosen pembimbing..."></textarea>
+      </div>
+
+      <!-- Warning Box -->
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <span style="font-size: 18px; line-height: 1;">⚠️</span>
+          <div style="font-size: 12px; color: #92400e; line-height: 1.5;">
+            <strong style="color: #78350f; display: block; margin-bottom: 2px;">Ketentuan Penyerahan Tugas:</strong>
+            Setelah diserahkan, tindakan ini <strong>tidak bisa dibatalkan</strong> kecuali dikonfirmasi atau dibuka kembali oleh Dosen Pembimbing.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('submitCheckpointModal')">Batal</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmSubmitCp" onclick="confirmSubmitCheckpointAction()">
+          <span>📤 Serahkan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reopen / Cancel Checkpoint Modal (Lecturer Only) -->
+  <div class="modal-overlay" id="reopenCheckpointModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <button class="modal-close" onclick="closeModal('reopenCheckpointModal')">&times;</button>
+      <div class="eyebrow" style="color: var(--accent-orange);">Otoritas Supervisi Dosen</div>
+      <h2 style="font-size: 19px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Buka Kembali Checkpoint untuk Revisi</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+        Tindakan ini akan membatalkan status penyerahan tahap riset dan memberi kesempatan kepada tim mahasiswa untuk memperbaiki tugasnya.
+      </p>
+
+      <div style="background: var(--surface-alt); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+        <strong style="font-size: 13px; color: var(--navy); display: block;" id="reopenCpStageTitle">Tahap Checkpoint</strong>
+        <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;" id="reopenCpStageDesc"></p>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('reopenCheckpointModal')">Tutup</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmReopenCp" onclick="confirmReopenCheckpointAction()">
+          <span>🔓 Batalkan Penyerahan & Buka Revisi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastMessage">Pemberitahuan sistem</div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
