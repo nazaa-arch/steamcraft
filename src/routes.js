@@ -203,6 +203,18 @@ async function handleApiRequest(req, res, url, body) {
       const info = insert.run(userHandle, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash, cleanEmail);
       const newUserId = info.lastInsertRowid;
 
+      // Auto-acknowledge existing historical announcements for new users so their unread counter starts clean at 0
+      try {
+        const existingAnnouncements = db.prepare('SELECT id FROM announcements').all();
+        const insertInteraction = db.prepare(`
+          INSERT OR IGNORE INTO announcement_interactions (announcement_id, user_id, is_read, is_saved)
+          VALUES (?, ?, 1, 0)
+        `);
+        for (const ann of existingAnnouncements) {
+          insertInteraction.run(ann.id, newUserId);
+        }
+      } catch (e) {}
+
       db.prepare(`
         INSERT INTO email_verifications (user_id, email, otp_code, expires_at)
         VALUES (?, ?, ?, datetime('now', 'localtime', '+10 minutes'))
@@ -1020,12 +1032,27 @@ async function handleApiRequest(req, res, url, body) {
   // ===================== ANNOUNCEMENTS ROUTES =====================
   if (pathname === '/api/announcements' && method === 'GET') {
     const userId = user ? user.id : 0;
+    let targetFilter = '';
+    if (user && user.role === 'student') {
+      const hasTeam = db.prepare(`
+        SELECT 1 FROM projects WHERE creator_id = ? 
+        UNION 
+        SELECT 1 FROM project_members WHERE user_id = ? OR identifier = ?
+      `).get(user.id, user.id, user.identifier);
+
+      if (!hasTeam) {
+        // Students with NO team only see general announcements ('all')
+        targetFilter = "WHERE (a.target = 'all' OR a.target = 'new_users' OR a.target IS NULL)";
+      }
+    }
+
     const announcements = db.prepare(`
       SELECT a.*,
              COALESCE(i.is_read, 0) as is_read,
              COALESCE(i.is_saved, 0) as is_saved
       FROM announcements a
       LEFT JOIN announcement_interactions i ON a.id = i.announcement_id AND i.user_id = ?
+      ${targetFilter}
       ORDER BY a.pinned DESC, a.id DESC
     `).all(userId);
 
@@ -1377,11 +1404,23 @@ async function handleApiRequest(req, res, url, body) {
     
     let unreadAnnouncements = 0;
     try {
+      const hasTeam = db.prepare(`
+        SELECT 1 FROM projects WHERE creator_id = ? 
+        UNION 
+        SELECT 1 FROM project_members WHERE user_id = ? OR identifier = ?
+      `).get(user.id, user.id, user.identifier);
+
+      const targetFilter = (user.role === 'student' && !hasTeam)
+        ? "AND (a.target = 'all' OR a.target = 'new_users' OR a.target IS NULL)"
+        : "";
+
       unreadAnnouncements = db.prepare(`
         SELECT COUNT(*) as c FROM announcements a
         LEFT JOIN announcement_interactions i ON a.id = i.announcement_id AND i.user_id = ?
         WHERE COALESCE(i.is_read, 0) = 0
-      `).get(user.id).c;
+          AND datetime(a.created_at) >= datetime(?)
+          ${targetFilter}
+      `).get(user.id, user.created_at || '1970-01-01').c;
     } catch (e) {}
 
     return json({

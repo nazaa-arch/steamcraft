@@ -660,10 +660,19 @@ function seedDefaultData() {
   `);
 
   insertAnnounce.run(
+    'Biro Riset & Kemahasiswaan',
+    'Panduan Awal & Kolaborasi Riset Multidisiplin Mahasiswa',
+    'Akademik',
+    'all',
+    'Selamat datang di platform STEAM-Craft. Mahasiswa baru dapat menjelajahi Katalog Proyek untuk bergabung dengan tim lintas program studi, atau mempublikasikan topik riset mandiri melalui menu Buat Proyek Baru.',
+    1
+  );
+
+  insertAnnounce.run(
     'Dr. Rahmat Wijaya, M.Sc.',
     'Standar Dokumentasi Checkpoint & Reproducibility Riset',
     'Metodologi',
-    'all',
+    'teams',
     'Setiap tim wajib mendokumentasikan dataset, parameter eksperimen, lisensi, dan log galat pada jurnal workspace. Reproducibility package akan menjadi bobot 25% penilaian akhir.',
     1
   );
@@ -672,7 +681,7 @@ function seedDefaultData() {
     'Panitia Lomba STEAM Nasional 2026',
     'Tenggat Pengajuan Review Tengah Proyek (Mid-Evaluation)',
     'Tenggat',
-    'all',
+    'teams',
     'Batas akhir penyelesaian Checkpoint 3 (Model atau Solusi) adalah tanggal 25 Oktober 2026 pukul 23:59 WIB. Pastikan repositori GitHub terhubung.',
     1
   );
@@ -681,7 +690,7 @@ function seedDefaultData() {
     'Laboratorium Riset Terpadu',
     'Prosedur Pengajuan Akses GPU Workstation & 3D Printing',
     'Fasilitas',
-    'all',
+    'teams',
     'Tim yang membutuhkan komputasi CUDA atau pencetakan casing prototipe dapat mengajukan permohonan melalui menu "Ajukan Fasilitas" H-2 sebelum pemakaian.',
     0
   );
