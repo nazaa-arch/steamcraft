@@ -102,10 +102,6 @@
           <span>Jadwal & Bimbingan</span>
           <span class="nav-badge" id="badgeStudentConsult"></span>
         </button>
-        <button data-page="studentAnnouncements" data-roles="student">
-          <span>Papan Pengumuman</span>
-          <span class="nav-badge" id="badgeStudentAnn"></span>
-        </button>
         <button data-page="studentResources" data-roles="student">Ajukan Fasilitas</button>
         <button data-page="studentPortfolio" data-roles="student">Portofolio Saya</button>
 
@@ -118,7 +114,6 @@
           <span>Bimbingan</span>
           <span class="nav-badge" id="badgeLecturerConsult"></span>
         </button>
-        <button data-page="announcements" data-roles="lecturer">Pengumuman</button>
         <button data-page="resources" data-roles="lecturer">Lab & Fasilitas</button>
         <button data-page="analytics" data-roles="lecturer">Analitik Kohort</button>
 
@@ -134,6 +129,38 @@
         <div id="devModeIndicator" style="display: none; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #38bdf8; padding: 4px 12px; border-radius: 20px;">
           <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
           <span style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px;">MODE KHUSUS DEV / ADMIN</span>
+        </div>
+
+        <!-- Notification Bell Dropdown Button (Near Profile) -->
+        <div class="notif-bell-wrapper" id="notifBellWrapper">
+          <button class="notif-bell-btn" id="topNotifBellBtn" onclick="toggleNotifDropdown(event)" title="Pemberitahuan & Pengumuman Kampus" aria-label="Notifikasi">
+            <span class="notif-bell-icon">🔔</span>
+            <span class="notif-badge" id="badgeNotifBell" style="display: none;">0</span>
+          </button>
+
+          <!-- Notification Dropdown Popover -->
+          <div class="notif-dropdown" id="topNotifDropdown" style="display: none;">
+            <div class="notif-dropdown-header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">📢</span>
+                <strong style="font-size: 13.5px; color: var(--navy);">Pemberitahuan & Pengumuman</strong>
+              </div>
+              <span class="badge badge-rose" id="dropdownUnreadCount" style="font-size: 10px; display: none;">0 baru</span>
+            </div>
+
+            <div class="notif-dropdown-list" id="dropdownAnnouncementsList">
+              <div style="text-align: center; color: var(--muted); padding: 24px; font-size: 12px;">Memuat pemberitahuan...</div>
+            </div>
+
+            <div class="notif-dropdown-footer">
+              <button class="btn btn-ghost btn-sm" onclick="markAllAnnouncementsRead(event)" style="font-size: 11px; padding: 4px 8px;">
+                <span>✓ Tandai Semua Dibaca</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnDropdownMore" onclick="openFullAnnouncementsPage(event)" style="font-size: 11px; padding: 4px 10px;">
+                <span>Lihat Halaman Penuh &rarr;</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="user-badge" id="topUserBadge" onclick="openEditProfileModal()" title="Klik untuk mengedit identitas & profil peneliti STEAM" tabindex="0" role="button">
@@ -202,7 +229,33 @@
           </div>
         </div>
 
-        <div class="section-head" style="margin-top: 36px;">
+        <!-- Kotak Kecil Pemberitahuan & Pengumuman Kampus di Dashboard -->
+        <div class="card dashboard-announcement-card" id="dashboardAnnouncementWidget" style="margin-top: 24px; margin-bottom: 24px; padding: 18px 20px; border-radius: 14px; border: 1px solid #bfdbfe; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(37,99,235,0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                🔔
+              </div>
+              <div>
+                <h3 style="font-size: 15px; font-weight: 800; color: var(--navy); margin: 0; line-height: 1.2;">Pemberitahuan & Pengumuman Kampus</h3>
+                <small style="color: var(--muted); font-size: 11px;">Informasi resmi dari dosen pembimbing & fakultas</small>
+              </div>
+              <span class="badge badge-rose" id="dashAnnUnreadBadge" style="display: none; font-size: 10px;">0 baru</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="btn btn-ghost btn-sm" onclick="toggleNotifDropdown(event)" style="font-size: 11.5px; padding: 4px 10px;">
+                <span>Buka Panel Lonceng 🔔</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mini list of latest announcements -->
+          <div id="dashboardAnnouncementsMiniList" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="text-align: center; color: var(--muted); padding: 16px; font-size: 12px;">Memuat pengumuman...</div>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top: 28px;">
           <div>
             <div class="eyebrow">Akses Cepat Proyek</div>
             <h2 class="h1">Proyek Terkini</h2>
@@ -1582,6 +1635,28 @@
         <button type="button" class="btn btn-primary" id="btnApplySwitchMode" onclick="applySystemModeChange()">
           <span>✓ Terapkan Mode Sistem</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Announcement Detail Modal -->
+  <div class="modal-overlay" id="announcementDetailModal">
+    <div class="modal-box" style="max-width: 580px;">
+      <button class="modal-close" onclick="closeModal('announcementDetailModal')">&times;</button>
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+        <span class="badge badge-teal" id="modalAnnCategory">Akademik</span>
+        <span class="badge badge-rose" id="modalAnnPinned" style="display: none;">📌 Disematkan</span>
+        <small style="color: var(--muted);" id="modalAnnDate">-</small>
+      </div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 12px; line-height: 1.3;" id="modalAnnTitle">-</h2>
+      <div style="background: var(--surface-alt); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line-light); font-size: 11.5px; color: var(--primary); font-weight: 700; margin-bottom: 14px;" id="modalAnnAuthor">
+        ✍️ Dipublikasikan oleh: -
+      </div>
+      <div style="font-size: 13.5px; color: var(--ink-secondary); line-height: 1.65; white-space: pre-wrap; margin-bottom: 20px;" id="modalAnnBody">
+        -
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('announcementDetailModal')">Tutup</button>
       </div>
     </div>
   </div>

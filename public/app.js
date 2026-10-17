@@ -40,6 +40,7 @@ let pendingCheckpointTitle = '';
 let pendingCheckpointDesc = '';
 let currentAppMode = 'demo';
 let selectedTargetMode = 'demo';
+let cachedAnnouncements = [];
 
 // Helper: Toast Notification
 function showToast(msg) {
@@ -194,6 +195,36 @@ async function updateNotificationBadges() {
     const bLecturerConsult = document.getElementById('badgeLecturerConsult');
     if (bLecturerConsult) {
       bLecturerConsult.textContent = (pendingConsultations > 0) ? pendingConsultations : '';
+    }
+
+    const bNotifBell = document.getElementById('badgeNotifBell');
+    if (bNotifBell) {
+      if (unreadAnnouncements > 0) {
+        bNotifBell.textContent = unreadAnnouncements;
+        bNotifBell.style.display = 'inline-flex';
+      } else {
+        bNotifBell.style.display = 'none';
+      }
+    }
+
+    const bDashUnread = document.getElementById('dashAnnUnreadBadge');
+    if (bDashUnread) {
+      if (unreadAnnouncements > 0) {
+        bDashUnread.textContent = `${unreadAnnouncements} baru`;
+        bDashUnread.style.display = 'inline-block';
+      } else {
+        bDashUnread.style.display = 'none';
+      }
+    }
+
+    const bDropdownCount = document.getElementById('dropdownUnreadCount');
+    if (bDropdownCount) {
+      if (unreadAnnouncements > 0) {
+        bDropdownCount.textContent = `${unreadAnnouncements} baru`;
+        bDropdownCount.style.display = 'inline-block';
+      } else {
+        bDropdownCount.style.display = 'none';
+      }
     }
   } catch (e) {
     // Silent fail if not authenticated
@@ -915,6 +946,7 @@ function projectCardHTML(p) {
 
 async function loadDashboard() {
   await loadAllProjects();
+  loadDashboardAnnouncementsWidget();
   const list = document.getElementById('dashboardProjectsList');
   if (!list) return;
 
@@ -2001,6 +2033,9 @@ async function toggleReadAnnouncement(id) {
   try {
     await api(`/api/announcements/${id}/toggle-read`, 'POST');
     loadStudentAnnouncements();
+    updateNotificationBadges();
+    loadDashboardAnnouncementsWidget();
+    loadTopAnnouncements();
   } catch (e) {
     console.error(e);
   }
@@ -2010,8 +2045,255 @@ async function toggleSaveAnnouncement(id) {
   try {
     await api(`/api/announcements/${id}/toggle-save`, 'POST');
     loadStudentAnnouncements();
+    updateNotificationBadges();
+    loadDashboardAnnouncementsWidget();
+    loadTopAnnouncements();
   } catch (e) {
     console.error(e);
+  }
+}
+
+// ==================== NOTIFICATION BELL & TOP DROPDOWN ====================
+function toggleNotifDropdown(e) {
+  if (e) {
+    e.stopPropagation();
+  }
+  const dropdown = document.getElementById('topNotifDropdown');
+  if (!dropdown) return;
+
+  const isHidden = dropdown.style.display === 'none' || !dropdown.style.display;
+  if (isHidden) {
+    dropdown.style.display = 'flex';
+    loadTopAnnouncements();
+  } else {
+    dropdown.style.display = 'none';
+  }
+}
+
+function closeNotifDropdown() {
+  const dropdown = document.getElementById('topNotifDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+}
+
+// Auto-close notification dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const wrapper = document.getElementById('notifBellWrapper');
+  const dropdown = document.getElementById('topNotifDropdown');
+  if (dropdown && dropdown.style.display !== 'none') {
+    if (wrapper && !wrapper.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  }
+});
+
+async function loadTopAnnouncements() {
+  const listEl = document.getElementById('dropdownAnnouncementsList');
+  const countBadge = document.getElementById('dropdownUnreadCount');
+  if (!listEl) return;
+
+  try {
+    const res = await api('/api/announcements');
+    cachedAnnouncements = res.announcements || [];
+    const unreadCount = cachedAnnouncements.filter(a => !a.is_read).length;
+
+    if (countBadge) {
+      if (unreadCount > 0) {
+        countBadge.textContent = `${unreadCount} baru`;
+        countBadge.style.display = 'inline-block';
+      } else {
+        countBadge.style.display = 'none';
+      }
+    }
+
+    const bNotifBell = document.getElementById('badgeNotifBell');
+    if (bNotifBell) {
+      if (unreadCount > 0) {
+        bNotifBell.textContent = unreadCount;
+        bNotifBell.style.display = 'inline-flex';
+      } else {
+        bNotifBell.style.display = 'none';
+      }
+    }
+
+    const bDashUnread = document.getElementById('dashAnnUnreadBadge');
+    if (bDashUnread) {
+      if (unreadCount > 0) {
+        bDashUnread.textContent = `${unreadCount} baru`;
+        bDashUnread.style.display = 'inline-block';
+      } else {
+        bDashUnread.style.display = 'none';
+      }
+    }
+
+    if (cachedAnnouncements.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; color: var(--muted); padding: 32px 16px; font-size: 12.5px;">
+          <div style="font-size: 26px; margin-bottom: 6px;">📭</div>
+          Tidak ada pemberitahuan atau pengumuman kampus saat ini.
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = cachedAnnouncements.map(a => `
+      <div class="notif-dropdown-item ${!a.is_read ? 'unread' : ''}" onclick="handleAnnouncementItemClick(${a.id})">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            ${a.pinned ? '<span class="badge badge-rose" style="font-size: 9.5px; padding: 1px 6px;">📌</span>' : ''}
+            <span class="badge badge-teal" style="font-size: 10px; padding: 1px 6px;">${a.category || 'Umum'}</span>
+            ${!a.is_read ? '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #ef4444;" title="Belum dibaca"></span>' : ''}
+          </div>
+          <small style="color: var(--muted); font-size: 10.5px;">${a.created_at ? a.created_at.slice(0, 10) : ''}</small>
+        </div>
+        <div style="font-weight: 700; font-size: 12.5px; color: var(--navy); line-height: 1.35;">${a.title}</div>
+        <p style="font-size: 11.5px; color: var(--ink-secondary); margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+          ${a.body}
+        </p>
+        <div style="font-size: 10.5px; color: var(--muted); margin-top: 3px;">
+          Oleh: <strong>${a.author_name || 'Dosen Pembimbing'}</strong>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    listEl.innerHTML = `<div style="text-align: center; color: var(--rose); padding: 20px; font-size: 12px;">Gagal memuat pemberitahuan.</div>`;
+  }
+}
+
+// ==================== DASHBOARD ANNOUNCEMENTS MINI WIDGET ====================
+async function loadDashboardAnnouncementsWidget() {
+  const container = document.getElementById('dashboardAnnouncementsMiniList');
+  const unreadBadge = document.getElementById('dashAnnUnreadBadge');
+  if (!container) return;
+
+  try {
+    const res = await api('/api/announcements');
+    const list = res.announcements || [];
+    cachedAnnouncements = list;
+    const unreadCount = list.filter(a => !a.is_read).length;
+
+    if (unreadBadge) {
+      if (unreadCount > 0) {
+        unreadBadge.textContent = `${unreadCount} baru`;
+        unreadBadge.style.display = 'inline-block';
+      } else {
+        unreadBadge.style.display = 'none';
+      }
+    }
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; color: var(--muted); padding: 20px; font-size: 12.5px; background: white; border-radius: 10px; border: 1px dashed var(--line);">
+          Belum ada pemberitahuan atau pengumuman kampus saat ini.
+        </div>
+      `;
+      return;
+    }
+
+    const topItems = list.slice(0, 3);
+    container.innerHTML = topItems.map(a => `
+      <div class="dash-ann-item ${!a.is_read ? 'unread' : ''}" onclick="handleAnnouncementItemClick(${a.id})" style="cursor: pointer;">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px; flex-wrap: wrap;">
+            ${a.pinned ? '<span class="badge badge-rose" style="font-size: 9.5px; padding: 1px 6px;">📌 Sematan</span>' : ''}
+            <span class="badge badge-teal" style="font-size: 10px; padding: 1px 6px;">${a.category || 'Umum'}</span>
+            ${!a.is_read ? '<span class="badge badge-blue" style="font-size: 9.5px; font-weight: 800; padding: 1px 6px;">Baru</span>' : ''}
+            <strong style="font-size: 13.5px; color: var(--navy); margin-left: 2px;">${a.title}</strong>
+          </div>
+          <p style="font-size: 12px; color: var(--ink-secondary); margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+            ${a.body}
+          </p>
+        </div>
+        <div style="text-align: right; flex-shrink: 0; font-size: 11px;">
+          <div style="color: var(--muted); margin-bottom: 2px;">📅 ${a.created_at ? a.created_at.slice(0, 10) : ''}</div>
+          <span style="color: var(--primary); font-weight: 700;">Buka &rarr;</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 16px; font-size: 12px;">Gagal memuat pemberitahuan terkini.</div>`;
+  }
+}
+
+// Open and View Announcement Detail in Modal
+async function handleAnnouncementItemClick(id) {
+  let item = (cachedAnnouncements || []).find(a => a.id === id);
+  if (!item) {
+    try {
+      const res = await api('/api/announcements');
+      cachedAnnouncements = res.announcements || [];
+      item = cachedAnnouncements.find(a => a.id === id);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  if (item) {
+    // If not yet marked as read, trigger toggle-read
+    if (!item.is_read) {
+      try {
+        await api(`/api/announcements/${id}/toggle-read`, 'POST');
+        item.is_read = 1;
+        updateNotificationBadges();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    openAnnouncementDetailModal(item);
+    loadTopAnnouncements();
+    loadDashboardAnnouncementsWidget();
+  }
+}
+
+function openAnnouncementDetailModal(item) {
+  if (!item) return;
+  const catEl = document.getElementById('modalAnnCategory');
+  const pinEl = document.getElementById('modalAnnPinned');
+  const dateEl = document.getElementById('modalAnnDate');
+  const titleEl = document.getElementById('modalAnnTitle');
+  const authorEl = document.getElementById('modalAnnAuthor');
+  const bodyEl = document.getElementById('modalAnnBody');
+
+  if (catEl) catEl.textContent = item.category || 'Akademik';
+  if (pinEl) pinEl.style.display = item.pinned ? 'inline-flex' : 'none';
+  if (dateEl) dateEl.textContent = item.created_at ? item.created_at.slice(0, 10) : '-';
+  if (titleEl) titleEl.textContent = item.title || 'Pengumuman';
+  if (authorEl) authorEl.textContent = `✍️ Dipublikasikan oleh: ${item.author_name || 'Dosen Pembimbing / Fakultas'} (${item.target === 'all' ? 'Semua Mahasiswa' : 'Proyek Terkait'})`;
+  if (bodyEl) bodyEl.textContent = item.body || '';
+
+  openModal('announcementDetailModal');
+}
+
+// Mark All Campus Announcements as Read
+async function markAllAnnouncementsRead(e) {
+  if (e) e.stopPropagation();
+  try {
+    const res = await api('/api/announcements');
+    const list = res.announcements || [];
+    const unread = list.filter(a => !a.is_read);
+    for (const a of unread) {
+      await api(`/api/announcements/${a.id}/toggle-read`, 'POST');
+    }
+    showToast('✓ Semua pengumuman berhasil ditandai dibaca.');
+    updateNotificationBadges();
+    loadTopAnnouncements();
+    loadDashboardAnnouncementsWidget();
+    const stAnn = document.getElementById('studentAnnouncements');
+    if (stAnn && stAnn.classList.contains('active')) {
+      loadStudentAnnouncements();
+    }
+  } catch (err) {
+    showToast('Gagal menandai pengumuman.');
+  }
+}
+
+// Route to Full Announcements Feed
+function openFullAnnouncementsPage(e) {
+  if (e) e.stopPropagation();
+  closeNotifDropdown();
+  if (currentUser && (currentUser.role === 'lecturer' || currentUser.role === 'admin')) {
+    showPage('announcements');
+  } else {
+    showPage('studentAnnouncements');
   }
 }
 
@@ -3259,6 +3541,9 @@ async function handleCreateAnnouncement(e) {
     document.getElementById('annBody').value = '';
     showToast('Pengumuman resmi berhasil dipublikasikan!');
     loadLecturerAnnouncements();
+    updateNotificationBadges();
+    loadDashboardAnnouncementsWidget();
+    loadTopAnnouncements();
   } catch (e) {
     console.error(e);
   }
@@ -3270,6 +3555,9 @@ async function deleteAnnouncement(id) {
     await api(`/api/announcements/${id}`, 'DELETE');
     showToast('Pengumuman dihapus.');
     loadLecturerAnnouncements();
+    updateNotificationBadges();
+    loadDashboardAnnouncementsWidget();
+    loadTopAnnouncements();
   } catch (e) {
     console.error(e);
   }

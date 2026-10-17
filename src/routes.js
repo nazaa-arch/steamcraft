@@ -867,6 +867,7 @@ function handleApiRequest(req, res, url, body) {
 
   // ===================== ANNOUNCEMENTS ROUTES =====================
   if (pathname === '/api/announcements' && method === 'GET') {
+    const userId = user ? user.id : 0;
     const announcements = db.prepare(`
       SELECT a.*,
              COALESCE(i.is_read, 0) as is_read,
@@ -874,24 +875,26 @@ function handleApiRequest(req, res, url, body) {
       FROM announcements a
       LEFT JOIN announcement_interactions i ON a.id = i.announcement_id AND i.user_id = ?
       ORDER BY a.pinned DESC, a.id DESC
-    `).all(user.id);
+    `).all(userId);
 
     return json({ announcements });
   }
 
   if (pathname === '/api/announcements' && method === 'POST') {
+    if (!user) return error('Autentikasi diperlukan', 401);
     const { title, category, target, body: content, pinned } = body || {};
     if (!title || !content) return error('Judul dan isi pengumuman wajib diisi');
 
     db.prepare(`
       INSERT INTO announcements (author_name, title, category, target, body, pinned)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(user.name, title, category || 'Metodologi', target || 'all', content, pinned ? 1 : 0);
+    `).run(user.name || 'Dosen Pembimbing', title, category || 'Metodologi', target || 'all', content, pinned ? 1 : 0);
 
     return json({ success: true });
   }
 
   if (pathname.match(/^\/api\/announcements\/(\d+)\/toggle-read$/) && method === 'POST') {
+    if (!user) return error('Autentikasi diperlukan', 401);
     const annId = pathname.match(/^\/api\/announcements\/(\d+)\/toggle-read$/)[1];
     const cur = db.prepare('SELECT is_read FROM announcement_interactions WHERE announcement_id = ? AND user_id = ?').get(annId, user.id);
     const newRead = cur && cur.is_read ? 0 : 1;
@@ -906,6 +909,7 @@ function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname.match(/^\/api\/announcements\/(\d+)\/toggle-save$/) && method === 'POST') {
+    if (!user) return error('Autentikasi diperlukan', 401);
     const annId = pathname.match(/^\/api\/announcements\/(\d+)\/toggle-save$/)[1];
     const cur = db.prepare('SELECT is_saved FROM announcement_interactions WHERE announcement_id = ? AND user_id = ?').get(annId, user.id);
     const newSaved = cur && cur.is_saved ? 0 : 1;
@@ -1135,6 +1139,14 @@ function handleApiRequest(req, res, url, body) {
 
   // Real-time Notification Badges
   if (pathname === '/api/notifications' && method === 'GET') {
+    if (!user) {
+      return json({
+        pendingConsultations: 0,
+        activeBlockers: 0,
+        pendingReviews: 0,
+        unreadAnnouncements: 0
+      });
+    }
     const appMode = getAppMode();
     const isProd = appMode === 'production';
     let pendingConsultations = 0;
