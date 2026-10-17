@@ -561,7 +561,7 @@ async function resendVerificationOtp() {
       if (simBanner) simBanner.style.display = 'block';
       if (simText) simText.textContent = res.simulatedOtp;
       if (otpInput) otpInput.value = res.simulatedOtp;
-      showToast(`Kode OTP baru (Dev Mode): ${res.simulatedOtp}`);
+      showToast(`Kode OTP verifikasi akun Anda: ${res.simulatedOtp}`);
     } else {
       showToast(res.message || 'Kode OTP baru telah dikirimkan ke email Anda.');
     }
@@ -636,10 +636,10 @@ function setAuthRole(role) {
 
   if (role === 'student') {
     label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
-    input.placeholder = 'Contoh: 202610101 atau budi';
+    input.placeholder = 'Contoh: 202610101 (NIM) atau username';
   } else {
     label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
-    input.placeholder = 'Contoh: 198504122010121002 atau dosen';
+    input.placeholder = 'Contoh: 198504122010121002 (NIP / NIDN) atau username';
   }
 }
 
@@ -741,7 +741,7 @@ function enterWorkspace() {
     if (devPill) devPill.style.display = 'inline-flex';
     if (topModeBtn) topModeBtn.style.display = 'inline-flex';
     document.body.classList.add('dev-mode-active');
-    showToast('🛠️ Mode Khusus Administrator & Lead Developer Aktif.');
+    showToast('🛠️ Sesi Administrator Sistem Aktif.');
   } else {
     if (devPill) devPill.style.display = 'none';
     if (topModeBtn) topModeBtn.style.display = 'none';

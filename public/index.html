@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STEAM-Craft — Ruang Kolaborasi Multidisiplin</title>
+  <title>STEAM-Craft — Platform Riset & Kolaborasi Multidisiplin Civitas Akademika</title>
+  <meta name="description" content="Platform resmi inkubasi dan kolaborasi riset multidisiplin mahasiswa dan dosen berbasis STEAM (Science, Technology, Engineering, Art, and Mathematics).">
+  <meta name="keywords" content="STEAM-Craft, riset mahasiswa, kolaborasi multidisiplin, FMIPA, sains data, bioteknologi, reproduktibilitas riset, kompetisi ilmiah nasional">
+  <meta name="author" content="Tim Riset Inovasi STEAM-Craft">
+  <meta name="theme-color" content="#0a192f">
   <link rel="icon" type="image/jpeg" href="/logo.jpg">
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -54,12 +58,12 @@
         <form id="authForm" onsubmit="handleLoginSubmit(event)">
           <div class="auth-field">
             <label id="authIdLabel">NIM (Nomor Induk Mahasiswa)</label>
-            <input type="text" id="authUsername" placeholder="Contoh: 202610101 atau budi" required>
+            <input type="text" id="authUsername" placeholder="Contoh: 202610101 (NIM) atau username" required>
           </div>
 
           <div class="auth-field">
             <label>Kata Sandi</label>
-            <input type="password" id="authPassword" placeholder="••••••••" required>
+            <input type="password" id="authPassword" placeholder="Masukkan kata sandi akun" required>
           </div>
 
           <div class="auth-error" id="authError"></div>
@@ -125,10 +129,10 @@
 
       <!-- User Controls -->
       <div class="user-controls">
-        <!-- Special Developer / Administrator Mode Indicator Pill -->
+        <!-- Special Administrator Mode Indicator Pill -->
         <div id="devModeIndicator" style="display: none; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #38bdf8; padding: 4px 12px; border-radius: 20px;">
           <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
-          <span style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px;">MODE KHUSUS DEV / ADMIN</span>
+          <span style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px;">ADMINISTRATOR SISTEM</span>
         </div>
 
         <!-- Notification Bell Dropdown Button (Near Profile) -->
@@ -1759,9 +1763,9 @@
       </p>
 
       <!-- Simulated Dev Mode Banner (Shown if SMTP is in dev/simulated mode) -->
-      <div id="verifyDevSimulatedBanner" style="display: none; background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: #92400e; text-align: left;">
-        <div style="font-weight: 800; margin-bottom: 2px;">⚡ Mode Uji Coba Cepat (Dev / Fallback)</div>
-        <div>Kode OTP Anda: <strong id="verifyDevOtpText" style="font-family: monospace; font-size: 14px; letter-spacing: 2px; color: #1e3a8a;">-</strong></div>
+      <div id="verifyDevSimulatedBanner" style="display: none; background: #eff6ff; border: 1px dashed #3b82f6; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: #1e40af; text-align: left;">
+        <div style="font-weight: 800; margin-bottom: 2px;">ℹ️ Pratinjau Kode OTP Sistem (Uji Coba Langsung)</div>
+        <div>Kode OTP Anda: <strong id="verifyDevOtpText" style="font-family: monospace; font-size: 15px; letter-spacing: 2px; color: #1d4ed8;">-</strong></div>
       </div>
 
       <form id="verifyOtpForm" onsubmit="handleVerifyOtpSubmit(event)">
