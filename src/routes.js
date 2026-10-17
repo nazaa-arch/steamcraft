@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { db, DEFAULT_TEMPLATES } = require('./db');
+const { db, DEFAULT_TEMPLATES, getAppMode, setAppMode } = require('./db');
 const { generateGuidance, answerUserQuery } = require('./ai');
 
 // In-memory active session for simplicity and instant presentation
@@ -26,9 +26,29 @@ function handleApiRequest(req, res, url, body) {
   };
   const error = (msg, status = 400) => json({ error: msg }, status);
 
+  // ===================== SYSTEM MODE ROUTES =====================
+  if (pathname === '/api/system/mode' && method === 'GET') {
+    const mode = getAppMode();
+    return json({ mode, appMode: mode, isDemo: mode === 'demo' });
+  }
+
+  if (pathname === '/api/system/mode' && method === 'POST') {
+    const { mode } = body || {};
+    const newMode = setAppMode(mode);
+    return json({
+      success: true,
+      mode: newMode,
+      appMode: newMode,
+      isDemo: newMode === 'demo',
+      message: newMode === 'demo'
+        ? '✓ Sistem beralih ke Mode Demo (Showcase Lomba & 13 Proyek Sampel)'
+        : '✓ Sistem beralih ke Mode Operasional Riil (Data Kampus Bersih)'
+    });
+  }
+
   // ===================== AUTH ROUTES =====================
   if (pathname === '/api/auth/me' && method === 'GET') {
-    return json({ user });
+    return json({ user, appMode: getAppMode() });
   }
 
   if (pathname === '/api/auth/switch-demo' && method === 'POST') {
@@ -60,9 +80,10 @@ function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname === '/api/auth/register' && method === 'POST') {
-    const { username, name, role, identifier, study_program, password } = body || {};
-    if (!username || !name || !role || !identifier) {
-      return error('Semua field wajib diisi');
+    const { username, name, role, identifier, nim, nip, study_program, password } = body || {};
+    const idVal = identifier || nim || nip;
+    if (!username || !name || !role || !idVal) {
+      return error('Semua field wajib diisi (Nama, Username, Peran, dan NIM/NIP)');
     }
     try {
       const colors = ['#2878d7', '#37b6a0', '#8060d5', '#ed7b64', '#f4b33e'];
@@ -71,12 +92,12 @@ function handleApiRequest(req, res, url, body) {
         INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
-      const info = insert.run(username, name, role, identifier, study_program || 'Sains Terapan', avatarColor, password || 'password123');
+      const info = insert.run(username, name, role, idVal, study_program || 'Sains Terapan', avatarColor, password || 'password123');
       const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
       currentSessionUser = newUser;
       return json({ success: true, user: newUser });
     } catch (e) {
-      return error('Username sudah terpakai');
+      return error('Pendaftaran gagal: ' + e.message);
     }
   }
 
@@ -137,9 +158,18 @@ function handleApiRequest(req, res, url, body) {
     const search = url.searchParams.get('q') || '';
     const study = url.searchParams.get('study') || '';
     const status = url.searchParams.get('status') || '';
+    const reqMode = url.searchParams.get('mode'); // 'demo' | 'production' | 'all'
+    const appMode = getAppMode();
 
     let query = 'SELECT * FROM projects WHERE 1=1';
     const params = [];
+
+    // Filter by system operational mode
+    if (reqMode === 'production' || (appMode === 'production' && reqMode !== 'all' && reqMode !== 'demo')) {
+      query += ' AND is_demo = 0';
+    } else if (reqMode === 'demo') {
+      query += ' AND is_demo = 1';
+    }
 
     if (search) {
       query += ' AND (name LIKE ? OR desc LIKE ? OR goal LIKE ?)';
@@ -166,7 +196,7 @@ function handleApiRequest(req, res, url, body) {
       p.leader = p.members.find(m => m.is_lead) || p.members[0] || null;
     }
 
-    return json({ projects });
+    return json({ projects, appMode });
   }
 
   if (pathname.match(/^\/api\/projects\/(\d+)$/) && method === 'GET') {
@@ -201,20 +231,23 @@ function handleApiRequest(req, res, url, body) {
     const { name, desc, study, steam, template, goal, tools, repo_url, recruitment_roles, open_recruitment } = body || {};
     if (!name || !desc) return error('Nama dan deskripsi proyek wajib diisi');
 
+    const appMode = getAppMode();
+    const isDemoVal = appMode === 'demo' ? 1 : 0;
+
     const insert = db.prepare(`
       INSERT INTO projects (
         name, desc, study, steam, template, status, progress, members_count, open_recruitment,
-        recruitment_roles, goal, tools, repo_url, lecturer, creator_id, versions_count, blocker
+        recruitment_roles, goal, tools, repo_url, lecturer, creator_id, versions_count, blocker, is_demo
       ) VALUES (
         ?, ?, ?, ?, ?, 'Aktif', 0, 1, ?,
-        ?, ?, ?, ?, 'Dr. Rahmat Wijaya, M.Sc.', ?, 1, 0
+        ?, ?, ?, ?, 'Dr. Rahmat Wijaya, M.Sc.', ?, 1, 0, ?
       )
     `);
 
     const info = insert.run(
       name, desc, study || 'Sains Data', steam || 'Science + Data', template || 'data',
       open_recruitment ? 1 : 0, recruitment_roles || 'Peneliti Muda, Analis',
-      goal || '', tools || '', repo_url || '', user.id
+      goal || '', tools || '', repo_url || '', user.id, isDemoVal
     );
 
     const newId = info.lastInsertRowid;
@@ -238,7 +271,9 @@ function handleApiRequest(req, res, url, body) {
     `);
 
     cps.forEach((cp, idx) => {
-      insertCP.run(newId, idx, cp[0], cp[1]);
+      const title = Array.isArray(cp) ? cp[0] : (cp.title || `Tahap ${idx + 1}`);
+      const desc = Array.isArray(cp) ? cp[1] : (cp.desc || '');
+      insertCP.run(newId, idx, title, desc);
     });
 
     db.prepare('INSERT INTO versions (project_id, version_number, note, artifact_url) VALUES (?, 1, ?, ?)').run(
@@ -249,7 +284,8 @@ function handleApiRequest(req, res, url, body) {
       newId, user.name, 'Membuat workspace proyek baru.'
     );
 
-    return json({ success: true, projectId: newId });
+    const newProject = db.prepare('SELECT * FROM projects WHERE id = ?').get(newId);
+    return json({ success: true, projectId: newId, project: newProject });
   }
 
   // Manage Project Members

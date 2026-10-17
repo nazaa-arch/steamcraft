@@ -1,11 +1,16 @@
 const http = require('node:http');
 const path = require('node:path');
 const fs = require('node:fs');
-const { initDatabase } = require('./src/db');
+const { initDatabase, setAppMode } = require('./src/db');
 const { handleApiRequest } = require('./src/routes');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
+
+// Sync environment mode if specified
+if (process.env.APP_MODE) {
+  setAppMode(process.env.APP_MODE);
+}
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -23,10 +28,13 @@ const MIME_TYPES = {
 initDatabase();
 
 const server = http.createServer((req, res) => {
-  // CORS headers
+  // CORS & Security Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);

@@ -206,7 +206,16 @@ function initDatabase() {
       FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     );
+
+    CREATE TABLE IF NOT EXISTS system_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
   `);
+
+  // Default app_mode in database: 'demo'
+  db.prepare("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('app_mode', 'demo')").run();
 
   // Automatic Migration for dynamic columns
   const addColumnIfNotExists = (table, col, def) => {
@@ -222,6 +231,8 @@ function initDatabase() {
   addColumnIfNotExists('versions', 'file_name', 'TEXT');
   addColumnIfNotExists('versions', 'file_url', 'TEXT');
   addColumnIfNotExists('projects', 'steam_scores', 'TEXT');
+  addColumnIfNotExists('projects', 'is_demo', 'INTEGER NOT NULL DEFAULT 0');
+  db.exec('UPDATE projects SET is_demo = 1 WHERE id <= 13;');
   addColumnIfNotExists('checkpoints', 'completed_by', 'TEXT');
   addColumnIfNotExists('checkpoints', 'submission_notes', 'TEXT');
   addColumnIfNotExists('checkpoints', 'confirmed_by_lecturer', 'INTEGER DEFAULT 0');
@@ -1102,11 +1113,31 @@ function seedProjectMembers() {
     db.prepare("UPDATE checkpoints SET completed_by = ? WHERE id = ? AND (completed_by IS NULL OR completed_by = '')").run(assignedName, cp.id);
   }
 
+  // Mark seeded projects as demo projects
+  db.exec('UPDATE projects SET is_demo = 1 WHERE id <= 13;');
+
   console.log('Project team members and task assignees seeded successfully!');
+}
+
+function getAppMode() {
+  const row = db.prepare("SELECT value FROM system_settings WHERE key = 'app_mode'").get();
+  return row ? row.value : 'demo';
+}
+
+function setAppMode(mode) {
+  const validMode = mode === 'production' ? 'production' : 'demo';
+  db.prepare(`
+    INSERT INTO system_settings (key, value, updated_at)
+    VALUES ('app_mode', ?, datetime('now', 'localtime'))
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+  `).run(validMode);
+  return validMode;
 }
 
 module.exports = {
   db,
   initDatabase,
-  DEFAULT_TEMPLATES
+  DEFAULT_TEMPLATES,
+  getAppMode,
+  setAppMode
 };

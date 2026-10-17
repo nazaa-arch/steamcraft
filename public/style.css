@@ -1414,3 +1414,19 @@ button {
   color: #b91c1c;
   border: 1px solid #fca5a5;
 }
+
+/* App Mode Switcher & Card Selection */
+.app-mode-switch-bar button.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.mode-select-card {
+  transition: all 0.2s ease;
+}
+
+.mode-select-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}

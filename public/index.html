@@ -46,7 +46,20 @@
         <h2 style="font-size: 24px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Masuk ke Workspace</h2>
         <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Pilih peran Anda untuk mengakses ruang kerja atau gunakan akun demo cepat.</p>
 
-        <div class="auth-role-tabs">
+        <div class="app-mode-switch-bar" style="margin-bottom: 16px; background: #f1f5f9; border-radius: 10px; padding: 4px; display: flex; gap: 4px;">
+          <button type="button" class="btn btn-sm active" id="loginModeDemoBtn" onclick="setLoginAppMode('demo')" style="flex: 1; font-size: 11px; padding: 6px; font-weight: 800;">
+            🎯 Mode Demo (Lomba)
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" id="loginModeProdBtn" onclick="setLoginAppMode('production')" style="flex: 1; font-size: 11px; padding: 6px; font-weight: 800;">
+            🚀 Mode Operasi Riil
+          </button>
+        </div>
+
+        <div id="loginModeNotice" style="font-size: 11px; color: var(--primary); background: var(--primary-light); padding: 8px 12px; border-radius: 8px; margin-bottom: 14px; font-weight: 600;">
+          🎯 Mode Demo Lomba: Akses instan ke 13 proyek riset multidisiplin dan akun demo cepat.
+        </div>
+
+        <div class="auth-role-tabs" id="loginRoleTabs">
           <button type="button" class="active" id="tabStudent" onclick="setAuthRole('student')">Mahasiswa</button>
           <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">Dosen / Juri</button>
         </div>
@@ -68,9 +81,15 @@
             <span>Masuk ke Ruang Kerja</span>
             <span>&rarr;</span>
           </button>
+
+          <div style="margin-top: 12px; text-align: center;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openRegisterUserModal()" style="font-size: 12px; color: var(--primary);">
+              Belum punya akun? <strong>Daftar Akun Peneliti Baru &rarr;</strong>
+            </button>
+          </div>
         </form>
 
-        <div class="demo-box">
+        <div class="demo-box" id="demoQuickLoginBox">
           <h4>⚡ Akses Demo 1-Klik</h4>
           <div class="demo-btns" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
             <button type="button" class="demo-btn" onclick="quickLoginDemo('student')">
@@ -163,6 +182,10 @@
             <small id="userRoleBadge">Mahasiswa · Sains Data</small>
           </div>
         </div>
+
+        <button class="btn btn-sm btn-ghost" id="topAppModeBtn" onclick="openSwitchModeModal()" style="font-weight: 800; font-size: 11px; border: 1px solid var(--line); border-radius: 20px; padding: 5px 12px; background: white;" title="Beralih mode Demo Lomba / Operasional Riil">
+          <span id="topAppModeIcon">🎯</span> <span id="topAppModeText">Mode Demo</span>
+        </button>
 
         <button class="btn btn-secondary btn-sm" onclick="toggleRoleSwitch()" title="Beralih peran Mahasiswa / Dosen">
           <span>🔄 Tukar Peran</span>
@@ -1403,6 +1426,126 @@
           <span>🔓 Batalkan Penyerahan & Buka Revisi</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Switch Application Mode Modal -->
+  <div class="modal-overlay" id="switchModeModal">
+    <div class="modal-box" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeModal('switchModeModal')">&times;</button>
+      <div class="eyebrow" style="color: var(--primary);">Arsitektur Sistem STEAM-Craft</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Pilih Mode Operasional Aplikasi</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">
+        Sistem ini mendukung 2 mode pengoperasian yang dapat dialihkan secara fleksibel:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <!-- Option 1: Demo Mode -->
+        <div class="mode-select-card" id="cardModeDemo" onclick="selectModeOption('demo')" style="border: 2px solid var(--primary); border-radius: 12px; padding: 14px; cursor: pointer; background: var(--primary-light);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 14px; color: var(--navy);">🎯 Mode 1: Demo & Showcase Lomba</strong>
+            <span class="badge badge-blue">Evaluasi Juri</span>
+          </div>
+          <p style="font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4;">
+            Memuat 13 proyek riset multidisiplin terintegrasi (MIPA, Pendidikan, Sains Terapan), login cepat 1-klik akun demo, simulasi kendala (blocker), dan riwayat aktivitas terisi lengkap untuk demonstrasi kompetisi.
+          </p>
+        </div>
+
+        <!-- Option 2: Production Mode -->
+        <div class="mode-select-card" id="cardModeProd" onclick="selectModeOption('production')" style="border: 1px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; background: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 14px; color: var(--navy);">🚀 Mode 2: Operasi Riil Kampus / Produksi</strong>
+            <span class="badge badge-teal">Live Deployment</span>
+          </div>
+          <p style="font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4;">
+            Mode bersih siap operasional untuk universitas dan laboratorium nyata. Memerlukan autentikasi akun terdaftar asli, form registrasi mandiri, dan proyek riset riil yang dimulai dari awal.
+          </p>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('switchModeModal')">Batal</button>
+        <button type="button" class="btn btn-primary" id="btnApplySwitchMode" onclick="applySystemModeChange()">
+          <span>✓ Terapkan Mode Sistem</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register New User Modal (Production / Live Mode) -->
+  <div class="modal-overlay" id="registerUserModal">
+    <div class="modal-box" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeModal('registerUserModal')">&times;</button>
+      <div class="eyebrow" style="color: var(--primary);">Registrasi Civitas Akademika</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Daftar Akun Peneliti Baru</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">
+        Daftarkan akun resmi mahasiswa atau dosen untuk mengakses ruang kerja riset STEAM.
+      </p>
+
+      <form id="registerUserForm" onsubmit="handleRegisterSubmit(event)">
+        <div class="field" style="margin-bottom: 12px;">
+          <label>Nama Lengkap dengan Gelar *</label>
+          <input type="text" id="regName" placeholder="Contoh: Rian Hidayat, S.Si." required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="field">
+            <label>Username Login *</label>
+            <input type="text" id="regUsername" placeholder="Contoh: rian_steam" required>
+          </div>
+          <div class="field">
+            <label>Peran Pengguna *</label>
+            <select id="regRole" required onchange="handleRegisterRoleChange(this.value)">
+              <option value="student">Mahasiswa Peneliti</option>
+              <option value="lecturer">Dosen Pembimbing / Juri</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="field">
+            <label id="regIdentifierLabel">NIM (Nomor Induk Mahasiswa) *</label>
+            <input type="text" id="regIdentifier" placeholder="Contoh: 202610145" required>
+          </div>
+          <div class="field">
+            <label>Program Studi</label>
+            <select id="regStudy" required>
+              <optgroup label="Kelompok MIPA (Sains Murni)">
+                <option value="Biologi">Biologi (Murni)</option>
+                <option value="Kimia">Kimia (Murni)</option>
+                <option value="Fisika">Fisika (Murni)</option>
+                <option value="Matematika">Matematika (Murni)</option>
+              </optgroup>
+              <optgroup label="Kelompok Pendidikan Sains">
+                <option value="Pendidikan Biologi">Pendidikan Biologi</option>
+                <option value="Pendidikan Kimia">Pendidikan Kimia</option>
+                <option value="Pendidikan Fisika">Pendidikan Fisika</option>
+                <option value="Pendidikan Matematika">Pendidikan Matematika</option>
+              </optgroup>
+              <optgroup label="Kelompok Sains Terapan & Komputasi">
+                <option value="Sains Data" selected>Sains Data</option>
+                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                <option value="Sains Aktuaria">Sains Aktuaria</option>
+                <option value="Bioteknologi">Bioteknologi</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 18px;">
+          <label>Kata Sandi Akun *</label>
+          <input type="password" id="regPassword" placeholder="Minimal 6 karakter" required minlength="6">
+        </div>
+
+        <div class="auth-error" id="registerError" style="margin-bottom: 12px; display: none; color: #dc2626; font-size: 12px; background: #fee2e2; padding: 8px 12px; border-radius: 8px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('registerUserModal')">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitRegister">
+            <span>✓ Buat Akun & Masuk</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

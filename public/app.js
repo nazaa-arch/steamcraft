@@ -19,6 +19,8 @@ let pendingCheckpointProjectId = null;
 let pendingCheckpointStageIndex = null;
 let pendingCheckpointTitle = '';
 let pendingCheckpointDesc = '';
+let currentAppMode = 'demo';
+let selectedTargetMode = 'demo';
 
 // Helper: Toast Notification
 function showToast(msg) {
@@ -224,6 +226,219 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ==================== DUAL APPLICATION MODE (DEMO VS PRODUCTION) ====================
+async function loadAppMode() {
+  try {
+    const res = await api('/api/system/mode');
+    currentAppMode = res.mode || 'demo';
+    selectedTargetMode = currentAppMode;
+    applyAppModeUI(currentAppMode);
+  } catch (err) {
+    console.error('Failed to load app mode:', err);
+    currentAppMode = 'demo';
+    applyAppModeUI('demo');
+  }
+}
+
+function applyAppModeUI(mode) {
+  // 1. Topbar Mode Badge
+  const topIcon = document.getElementById('topAppModeIcon');
+  const topText = document.getElementById('topAppModeText');
+  const topBtn = document.getElementById('topAppModeBtn');
+  
+  if (topIcon && topText) {
+    if (mode === 'production') {
+      topIcon.textContent = '🚀';
+      topText.textContent = 'Mode Operasi Riil';
+      if (topBtn) {
+        topBtn.style.borderColor = 'var(--teal)';
+        topBtn.style.color = '#0d9488';
+      }
+    } else {
+      topIcon.textContent = '🎯';
+      topText.textContent = 'Mode Demo Lomba';
+      if (topBtn) {
+        topBtn.style.borderColor = 'var(--line)';
+        topBtn.style.color = 'inherit';
+      }
+    }
+  }
+
+  // 2. Login Screen Switcher & Notice
+  const loginDemoBtn = document.getElementById('loginModeDemoBtn');
+  const loginProdBtn = document.getElementById('loginModeProdBtn');
+  const loginNotice = document.getElementById('loginModeNotice');
+  const demoBox = document.getElementById('demoQuickLoginBox');
+
+  if (loginDemoBtn && loginProdBtn) {
+    if (mode === 'production') {
+      loginProdBtn.classList.add('active');
+      loginProdBtn.classList.remove('btn-ghost');
+      loginDemoBtn.classList.remove('active');
+      loginDemoBtn.classList.add('btn-ghost');
+      if (loginNotice) {
+        loginNotice.style.background = '#f0fdf4';
+        loginNotice.style.color = '#15803d';
+        loginNotice.innerHTML = '🚀 <strong>Mode Operasi Riil Aktif</strong>: Lingkungan kerja bersih untuk civitas akademika nyata. Masuk dengan akun terdaftar Anda atau daftar akun baru.';
+      }
+      if (demoBox) demoBox.style.display = 'none';
+    } else {
+      loginDemoBtn.classList.add('active');
+      loginDemoBtn.classList.remove('btn-ghost');
+      loginProdBtn.classList.remove('active');
+      loginProdBtn.classList.add('btn-ghost');
+      if (loginNotice) {
+        loginNotice.style.background = 'var(--primary-light)';
+        loginNotice.style.color = 'var(--primary)';
+        loginNotice.innerHTML = '🎯 <strong>Mode Demo Lomba Aktif</strong>: Akses instan ke 13 proyek riset multidisiplin dan login cepat 1-klik akun demo untuk evaluasi juri.';
+      }
+      if (demoBox) demoBox.style.display = 'block';
+    }
+  }
+}
+
+function setLoginAppMode(mode) {
+  applyAppModeUI(mode);
+  selectedTargetMode = mode;
+  api('/api/system/mode', 'POST', { mode })
+    .then(res => {
+      currentAppMode = res.mode;
+      showToast(mode === 'production' ? 'Beralih ke Tampilan Operasi Riil' : 'Beralih ke Tampilan Demo Lomba');
+    })
+    .catch(e => console.error(e));
+}
+
+function openSwitchModeModal() {
+  selectedTargetMode = currentAppMode;
+  selectModeOption(currentAppMode);
+  openModal('switchModeModal');
+}
+
+function selectModeOption(mode) {
+  selectedTargetMode = mode;
+  const cardDemo = document.getElementById('cardModeDemo');
+  const cardProd = document.getElementById('cardModeProd');
+
+  if (cardDemo && cardProd) {
+    if (mode === 'demo') {
+      cardDemo.style.border = '2px solid var(--primary)';
+      cardDemo.style.background = 'var(--primary-light)';
+      cardProd.style.border = '1px solid var(--line)';
+      cardProd.style.background = 'white';
+    } else {
+      cardProd.style.border = '2px solid var(--teal)';
+      cardProd.style.background = '#f0fdf4';
+      cardDemo.style.border = '1px solid var(--line)';
+      cardDemo.style.background = 'white';
+    }
+  }
+}
+
+async function applySystemModeChange() {
+  const btn = document.getElementById('btnApplySwitchMode');
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await api('/api/system/mode', 'POST', { mode: selectedTargetMode });
+    currentAppMode = res.mode;
+    applyAppModeUI(currentAppMode);
+    closeModal('switchModeModal');
+    showToast(currentAppMode === 'production' 
+      ? 'Mode Operasi Riil Aktif! Proyek demo disembunyikan.' 
+      : 'Mode Demo Lomba Aktif! 13 Proyek demo kembali ditampilkan.');
+
+    // Reload projects and views
+    await loadAllProjects();
+    if (currentUser) {
+      if (currentActivePage === 'dashboard') {
+        loadDashboard();
+      } else if (currentActivePage === 'projects') {
+        loadProjectsCatalog();
+      } else if (currentActivePage === 'mission') {
+        loadMissionControl();
+      }
+    }
+  } catch (err) {
+    alert('Gagal mengubah mode sistem: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ==================== CIVITAS REGISTRATION (PRODUCTION MODE) ====================
+function openRegisterUserModal() {
+  const form = document.getElementById('registerUserForm');
+  if (form) form.reset();
+  const errDiv = document.getElementById('registerError');
+  if (errDiv) {
+    errDiv.textContent = '';
+    errDiv.style.display = 'none';
+  }
+  handleRegisterRoleChange('student');
+  openModal('registerUserModal');
+}
+
+function handleRegisterRoleChange(role) {
+  const label = document.getElementById('regIdentifierLabel');
+  const input = document.getElementById('regIdentifier');
+  if (!label || !input) return;
+
+  if (role === 'lecturer') {
+    label.textContent = 'NIP (Nomor Induk Pegawai) *';
+    input.placeholder = 'Contoh: 198504122010121002';
+  } else {
+    label.textContent = 'NIM (Nomor Induk Mahasiswa) *';
+    input.placeholder = 'Contoh: 202610145';
+  }
+}
+
+async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const username = document.getElementById('regUsername').value.trim();
+  const role = document.getElementById('regRole').value;
+  const identifier = document.getElementById('regIdentifier').value.trim();
+  const study_program = document.getElementById('regStudy').value;
+  const password = document.getElementById('regPassword').value;
+  const errDiv = document.getElementById('registerError');
+  const btn = document.getElementById('btnSubmitRegister');
+
+  if (errDiv) {
+    errDiv.textContent = '';
+    errDiv.style.display = 'none';
+  }
+
+  if (btn) btn.disabled = true;
+
+  try {
+    const payload = {
+      name,
+      username,
+      password,
+      role,
+      study_program,
+      nim: role === 'student' ? identifier : undefined,
+      nip: role === 'lecturer' ? identifier : undefined
+    };
+
+    const res = await api('/api/auth/register', 'POST', payload);
+    if (res.user) {
+      currentUser = res.user;
+      currentRole = res.user.role;
+      closeModal('registerUserModal');
+      enterWorkspace();
+      showToast(`Registrasi berhasil! Selamat datang, ${res.user.name}`);
+    }
+  } catch (err) {
+    if (errDiv) {
+      errDiv.textContent = err.message || 'Gagal mendaftar akun.';
+      errDiv.style.display = 'block';
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 // ==================== AUTHENTICATION ====================
 function setAuthRole(role) {
   const sBtn = document.getElementById('tabStudent');
@@ -304,12 +519,14 @@ function logout() {
   currentUser = null;
   document.getElementById('workspaceApp').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'grid';
+  applyAppModeUI(currentAppMode);
   showToast('Anda telah keluar.');
 }
 
 function enterWorkspace() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('workspaceApp').style.display = 'block';
+  applyAppModeUI(currentAppMode);
   updateUserProfileUI();
   syncNavigation();
   loadAllProjects();
@@ -616,7 +833,22 @@ async function loadDashboard() {
   const list = document.getElementById('dashboardProjectsList');
   if (!list) return;
   const recent = allProjects.slice(0, 3);
-  list.innerHTML = recent.map(projectCardHTML).join('');
+  if (recent.length === 0) {
+    list.innerHTML = `
+      <div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 48px; background: white; border: 1px dashed var(--line); border-radius: 12px;">
+        <div style="font-size: 36px; margin-bottom: 12px;">🧪</div>
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 8px;">Belum Ada Proyek Riset Aktif</h3>
+        <p style="font-size: 13px; margin-bottom: 16px; max-width: 480px; margin-left: auto; margin-right: auto;">
+          Anda sedang berada dalam <strong>Mode Operasi Riil Kampus</strong>. Mulai kolaborasi riset multidisiplin dengan membuat proyek baru.
+        </p>
+        <button class="btn btn-primary" onclick="openNewProjectModal()">
+          <span>+ Buat Proyek Riset Baru</span>
+        </button>
+      </div>
+    `;
+  } else {
+    list.innerHTML = recent.map(projectCardHTML).join('');
+  }
 }
 
 async function loadProjectsCatalog() {
@@ -2888,6 +3120,7 @@ function exportAnalyticsCSV() {
 // Initial Launch Check
 window.addEventListener('DOMContentLoaded', async () => {
   try {
+    await loadAppMode();
     const res = await api('/api/auth/me');
     if (res.user) {
       currentUser = res.user;
