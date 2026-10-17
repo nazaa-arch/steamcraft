@@ -9,12 +9,9 @@ let currentRole = 'student';
 let allProjects = [];
 let selectedProjectId = null;
 
+// Helper: Filter projects strictly belonging to the currently logged in user
 function getUserProjects() {
   if (!currentUser) return [];
-  // Administrator / Lead Developer has global oversight over all projects
-  if (currentUser.role === 'admin') {
-    return allProjects;
-  }
   return allProjects.filter(p => {
     if (p.creator_id && p.creator_id === currentUser.id) return true;
     if (p.members && Array.isArray(p.members)) {
@@ -749,34 +746,19 @@ async function handleVerifyOtpSubmit(e) {
 function setAuthRole(role) {
   const sBtn = document.getElementById('tabStudent');
   const lBtn = document.getElementById('tabLecturer');
-  const aBtn = document.getElementById('tabAdmin');
   const label = document.getElementById('authIdLabel');
   const input = document.getElementById('authUsername');
 
   if (sBtn) sBtn.classList.toggle('active', role === 'student');
   if (lBtn) lBtn.classList.toggle('active', role === 'lecturer');
-  if (aBtn) aBtn.classList.toggle('active', role === 'admin');
 
   if (role === 'student') {
-    if (label) label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
-    if (input) input.placeholder = 'Contoh: 202610101 (NIM) atau budi';
-  } else if (role === 'lecturer') {
-    if (label) label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
-    if (input) input.placeholder = 'Contoh: 198504122010121002 (NIP / NIDN) atau dosen';
-  } else if (role === 'admin') {
-    if (label) label.textContent = 'ID Administrator / Username';
-    if (input) input.placeholder = 'Contoh: admin atau ADM-2026-DEV01';
+    label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
+    input.placeholder = 'Contoh: 202610101 (NIM) atau username';
+  } else {
+    label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
+    input.placeholder = 'Contoh: 198504122010121002 (NIP / NIDN) atau username';
   }
-}
-
-function quickFillLogin(username, password, role) {
-  setAuthRole(role);
-  const uInput = document.getElementById('authUsername');
-  const pInput = document.getElementById('authPassword');
-  if (uInput) uInput.value = username;
-  if (pInput) pInput.value = password;
-  const roleName = role === 'student' ? 'Mahasiswa' : (role === 'lecturer' ? 'Dosen' : 'Administrator');
-  showToast(`✓ Kredensial ${roleName} terisi (${username}). Silakan klik Masuk.`);
 }
 
 async function quickLoginDemo(target) {
@@ -901,21 +883,21 @@ function enterWorkspace() {
 
 function updateUserProfileUI() {
   if (!currentUser) return;
-  document.getElementById('userName').textContent = currentUser.name || (currentUser.role === 'admin' ? 'Administrator Sistem' : 'Pengguna');
-  const initial = (currentUser.name || (currentUser.role === 'admin' ? 'A' : 'U')).charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = currentUser.name;
+  const initial = (currentUser.name || 'U').charAt(0).toUpperCase();
   const avatarEl = document.getElementById('userAvatar');
   if (avatarEl) {
     avatarEl.textContent = initial;
-    avatarEl.style.background = currentUser.avatar_color || (currentUser.role === 'admin' ? '#0f172a' : 'var(--primary)');
+    avatarEl.style.background = currentUser.avatar_color || 'var(--primary)';
   }
 
   let roleText = '';
   if (currentUser.role === 'admin') {
-    roleText = `🛠️ Administrator · Lead Dev`;
+    roleText = `🛠️ Administrator · ${currentUser.study_program || 'Sistem'}`;
   } else if (currentUser.role === 'lecturer') {
-    roleText = `Dosen Pembimbing · ${currentUser.study_program || 'Civitas'}`;
+    roleText = `Dosen Pembimbing · ${currentUser.study_program}`;
   } else {
-    roleText = `Mahasiswa · ${currentUser.study_program || 'Civitas'}`;
+    roleText = `Mahasiswa · ${currentUser.study_program}`;
   }
   document.getElementById('userRoleBadge').textContent = roleText;
 }
@@ -923,6 +905,28 @@ function updateUserProfileUI() {
 // ==================== PROFILE & IDENTITY MANAGEMENT ====================
 function openEditProfileModal() {
   if (!currentUser) return;
+
+  const modalEyebrow = document.getElementById('editProfileModalEyebrow');
+  const modalTitle = document.getElementById('editProfileModalTitle');
+  const modalSub = document.getElementById('editProfileModalSubtitle');
+  const idLabel = document.getElementById('profileIdLabel');
+
+  if (currentUser.role === 'admin') {
+    if (modalEyebrow) modalEyebrow.textContent = '🛠️ Identitas Administrator & Lead Developer';
+    if (modalTitle) modalTitle.textContent = 'Kelola Profil Administrator';
+    if (modalSub) modalSub.textContent = 'Lengkapi data identitas pengembang sistem, direktorat/unit riset, dan tautan repositori kontrol Anda.';
+    if (idLabel) idLabel.textContent = 'ID Administrator / NIP *';
+  } else if (currentUser.role === 'lecturer') {
+    if (modalEyebrow) modalEyebrow.textContent = '👨‍🏫 Identitas Dosen Pembimbing / Evaluator';
+    if (modalTitle) modalTitle.textContent = 'Kelola Profil Dosen Pembimbing';
+    if (modalSub) modalSub.textContent = 'Lengkapi data kepakaran riset, fakultas, institusi, dan tautan publik portofolio akademik Anda.';
+    if (idLabel) idLabel.textContent = 'NIP / NIDN Dosen *';
+  } else {
+    if (modalEyebrow) modalEyebrow.textContent = 'Identitas & Hak Akses Peneliti';
+    if (modalTitle) modalTitle.textContent = 'Kelola Profil & Identitas STEAM';
+    if (modalSub) modalSub.textContent = 'Lengkapi data akademik, institusi perguruan tinggi, bidang fokus riset, dan tautan publik portofolio Anda.';
+    if (idLabel) idLabel.textContent = 'NIM (Nomor Induk Mahasiswa) *';
+  }
   
   const nameInput = document.getElementById('profileName');
   if (nameInput) nameInput.value = currentUser.name || '';
@@ -932,7 +936,21 @@ function openEditProfileModal() {
   
   const studySelect = document.getElementById('profileStudy');
   if (studySelect) {
-    studySelect.value = currentUser.study_program || 'Sains Data';
+    const targetStudy = currentUser.study_program || (currentUser.role === 'admin' ? 'Pusat Riset & Rekayasa Sistem' : 'Sains Data');
+    let exists = false;
+    for (let i = 0; i < studySelect.options.length; i++) {
+      if (studySelect.options[i].value === targetStudy) {
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = targetStudy;
+      opt.textContent = targetStudy;
+      studySelect.appendChild(opt);
+    }
+    studySelect.value = targetStudy;
   }
 
   const roleDisplay = document.getElementById('profileRoleDisplay');
@@ -947,7 +965,7 @@ function openEditProfileModal() {
   }
 
   const facInput = document.getElementById('profileFaculty');
-  if (facInput) facInput.value = currentUser.faculty || 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)';
+  if (facInput) facInput.value = currentUser.faculty || (currentUser.role === 'admin' ? 'Direktorat Sistem Informasi & Laboratorium Terpadu' : 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)');
 
   const univInput = document.getElementById('profileUniversity');
   if (univInput) univInput.value = currentUser.university || 'Universitas Indonesia';
@@ -961,7 +979,7 @@ function openEditProfileModal() {
   const linksInput = document.getElementById('profileLinks');
   if (linksInput) linksInput.value = currentUser.academic_links || '';
 
-  const avatarColor = currentUser.avatar_color || '#2878d7';
+  const avatarColor = currentUser.avatar_color || (currentUser.role === 'admin' ? '#0f172a' : '#2878d7');
   selectAvatarColor(avatarColor);
 
   openModal('editProfileModal');
@@ -1024,15 +1042,20 @@ async function handleEditProfileSubmit(e) {
 
     if (res.user) {
       currentUser = res.user;
+      localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
       updateUserProfileUI();
       if (currentActivePage === 'studentPortfolio') {
         loadStudentPortfolio();
       }
+      if (currentActivePage === 'admin') {
+        renderAdminProfileCard();
+      }
       closeModal('editProfileModal');
-      showToast('✅ Identitas dan profil peneliti STEAM berhasil diperbarui!');
+      showToast('✅ Identitas dan profil berhasil diperbarui!');
     }
   } catch (err) {
     console.error(err);
+    alert('Gagal menyimpan profil: ' + err.message);
   } finally {
     if (btnSave) {
       btnSave.disabled = false;
@@ -1055,16 +1078,6 @@ function syncNavigation() {
   });
 }
 
-function handleBrandLogoClick() {
-  if (currentRole === 'admin') {
-    showPage('admin');
-  } else if (currentRole === 'lecturer') {
-    showPage('mission');
-  } else {
-    showPage('dashboard');
-  }
-}
-
 // ==================== PAGE NAVIGATION ====================
 function showPage(pageId) {
   currentActivePage = pageId;
@@ -1078,39 +1091,6 @@ function showPage(pageId) {
   document.querySelectorAll('main.wrap > section.page').forEach(sec => {
     sec.classList.toggle('active', sec.id === pageId);
   });
-
-  // Admin Inspection Mode Banner handling
-  const inspectBanner = document.getElementById('adminInspectionBanner');
-  const inspectLabel = document.getElementById('adminInspectPageLabel');
-  if (inspectBanner) {
-    if (currentRole === 'admin' && pageId !== 'admin') {
-      inspectBanner.style.display = 'flex';
-      const pageNames = {
-        dashboard: 'Dashboard Mahasiswa Peneliti',
-        projects: 'Katalog Proyek Riset STEAM',
-        workspace: 'Ruang Kerja Riset & 5 Checkpoint',
-        recruitment: 'Open Recruitment Kolaborator',
-        studentConsultations: 'Jadwal & Bimbingan Mahasiswa',
-        studentAnnouncements: 'Pengumuman Kampus (Mahasiswa)',
-        studentResources: 'Pengajuan Fasilitas Lab Mahasiswa',
-        studentPortfolio: 'Portofolio Riset Mahasiswa',
-        mission: 'Mission Control Supervisi Dosen',
-        consultations: 'Panel Bimbingan & Konsultasi Dosen',
-        announcements: 'Manajemen Pengumuman (Dosen)',
-        resources: 'Manajemen Fasilitas & Lab Riset',
-        analytics: 'Analitik Kohort Riset Civitas'
-      };
-      if (inspectLabel) inspectLabel.textContent = `Meninjau: ${pageNames[pageId] || pageId}`;
-    } else {
-      inspectBanner.style.display = 'none';
-    }
-  }
-
-  // Smoothly scroll active button in mainNav into view
-  const activeNavBtn = document.querySelector('#mainNav button.active');
-  if (activeNavBtn) {
-    activeNavBtn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
-  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
   updateNotificationBadges();
@@ -1226,9 +1206,7 @@ function projectCardHTML(p) {
     ? '<span class="badge badge-orange">🚩 Kendala (Blocker)</span>'
     : `<span class="badge badge-gray">${p.status}</span>`;
 
-  const isAdmin = currentUser && currentUser.role === 'admin';
   const isMine = currentUser && (
-    isAdmin ||
     (p.creator_id && p.creator_id === currentUser.id) ||
     (p.members && p.members.some(m => 
       (m.user_id && m.user_id === currentUser.id) || 
@@ -1243,7 +1221,7 @@ function projectCardHTML(p) {
         <div class="project-card-top">
           <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             <span class="badge ${badgeClass}">${p.study}</span>
-            ${isAdmin ? '<span class="badge badge-blue" style="font-weight: 800; font-size: 10px;">🛡️ Akses Admin</span>' : (isMine ? '<span class="badge badge-teal" style="font-weight: 800;">⭐ Proyek Saya</span>' : '')}
+            ${isMine ? '<span class="badge badge-teal" style="font-weight: 800;">⭐ Proyek Saya</span>' : ''}
           </div>
           ${statusBadge}
         </div>
@@ -1275,7 +1253,7 @@ function projectCardHTML(p) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line);">
           <small style="color: var(--muted);">👥 ${p.members_count || (p.members ? p.members.length : 1)} Mahasiswa</small>
           <button class="btn ${isMine ? 'btn-primary' : 'btn-secondary'} btn-sm" onclick="openWorkspace(${p.id})">
-            <span>${isAdmin ? '🛡️ Buka & Kelola &rarr;' : (isMine ? 'Buka Ruang Kerja &rarr;' : 'Lihat Ruang Kerja &rarr;')}</span>
+            <span>${isMine ? 'Buka Ruang Kerja &rarr;' : 'Lihat Ruang Kerja &rarr;'}</span>
           </button>
         </div>
       </div>
@@ -1313,7 +1291,7 @@ async function loadDashboard() {
       </div>
     `;
   } else {
-    const recent = (currentUser && currentUser.role === 'admin') ? myProjects.slice(0, 6) : myProjects.slice(0, 3);
+    const recent = myProjects.slice(0, 3);
     list.innerHTML = recent.map(projectCardHTML).join('');
   }
 }
@@ -4003,7 +3981,52 @@ function exportAnalyticsCSV() {
 let cachedAdminUsers = [];
 
 async function loadAdminDashboard() {
+  renderAdminProfileCard();
   await Promise.all([loadAdminSystemStats(), loadAdminUsers()]);
+}
+
+function renderAdminProfileCard() {
+  if (!currentUser) return;
+  const avatarEl = document.getElementById('admProfileAvatar');
+  if (avatarEl) {
+    avatarEl.textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+    avatarEl.style.background = currentUser.avatar_color || '#0f172a';
+  }
+  const nameEl = document.getElementById('admProfileName');
+  if (nameEl) nameEl.textContent = currentUser.name || 'Administrator Sistem (Lead Dev & Architect)';
+
+  const handleEl = document.getElementById('admProfileHandle');
+  if (handleEl) handleEl.textContent = `@${currentUser.username || 'admin'}`;
+
+  const idEl = document.getElementById('admProfileIdentifier');
+  if (idEl) idEl.textContent = currentUser.identifier || 'ADM-2026-DEV01';
+
+  const deptEl = document.getElementById('admProfileDept');
+  if (deptEl) deptEl.textContent = currentUser.study_program || 'Pusat Riset & Rekayasa Sistem';
+
+  const affEl = document.getElementById('admProfileAffiliation');
+  if (affEl) affEl.textContent = `${currentUser.faculty || 'Direktorat Sistem Informasi & Laboratorium Terpadu'} · ${currentUser.university || 'Universitas Indonesia'}`;
+
+  const bioEl = document.getElementById('admProfileBio');
+  if (bioEl) {
+    bioEl.textContent = currentUser.bio || 'Akun administrator utama platform STEAM-Craft untuk monitoring telemetri riset, tata kelola akses dosen & mahasiswa, audit repositori, dan kontrol mode sistem.';
+  }
+
+  const intEl = document.getElementById('admProfileInterests');
+  if (intEl) {
+    intEl.textContent = currentUser.research_interests || 'System Architecture, Cloud Infrastructure, AI Pipeline & Data Science';
+  }
+
+  const linksEl = document.getElementById('admProfileLinks');
+  if (linksEl) {
+    linksEl.textContent = currentUser.academic_links || 'GitHub: github.com/steamcraft-admin · Docs: steamcraft.online/docs';
+  }
+}
+
+function adminOpenOwnPasswordModal() {
+  if (currentUser && currentUser.id) {
+    openAdminEditUserModal(currentUser.id);
+  }
 }
 
 async function loadAdminSystemStats() {
