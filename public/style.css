@@ -1608,3 +1608,21 @@ body.dev-mode-active .topbar {
   background: #f0f7ff;
 }
 
+/* Email Verification Modal & OTP Styling */
+#emailVerificationModal .modal-box {
+  animation: modalScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#otpInput:focus {
+  outline: none;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  background: white !important;
+}
+
+

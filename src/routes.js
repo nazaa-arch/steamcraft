@@ -10,6 +10,7 @@ const {
   destroySession,
   backupDatabase
 } = require('./security');
+const { sendVerificationEmail } = require('./mailer');
 
 // In-memory active session for simplicity and instant presentation
 let currentSessionUser = null;
@@ -34,7 +35,7 @@ function getCurrentUser(req) {
   return currentSessionUser;
 }
 
-function handleApiRequest(req, res, url, body) {
+async function handleApiRequest(req, res, url, body) {
   const method = req.method;
   const pathname = url.pathname;
   const user = getCurrentUser(req);
@@ -135,34 +136,185 @@ function handleApiRequest(req, res, url, body) {
       } catch (e) {}
     }
 
+    if (found.email_verified === 0) {
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const targetEmail = found.email || `${found.username}@mail.steamcraft.ac.id`;
+      db.prepare('DELETE FROM email_verifications WHERE user_id = ?').run(found.id);
+      db.prepare(`
+        INSERT INTO email_verifications (user_id, email, otp_code, expires_at)
+        VALUES (?, ?, ?, datetime('now', 'localtime', '+10 minutes'))
+      `).run(found.id, targetEmail, otpCode);
+
+      const mailResult = await sendVerificationEmail({
+        to: targetEmail,
+        name: found.name,
+        otpCode: otpCode
+      });
+
+      return json({
+        success: false,
+        requiresVerification: true,
+        userId: found.id,
+        email: targetEmail,
+        name: found.name,
+        simulatedOtp: mailResult.simulated ? otpCode : null,
+        error: 'Email Anda belum diverifikasi. Kode OTP telah dikirimkan ke email Anda.'
+      });
+    }
+
     const token = createSession(db, found.id);
     currentSessionUser = found;
     return json({ success: true, user: found, token });
   }
 
   if (pathname === '/api/auth/register' && method === 'POST') {
-    const { username, name, role, identifier, nim, nip, study_program, password } = body || {};
+    const { username, name, role, identifier, nim, nip, study_program, password, email } = body || {};
     const idVal = identifier || nim || nip;
     const userHandle = username || (idVal ? idVal.toLowerCase().replace(/[^a-z0-9_]/g, '') : '');
     if (!name || !role || !idVal) {
-      return error('Field wajib diisi: Nama, Peran, dan NIM/NIP');
+      return error('Field wajib diisi: Nama Lengkap, Peran, dan NIM/NIP');
     }
+
+    const cleanEmail = email ? String(email).trim().toLowerCase() : `${userHandle}@mail.steamcraft.ac.id`;
+    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      return error('Format alamat email tidak valid (harus mengandung @ dan domain)');
+    }
+
+    const existingUname = db.prepare('SELECT id FROM users WHERE username = ? OR identifier = ?').get(userHandle, idVal);
+    if (existingUname) {
+      return error(`Username "${userHandle}" atau NIM/NIP "${idVal}" sudah terdaftar.`);
+    }
+
+    const existingEmail = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
+    if (existingEmail) {
+      return error(`Alamat email "${cleanEmail}" sudah terdaftar.`);
+    }
+
     try {
       const colors = ['#2878d7', '#37b6a0', '#8060d5', '#ed7b64', '#f4b33e'];
       const avatarColor = colors[Math.floor(Math.random() * colors.length)];
       const securePasswordHash = hashPassword(password || 'password123');
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
       const insert = db.prepare(`
-        INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password, email, email_verified)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
       `);
-      const info = insert.run(userHandle, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash);
-      const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
-      const token = createSession(db, newUser.id);
-      currentSessionUser = newUser;
-      return json({ success: true, user: newUser, token });
+      const info = insert.run(userHandle, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash, cleanEmail);
+      const newUserId = info.lastInsertRowid;
+
+      db.prepare(`
+        INSERT INTO email_verifications (user_id, email, otp_code, expires_at)
+        VALUES (?, ?, ?, datetime('now', 'localtime', '+10 minutes'))
+      `).run(newUserId, cleanEmail, otpCode);
+
+      const mailResult = await sendVerificationEmail({
+        to: cleanEmail,
+        name: name,
+        otpCode: otpCode
+      });
+
+      return json({
+        success: true,
+        requiresVerification: true,
+        userId: newUserId,
+        email: cleanEmail,
+        name: name,
+        simulatedOtp: mailResult.simulated ? otpCode : null,
+        message: 'Akun berhasil dibuat. Kode OTP verifikasi telah dikirimkan ke email Anda!'
+      });
     } catch (e) {
       return error('Pendaftaran gagal: ' + e.message);
     }
+  }
+
+  if (pathname === '/api/auth/verify-email' && method === 'POST') {
+    const { userId, email, otpCode } = body || {};
+    if ((!userId && !email) || !otpCode) {
+      return error('Kode OTP dan identitas akun wajib diisi', 400);
+    }
+
+    const cleanOtp = String(otpCode).trim();
+    let query = "SELECT * FROM email_verifications WHERE otp_code = ? AND datetime(expires_at) >= datetime('now', 'localtime')";
+    let params = [cleanOtp];
+
+    if (userId) {
+      query += ' AND user_id = ?';
+      params.push(userId);
+    } else if (email) {
+      query += ' AND email = ?';
+      params.push(email.trim().toLowerCase());
+    }
+    query += ' ORDER BY id DESC LIMIT 1';
+
+    const verificationRecord = db.prepare(query).get(...params);
+
+    if (!verificationRecord) {
+      return error('Kode OTP salah atau telah kedaluwarsa. Silakan minta kode baru.', 400);
+    }
+
+    const targetUserId = verificationRecord.user_id;
+
+    // Mark user as verified
+    db.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(targetUserId);
+
+    // Clean up verification records
+    db.prepare('DELETE FROM email_verifications WHERE user_id = ?').run(targetUserId);
+
+    const verifiedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(targetUserId);
+    const token = createSession(db, verifiedUser.id);
+    currentSessionUser = verifiedUser;
+
+    return json({
+      success: true,
+      message: 'Email berhasil diverifikasi! Selamat datang di STEAM-Craft.',
+      user: verifiedUser,
+      token
+    });
+  }
+
+  if (pathname === '/api/auth/resend-otp' && method === 'POST') {
+    const { userId, email } = body || {};
+    if (!userId && !email) {
+      return error('Identitas akun wajib diisi', 400);
+    }
+
+    let userRow = null;
+    if (userId) {
+      userRow = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    } else if (email) {
+      userRow = db.prepare('SELECT * FROM users WHERE email = ?').get(email.trim().toLowerCase());
+    }
+
+    if (!userRow) {
+      return error('Pengguna tidak ditemukan', 404);
+    }
+
+    if (userRow.email_verified === 1) {
+      return error('Email pengguna ini sudah diverifikasi sebelumnya.', 400);
+    }
+
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    db.prepare('DELETE FROM email_verifications WHERE user_id = ?').run(userRow.id);
+    db.prepare(`
+      INSERT INTO email_verifications (user_id, email, otp_code, expires_at)
+      VALUES (?, ?, ?, datetime('now', 'localtime', '+10 minutes'))
+    `).run(userRow.id, userRow.email, newOtp);
+
+    const mailResult = await sendVerificationEmail({
+      to: userRow.email,
+      name: userRow.name,
+      otpCode: newOtp
+    });
+
+    return json({
+      success: true,
+      userId: userRow.id,
+      email: userRow.email,
+      simulatedOtp: mailResult.simulated ? newOtp : null,
+      message: 'Kode OTP baru telah dikirimkan ke ' + userRow.email
+    });
   }
 
   if (pathname === '/api/auth/profile' && method === 'POST') {

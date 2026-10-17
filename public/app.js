@@ -433,6 +433,7 @@ async function handleRegisterSubmit(e) {
   const username = document.getElementById('regUsername').value.trim();
   const role = document.getElementById('regRole').value;
   const identifier = document.getElementById('regIdentifier').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
   const study_program = document.getElementById('regStudy').value;
   const password = document.getElementById('regPassword').value;
   const errDiv = document.getElementById('registerError');
@@ -449,6 +450,7 @@ async function handleRegisterSubmit(e) {
     const payload = {
       name,
       username,
+      email,
       password,
       role,
       study_program,
@@ -457,7 +459,11 @@ async function handleRegisterSubmit(e) {
     };
 
     const res = await api('/api/auth/register', 'POST', payload);
-    if (res.user) {
+    if (res.requiresVerification) {
+      closeModal('registerUserModal');
+      openEmailVerificationModal(res.userId, res.email, res.simulatedOtp);
+      showToast(res.message || 'Silakan masukkan kode OTP verifikasi email.');
+    } else if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
       localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
@@ -470,6 +476,147 @@ async function handleRegisterSubmit(e) {
   } catch (err) {
     if (errDiv) {
       errDiv.textContent = err.message || 'Gagal mendaftar akun.';
+      errDiv.style.display = 'block';
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ==================== EMAIL VERIFICATION & OTP ====================
+let pendingVerificationUserId = null;
+let pendingVerificationEmail = '';
+let resendTimerInterval = null;
+
+function openEmailVerificationModal(userId, email, simulatedOtp = null) {
+  pendingVerificationUserId = userId;
+  pendingVerificationEmail = email;
+
+  const displayEl = document.getElementById('verifyEmailDisplay');
+  if (displayEl) displayEl.textContent = email || '-';
+
+  const simBanner = document.getElementById('verifyDevSimulatedBanner');
+  const simText = document.getElementById('verifyDevOtpText');
+  const otpInput = document.getElementById('otpInput');
+  const errDiv = document.getElementById('verifyOtpError');
+
+  if (errDiv) {
+    errDiv.textContent = '';
+    errDiv.style.display = 'none';
+  }
+
+  if (simulatedOtp && simBanner && simText) {
+    simBanner.style.display = 'block';
+    simText.textContent = simulatedOtp;
+    if (otpInput) otpInput.value = simulatedOtp;
+  } else {
+    if (simBanner) simBanner.style.display = 'none';
+    if (otpInput) otpInput.value = '';
+  }
+
+  startResendTimer();
+  openModal('emailVerificationModal');
+  setTimeout(() => {
+    if (otpInput) otpInput.focus();
+  }, 200);
+}
+
+function startResendTimer() {
+  if (resendTimerInterval) clearInterval(resendTimerInterval);
+
+  let seconds = 60;
+  const countText = document.getElementById('resendCountdownText');
+  const secEl = document.getElementById('resendSeconds');
+  const btnResend = document.getElementById('btnResendOtp');
+
+  if (countText) countText.style.display = 'inline';
+  if (btnResend) btnResend.style.display = 'none';
+  if (secEl) secEl.textContent = seconds;
+
+  resendTimerInterval = setInterval(() => {
+    seconds--;
+    if (secEl) secEl.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(resendTimerInterval);
+      if (countText) countText.style.display = 'none';
+      if (btnResend) btnResend.style.display = 'inline';
+    }
+  }, 1000);
+}
+
+async function resendVerificationOtp() {
+  const btnResend = document.getElementById('btnResendOtp');
+  if (btnResend) btnResend.disabled = true;
+
+  try {
+    const res = await api('/api/auth/resend-otp', 'POST', {
+      userId: pendingVerificationUserId,
+      email: pendingVerificationEmail
+    });
+
+    if (res.simulatedOtp) {
+      const simBanner = document.getElementById('verifyDevSimulatedBanner');
+      const simText = document.getElementById('verifyDevOtpText');
+      const otpInput = document.getElementById('otpInput');
+      if (simBanner) simBanner.style.display = 'block';
+      if (simText) simText.textContent = res.simulatedOtp;
+      if (otpInput) otpInput.value = res.simulatedOtp;
+      showToast(`Kode OTP baru (Dev Mode): ${res.simulatedOtp}`);
+    } else {
+      showToast(res.message || 'Kode OTP baru telah dikirimkan ke email Anda.');
+    }
+
+    startResendTimer();
+  } catch (err) {
+    showToast(err.message || 'Gagal mengirim ulang kode OTP.');
+  } finally {
+    if (btnResend) btnResend.disabled = false;
+  }
+}
+
+async function handleVerifyOtpSubmit(e) {
+  e.preventDefault();
+  const otpInput = document.getElementById('otpInput');
+  const otpCode = otpInput ? otpInput.value.trim() : '';
+  const errDiv = document.getElementById('verifyOtpError');
+  const btn = document.getElementById('btnSubmitOtp');
+
+  if (errDiv) {
+    errDiv.textContent = '';
+    errDiv.style.display = 'none';
+  }
+
+  if (!otpCode || otpCode.length !== 6) {
+    if (errDiv) {
+      errDiv.textContent = 'Harap masukkan 6 digit kode OTP lengkap.';
+      errDiv.style.display = 'block';
+    }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await api('/api/auth/verify-email', 'POST', {
+      userId: pendingVerificationUserId,
+      email: pendingVerificationEmail,
+      otpCode
+    });
+
+    if (res.user) {
+      if (resendTimerInterval) clearInterval(resendTimerInterval);
+      currentUser = res.user;
+      currentRole = res.user.role;
+      localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      if (res.token) localStorage.setItem('steamcraft_token', res.token);
+      selectedProjectId = null;
+      closeModal('emailVerificationModal');
+      enterWorkspace();
+      showToast(`✓ ${res.message || 'Email berhasil diverifikasi! Selamat datang.'}`);
+    }
+  } catch (err) {
+    if (errDiv) {
+      errDiv.textContent = err.message || 'Kode OTP tidak valid atau sudah kedaluwarsa.';
       errDiv.style.display = 'block';
     }
   } finally {
@@ -526,6 +673,11 @@ async function handleLoginSubmit(e) {
 
   try {
     const res = await api('/api/auth/login', 'POST', { username, password });
+    if (res.requiresVerification) {
+      openEmailVerificationModal(res.userId, res.email, res.simulatedOtp);
+      showToast(res.error || 'Silakan masukkan kode OTP verifikasi email Anda.');
+      return;
+    }
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;

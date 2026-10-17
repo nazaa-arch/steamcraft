@@ -29,6 +29,8 @@ function initDatabase() {
       academic_links TEXT DEFAULT '',
       avatar_color TEXT DEFAULT '#2878d7',
       password TEXT NOT NULL,
+      email TEXT,
+      email_verified INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now', 'localtime'))
     );
 
@@ -224,6 +226,17 @@ function initDatabase() {
       expires_at TEXT NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      email TEXT NOT NULL,
+      otp_code TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_email_verif_lookup ON email_verifications(email, otp_code);
   `);
 
   // Default app_mode in database: 'production' for real campus operations
@@ -255,6 +268,15 @@ function initDatabase() {
   addColumnIfNotExists('users', 'research_interests', "TEXT DEFAULT 'Sains, Teknologi, Rekayasa & Matematika'");
   addColumnIfNotExists('users', 'bio', "TEXT DEFAULT ''");
   addColumnIfNotExists('users', 'academic_links', "TEXT DEFAULT ''");
+  addColumnIfNotExists('users', 'email', "TEXT");
+  addColumnIfNotExists('users', 'email_verified', "INTEGER DEFAULT 0");
+
+  try {
+    db.exec(`
+      UPDATE users SET email_verified = 1 WHERE email_verified IS NULL OR email_verified = 0;
+      UPDATE users SET email = username || '@mail.steamcraft.ac.id' WHERE email IS NULL OR email = '';
+    `);
+  } catch (e) {}
 
   // Populate default profiles for known users if bio is empty
   const defaultProfiles = {

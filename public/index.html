@@ -1721,6 +1721,12 @@
           </div>
         </div>
 
+        <div class="field" style="margin-bottom: 12px;">
+          <label>Email Civitas / Kampus *</label>
+          <input type="email" id="regEmail" placeholder="Contoh: rian.hidayat@ui.ac.id atau rian@gmail.com" required>
+          <small style="color: var(--muted); font-size: 11px;">Kode OTP verifikasi 6 digit akan dikirimkan ke alamat email ini.</small>
+        </div>
+
         <div class="field" style="margin-bottom: 18px;">
           <label>Kata Sandi Akun *</label>
           <input type="password" id="regPassword" placeholder="Minimal 6 karakter" required minlength="6">
@@ -1731,7 +1737,60 @@
         <div style="display: flex; justify-content: flex-end; gap: 10px;">
           <button type="button" class="btn btn-secondary" onclick="closeModal('registerUserModal')">Batal</button>
           <button type="submit" class="btn btn-primary" id="btnSubmitRegister">
-            <span>✓ Buat Akun & Masuk</span>
+            <span>Daftar & Verifikasi Email &rarr;</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Email Verification Modal (OTP) -->
+  <div class="modal-overlay" id="emailVerificationModal">
+    <div class="modal-box" style="max-width: 460px; text-align: center;">
+      <button class="modal-close" onclick="closeModal('emailVerificationModal')">&times;</button>
+      <div style="width: 56px; height: 56px; margin: 0 auto 16px auto; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px solid #bfdbfe;">
+        ✉️
+      </div>
+      <div class="eyebrow" style="color: var(--primary);">Autentikasi Dua Langkah</div>
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Verifikasi Alamat Email</h2>
+      <p style="font-size: 13px; color: var(--ink-secondary); margin-bottom: 18px; line-height: 1.5;">
+        Kami telah mengirimkan 6 digit kode OTP verifikasi ke:<br>
+        <strong id="verifyEmailDisplay" style="color: var(--navy); font-size: 14px;">-</strong>
+      </p>
+
+      <!-- Simulated Dev Mode Banner (Shown if SMTP is in dev/simulated mode) -->
+      <div id="verifyDevSimulatedBanner" style="display: none; background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: #92400e; text-align: left;">
+        <div style="font-weight: 800; margin-bottom: 2px;">⚡ Mode Uji Coba Cepat (Dev / Fallback)</div>
+        <div>Kode OTP Anda: <strong id="verifyDevOtpText" style="font-family: monospace; font-size: 14px; letter-spacing: 2px; color: #1e3a8a;">-</strong></div>
+      </div>
+
+      <form id="verifyOtpForm" onsubmit="handleVerifyOtpSubmit(event)">
+        <div class="field" style="margin-bottom: 16px;">
+          <label style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">
+            Masukkan 6 Digit Kode OTP
+          </label>
+          <input
+            type="text"
+            id="otpInput"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="······"
+            required
+            autocomplete="one-time-code"
+            style="font-size: 28px; text-align: center; letter-spacing: 12px; font-weight: 900; font-family: monospace; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--primary-light); background: #fafcff; width: 100%; box-sizing: border-box;"
+          >
+        </div>
+
+        <div class="auth-error" id="verifyOtpError" style="margin-bottom: 14px; display: none; color: #dc2626; font-size: 12px; background: #fee2e2; padding: 8px 12px; border-radius: 8px; text-align: left;"></div>
+
+        <button type="submit" class="btn btn-primary" id="btnSubmitOtp" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 12px;">
+          <span>✓ Verifikasi & Masuk ke Ruang Kerja</span>
+        </button>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); padding-top: 8px; border-top: 1px solid var(--line-light);">
+          <span id="resendCountdownText">Kirim ulang dalam <strong id="resendSeconds">60</strong> detik</span>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnResendOtp" onclick="resendVerificationOtp()" style="display: none; font-size: 12px; color: var(--primary); padding: 4px 8px;">
+            Kirim Ulang Kode OTP ↻
           </button>
         </div>
       </form>
