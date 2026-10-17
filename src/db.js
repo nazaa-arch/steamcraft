@@ -226,8 +226,8 @@ function initDatabase() {
     );
   `);
 
-  // Default app_mode in database: 'demo'
-  db.prepare("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('app_mode', 'demo')").run();
+  // Default app_mode in database: 'production' for real campus operations
+  db.prepare("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('app_mode', 'production')").run();
 
   // Automatic Migration for dynamic columns
   const addColumnIfNotExists = (table, col, def) => {

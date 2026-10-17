@@ -102,10 +102,11 @@ function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname === '/api/auth/login' && method === 'POST') {
-    const { username, password } = body || {};
-    if (!username || !password) return error('Username dan kata sandi wajib diisi', 400);
+    const { username, identifier, password } = body || {};
+    const inputIdentifier = username || identifier;
+    if (!inputIdentifier || !password) return error('Username/NIM/NIP dan kata sandi wajib diisi', 400);
 
-    const unameClean = String(username).trim();
+    const unameClean = String(inputIdentifier).trim();
     const isSpecialDevLookup = ['admin', 'developer', 'dev'].includes(unameClean.toLowerCase());
 
     let found = null;
@@ -142,8 +143,9 @@ function handleApiRequest(req, res, url, body) {
   if (pathname === '/api/auth/register' && method === 'POST') {
     const { username, name, role, identifier, nim, nip, study_program, password } = body || {};
     const idVal = identifier || nim || nip;
-    if (!username || !name || !role || !idVal) {
-      return error('Semua field wajib diisi (Nama, Username, Peran, dan NIM/NIP)');
+    const userHandle = username || (idVal ? idVal.toLowerCase().replace(/[^a-z0-9_]/g, '') : '');
+    if (!name || !role || !idVal) {
+      return error('Field wajib diisi: Nama, Peran, dan NIM/NIP');
     }
     try {
       const colors = ['#2878d7', '#37b6a0', '#8060d5', '#ed7b64', '#f4b33e'];
@@ -153,7 +155,7 @@ function handleApiRequest(req, res, url, body) {
         INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
-      const info = insert.run(username, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash);
+      const info = insert.run(userHandle, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash);
       const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
       const token = createSession(db, newUser.id);
       currentSessionUser = newUser;
@@ -408,11 +410,12 @@ function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname === '/api/projects' && method === 'POST') {
-    const { name, desc, study, steam, template, goal, tools, repo_url, recruitment_roles, open_recruitment } = body || {};
+    const { name, desc, study, steam, template, goal, tools, repo_url, recruitment_roles, open_recruitment, lecturer } = body || {};
     if (!name || !desc) return error('Nama dan deskripsi proyek wajib diisi');
 
     const appMode = getAppMode();
     const isDemoVal = appMode === 'demo' ? 1 : 0;
+    const assignedLecturer = lecturer || 'Dr. Rahmat Wijaya, M.Sc.';
 
     const insert = db.prepare(`
       INSERT INTO projects (
@@ -420,14 +423,14 @@ function handleApiRequest(req, res, url, body) {
         recruitment_roles, goal, tools, repo_url, lecturer, creator_id, versions_count, blocker, is_demo
       ) VALUES (
         ?, ?, ?, ?, ?, 'Aktif', 0, 1, ?,
-        ?, ?, ?, ?, 'Dr. Rahmat Wijaya, M.Sc.', ?, 1, 0, ?
+        ?, ?, ?, ?, ?, ?, 1, 0, ?
       )
     `);
 
     const info = insert.run(
       name, desc, study || 'Sains Data', steam || 'Science + Data', template || 'data',
       open_recruitment ? 1 : 0, recruitment_roles || 'Peneliti Muda, Analis',
-      goal || '', tools || '', repo_url || '', user.id, isDemoVal
+      goal || '', tools || '', repo_url || '', assignedLecturer, user.id, isDemoVal
     );
 
     const newId = info.lastInsertRowid;
@@ -736,8 +739,12 @@ function handleApiRequest(req, res, url, body) {
   // ===================== RECRUITMENT ROUTES =====================
   if (pathname === '/api/recruitment' && method === 'GET') {
     const study = url.searchParams.get('study') || '';
+    const appMode = getAppMode();
     let query = "SELECT * FROM projects WHERE open_recruitment = 1 AND archived = 0 AND status != 'Selesai'";
     const params = [];
+    if (appMode === 'production') {
+      query += ' AND is_demo = 0';
+    }
     if (study) {
       query += ' AND study = ?';
       params.push(study);
@@ -787,12 +794,32 @@ function handleApiRequest(req, res, url, body) {
 
   // ===================== CONSULTATION ROUTES =====================
   if (pathname === '/api/consultations' && method === 'GET') {
-    const consultations = db.prepare(`
+    const appMode = getAppMode();
+    let query = `
       SELECT c.*, p.name as project_name, p.study as project_study
       FROM consultations c
       JOIN projects p ON c.project_id = p.id
-      ORDER BY c.date ASC, c.time ASC
-    `).all();
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (appMode === 'production') {
+      query += ' AND p.is_demo = 0';
+    }
+
+    if (user.role === 'student') {
+      query += ` AND (
+        p.creator_id = ?
+        OR c.project_id IN (SELECT project_id FROM project_members WHERE user_id = ? OR identifier = ?)
+      )`;
+      params.push(user.id, user.id, user.identifier);
+    } else if (user.role === 'lecturer' && appMode === 'production') {
+      query += ' AND (c.lecturer_name = ? OR p.lecturer = ? OR p.lecturer LIKE ?)';
+      params.push(user.name, user.name, `%${user.name}%`);
+    }
+
+    query += ' ORDER BY c.date ASC, c.time ASC';
+    const consultations = db.prepare(query).all(...params);
 
     return json({ consultations });
   }
@@ -900,12 +927,32 @@ function handleApiRequest(req, res, url, body) {
 
   // ===================== LAB & RESOURCE REQUESTS =====================
   if (pathname === '/api/resources' && method === 'GET') {
-    const requests = db.prepare(`
+    const appMode = getAppMode();
+    let query = `
       SELECT r.*, p.name as project_name, p.study as project_study
       FROM resource_requests r
       JOIN projects p ON r.project_id = p.id
-      ORDER BY r.id DESC
-    `).all();
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (appMode === 'production') {
+      query += ' AND p.is_demo = 0';
+    }
+
+    if (user.role === 'student') {
+      query += ` AND (
+        p.creator_id = ?
+        OR r.project_id IN (SELECT project_id FROM project_members WHERE user_id = ? OR identifier = ?)
+      )`;
+      params.push(user.id, user.id, user.identifier);
+    } else if (user.role === 'lecturer' && appMode === 'production') {
+      query += ' AND (p.lecturer = ? OR p.lecturer LIKE ?)';
+      params.push(user.name, `%${user.name}%`);
+    }
+
+    query += ' ORDER BY r.id DESC';
+    const requests = db.prepare(query).all(...params);
 
     return json({ requests });
   }
@@ -944,10 +991,12 @@ function handleApiRequest(req, res, url, body) {
 
   // ===================== MISSION CONTROL (DOSEN) =====================
   if (pathname === '/api/mission/stats' && method === 'GET') {
-    const totalProjects = db.prepare('SELECT COUNT(*) as c FROM projects WHERE archived = 0').get().c;
-    const pendingReview = db.prepare("SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0").get().c;
-    const activeBlockers = db.prepare('SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0').get().c;
-    const completedProjects = db.prepare("SELECT COUNT(*) as c FROM projects WHERE status = 'Selesai'").get().c;
+    const appMode = getAppMode();
+    const demoFilter = appMode === 'production' ? ' AND is_demo = 0' : '';
+    const totalProjects = db.prepare(`SELECT COUNT(*) as c FROM projects WHERE archived = 0${demoFilter}`).get().c;
+    const pendingReview = db.prepare(`SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0${demoFilter}`).get().c;
+    const activeBlockers = db.prepare(`SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0${demoFilter}`).get().c;
+    const completedProjects = db.prepare(`SELECT COUNT(*) as c FROM projects WHERE status = 'Selesai'${demoFilter}`).get().c;
 
     const templates = db.prepare('SELECT * FROM template_configs').all();
 
@@ -1086,9 +1135,81 @@ function handleApiRequest(req, res, url, body) {
 
   // Real-time Notification Badges
   if (pathname === '/api/notifications' && method === 'GET') {
-    const pendingConsultations = db.prepare("SELECT COUNT(*) as c FROM consultations WHERE status = 'Menunggu respons'").get().c;
-    const activeBlockers = db.prepare("SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0").get().c;
-    const pendingReviews = db.prepare("SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0").get().c;
+    const appMode = getAppMode();
+    const isProd = appMode === 'production';
+    let pendingConsultations = 0;
+    let activeBlockers = 0;
+    let pendingReviews = 0;
+
+    if (user.role === 'student') {
+      const demoFilter = isProd ? ' AND p.is_demo = 0' : '';
+      const cRow = db.prepare(`
+        SELECT COUNT(*) as c FROM consultations c
+        JOIN projects p ON c.project_id = p.id
+        WHERE c.status = 'Menunggu respons'
+          AND (p.creator_id = ? OR c.project_id IN (SELECT project_id FROM project_members WHERE user_id = ? OR identifier = ?))
+          ${demoFilter}
+      `).get(user.id, user.id, user.identifier);
+      pendingConsultations = cRow ? cRow.c : 0;
+
+      const bRow = db.prepare(`
+        SELECT COUNT(*) as c FROM projects p
+        WHERE p.blocker = 1 AND p.archived = 0
+          AND (p.creator_id = ? OR p.id IN (SELECT project_id FROM project_members WHERE user_id = ? OR identifier = ?))
+          ${demoFilter}
+      `).get(user.id, user.id, user.identifier);
+      activeBlockers = bRow ? bRow.c : 0;
+
+      const rRow = db.prepare(`
+        SELECT COUNT(*) as c FROM projects p
+        WHERE p.status IN ('Menunggu persetujuan', 'Review diajukan') AND p.archived = 0
+          AND (p.creator_id = ? OR p.id IN (SELECT project_id FROM project_members WHERE user_id = ? OR identifier = ?))
+          ${demoFilter}
+      `).get(user.id, user.id, user.identifier);
+      pendingReviews = rRow ? rRow.c : 0;
+    } else if (user.role === 'lecturer') {
+      const demoFilter = isProd ? ' AND p.is_demo = 0' : '';
+      const cRow = isProd
+        ? db.prepare(`
+            SELECT COUNT(*) as c FROM consultations c
+            JOIN projects p ON c.project_id = p.id
+            WHERE c.status = 'Menunggu respons'
+              AND (c.lecturer_name = ? OR p.lecturer = ? OR p.lecturer LIKE ?)
+              ${demoFilter}
+          `).get(user.name, user.name, `%${user.name}%`)
+        : db.prepare("SELECT COUNT(*) as c FROM consultations WHERE status = 'Menunggu respons'").get();
+      pendingConsultations = cRow ? cRow.c : 0;
+
+      const bRow = isProd
+        ? db.prepare(`
+            SELECT COUNT(*) as c FROM projects p
+            WHERE p.blocker = 1 AND p.archived = 0
+              AND (p.lecturer = ? OR p.lecturer LIKE ?)
+              ${demoFilter}
+          `).get(user.name, `%${user.name}%`)
+        : db.prepare("SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0").get();
+      activeBlockers = bRow ? bRow.c : 0;
+
+      const rRow = isProd
+        ? db.prepare(`
+            SELECT COUNT(*) as c FROM projects p
+            WHERE p.status IN ('Menunggu persetujuan', 'Review diajukan') AND p.archived = 0
+              AND (p.lecturer = ? OR p.lecturer LIKE ?)
+              ${demoFilter}
+          `).get(user.name, `%${user.name}%`)
+        : db.prepare("SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0").get();
+      pendingReviews = rRow ? rRow.c : 0;
+    } else {
+      // Admin sees overall
+      const demoFilter = isProd ? ' AND is_demo = 0' : '';
+      const cRow = isProd
+        ? db.prepare(`SELECT COUNT(*) as c FROM consultations c JOIN projects p ON c.project_id = p.id WHERE c.status = 'Menunggu respons' AND p.is_demo = 0`).get()
+        : db.prepare("SELECT COUNT(*) as c FROM consultations WHERE status = 'Menunggu respons'").get();
+      pendingConsultations = cRow ? cRow.c : 0;
+
+      activeBlockers = db.prepare(`SELECT COUNT(*) as c FROM projects WHERE blocker = 1 AND archived = 0${demoFilter}`).get().c;
+      pendingReviews = db.prepare(`SELECT COUNT(*) as c FROM projects WHERE status IN ('Menunggu persetujuan', 'Review diajukan') AND archived = 0${demoFilter}`).get().c;
+    }
     
     let unreadAnnouncements = 0;
     try {
@@ -1130,7 +1251,12 @@ function handleApiRequest(req, res, url, body) {
 
   // ===================== ANALYTICS =====================
   if (pathname === '/api/analytics' && method === 'GET') {
-    const projects = db.prepare('SELECT * FROM projects').all();
+    const appMode = getAppMode();
+    let query = 'SELECT * FROM projects WHERE 1=1';
+    if (appMode === 'production') {
+      query += ' AND is_demo = 0';
+    }
+    const projects = db.prepare(query).all();
     const disciplines = {};
     let totalProgress = 0;
     let completedCheckpoints = 0;
@@ -1201,7 +1327,12 @@ function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname === '/api/analytics/export.csv' && method === 'GET') {
-    const projects = db.prepare('SELECT * FROM projects').all();
+    const appMode = getAppMode();
+    let query = 'SELECT * FROM projects';
+    if (appMode === 'production') {
+      query += ' WHERE is_demo = 0';
+    }
+    const projects = db.prepare(query).all();
     const headers = ['ID', 'Nama Proyek', 'Program Studi', 'Pilar STEAM', 'Status', 'Progres (%)', 'Anggota', 'Blocker', 'Versi', 'Nilai Akhir', 'Predikat'];
     const rows = projects.map(p => [
       p.id,

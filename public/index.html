@@ -64,51 +64,17 @@
 
           <div class="auth-error" id="authError"></div>
 
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 6px;">
             <span>Masuk ke Ruang Kerja</span>
             <span>&rarr;</span>
           </button>
 
-          <div style="margin-top: 12px; text-align: center;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="openRegisterUserModal()" style="font-size: 12px; color: var(--primary);">
-              Belum punya akun? <strong>Daftar Akun Peneliti Baru &rarr;</strong>
+          <div style="margin-top: 16px; text-align: center; border-top: 1px solid var(--line-light); padding-top: 14px;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openRegisterUserModal()" style="font-size: 12.5px; color: var(--primary);">
+              Belum memiliki akun terdaftar? <strong>Daftar Akun Civitas Baru &rarr;</strong>
             </button>
           </div>
         </form>
-
-        <div class="demo-box" id="demoQuickLoginBox">
-          <h4>⚡ Akses Demo 1-Klik</h4>
-          <div class="demo-btns" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('student')">
-              <span>👤 Mahasiswa (Budi Santoso — Sains Data)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('tiara')">
-              <span>👤 Mahasiswa (Tiara Safitri — Pendidikan Fisika)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('dimas')">
-              <span>👤 Mahasiswa (Dimas Anggara — Kimia Murni)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('fitri')">
-              <span>👤 Mahasiswa (Fitri Handayani — Biologi Murni)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('laila')">
-              <span>👤 Mahasiswa (Laila Munawaroh — Pendidikan Matematika)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('prof_hartono')">
-              <span>👨‍🏫 Dosen Pembimbing (Prof. Dr. Hartono, M.Si. — FMIPA / Pendidikan Sains)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('lecturer')">
-              <span>👨‍🏫 Dosen Pembimbing (Dr. Rahmat Wijaya, M.Sc.)</span>
-              <span>&rarr;</span>
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   </div>
@@ -171,23 +137,15 @@
         </div>
 
         <div class="user-badge" id="topUserBadge" onclick="openEditProfileModal()" title="Klik untuk mengedit identitas & profil peneliti STEAM" tabindex="0" role="button">
-          <div class="user-avatar" id="userAvatar">B</div>
+          <div class="user-avatar" id="userAvatar">-</div>
           <div class="user-info">
             <div style="display: flex; align-items: center; gap: 6px;">
-              <strong id="userName">Budi Santoso</strong>
+              <strong id="userName">Pengguna</strong>
               <span class="profile-edit-indicator" title="Edit Profil">✏️</span>
             </div>
-            <small id="userRoleBadge">Mahasiswa · Sains Data</small>
+            <small id="userRoleBadge">Civitas Akademika</small>
           </div>
         </div>
-
-        <button class="btn btn-sm btn-ghost" id="topAppModeBtn" onclick="openSwitchModeModal()" style="font-weight: 800; font-size: 11px; border: 1px solid var(--line); border-radius: 20px; padding: 5px 12px; background: white;" title="Beralih mode Demo Lomba / Operasional Riil">
-          <span id="topAppModeIcon">🎯</span> <span id="topAppModeText">Mode Demo</span>
-        </button>
-
-        <button class="btn btn-secondary btn-sm" onclick="toggleRoleSwitch()" title="Beralih peran Mahasiswa / Dosen">
-          <span>🔄 Tukar Peran</span>
-        </button>
 
         <button class="btn btn-ghost btn-sm" onclick="logout()" title="Keluar">
           <span>Keluar</span>
@@ -378,18 +336,18 @@
             <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="color: var(--muted); font-size: 12px;">👥 Kelompok Riset:</span>
-                <strong id="wsTeamCountBadge" style="color: var(--navy);">4 Mahasiswa</strong>
+                <strong id="wsTeamCountBadge" style="color: var(--navy);">- Peneliti</strong>
                 <div id="wsTeamAvatarsStrip" class="avatar-stack">
                   <!-- Avatars populated via JS -->
                 </div>
               </div>
               <div style="border-left: 1px solid var(--line); padding-left: 16px; display: flex; align-items: center; gap: 6px;">
                 <span style="color: var(--muted); font-size: 12px;">👨‍🏫 Pembimbing:</span>
-                <strong id="wsLecturerName" style="color: var(--primary);">Dr. Rahmat Wijaya, M.Sc.</strong>
+                <strong id="wsLecturerName" style="color: var(--primary);">-</strong>
               </div>
               <div style="border-left: 1px solid var(--line); padding-left: 16px; display: flex; align-items: center; gap: 6px;">
                 <span style="color: var(--muted); font-size: 12px;">👑 Ketua Tim:</span>
-                <strong id="wsTeamLeaderName" style="color: var(--navy);">Budi Santoso</strong>
+                <strong id="wsTeamLeaderName" style="color: var(--navy);">-</strong>
               </div>
             </div>
             <div>
@@ -1047,6 +1005,17 @@
             <option value="experiment">Eksperimen / Laboratorium (Sains Eksperimental & Prototipe)</option>
             <option value="actuary">Model Risiko / Aktuaria (Matematika & Finansial)</option>
             <option value="free">Proyek Bebas / Lintas Disiplin (Human-Centered Design)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dosen Pembimbing / Reviewer</label>
+          <select id="newProjLecturer">
+            <option value="Dr. Rahmat Wijaya, M.Sc.">Dr. Rahmat Wijaya, M.Sc. (Fakultas Sains & Teknologi)</option>
+            <option value="Prof. Dr. Ir. Dewi Kartika">Prof. Dr. Ir. Dewi Kartika (Departemen Teknik Komputer)</option>
+            <option value="Prof. Dr. Hartono, M.Si.">Prof. Dr. Hartono, M.Si. (Fakultas MIPA / Pendidikan Sains)</option>
+            <option value="Dr. Ilham Saputra, M.Si.">Dr. Ilham Saputra, M.Si. (Bioteknologi)</option>
+            <option value="Prof. Dr. Hendra Gunawan, M.Sc.">Prof. Dr. Hendra Gunawan, M.Sc. (Matematika)</option>
+            <option value="Dr. Citra Lestari, M.Biomed.">Dr. Citra Lestari, M.Biomed. (Biologi)</option>
           </select>
         </div>
         <div class="field">

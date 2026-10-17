@@ -1730,6 +1730,8 @@ async function handleCreateProjectSubmit(e) {
   const repo_url = document.getElementById('newProjRepo').value.trim();
   const open_recruitment = document.getElementById('newProjOpenRecruit').checked ? 1 : 0;
 
+  const lecturer = document.getElementById('newProjLecturer')?.value || 'Dr. Rahmat Wijaya, M.Sc.';
+
   let steamPillar = 'Science + Tech';
   if (template === 'actuary') steamPillar = 'Mathematics + Modelling';
   else if (template === 'experiment') steamPillar = 'Science + Engineering';
@@ -1737,7 +1739,7 @@ async function handleCreateProjectSubmit(e) {
 
   try {
     const res = await api('/api/projects', 'POST', {
-      name, desc, study, steam: steamPillar, template, goal, tools, repo_url, open_recruitment
+      name, desc, study, steam: steamPillar, template, goal, tools, repo_url, open_recruitment, lecturer
     });
     closeModal('newProjectModal');
     showToast('Workspace proyek STEAM baru berhasil dibuat!');
@@ -1759,7 +1761,18 @@ async function loadRecruitment() {
     const list = res.listings || [];
 
     if (list.length === 0) {
-      container.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 48px;">Saat ini belum ada proyek yang membuka recruitment terbuka.</div>`;
+      container.innerHTML = `
+        <div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 56px 24px; border: 1.5px dashed var(--line); border-radius: 16px; background: white;">
+          <div style="font-size: 46px; margin-bottom: 12px;">👥</div>
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 6px;">Papan Kolaborasi & Rekrutmen Masih Kosong</h3>
+          <p style="font-size: 13.5px; color: var(--ink-secondary); max-width: 480px; margin: 0 auto 18px; line-height: 1.5;">
+            Belum ada tim riset yang membuka lowongan kolaborator saat ini. Buat proyek riset Anda dan buka rekrutmen untuk mengajak rekan lintas disiplin bergabung!
+          </p>
+          <button class="btn btn-primary btn-sm" onclick="openNewProjectModal()">
+            <span>+ Buat Proyek & Buka Rekrutmen</span>
+          </button>
+        </div>
+      `;
       return;
     }
 
@@ -1835,7 +1848,13 @@ async function loadStudentConsultations() {
     const dContainer = document.getElementById('studentConsultDoneList');
 
     if (pending.length === 0) {
-      pContainer.innerHTML = `<div style="color: var(--muted); padding: 18px; text-align: center;">Tidak ada jadwal bimbingan aktif.</div>`;
+      pContainer.innerHTML = `
+        <div style="color: var(--muted); padding: 36px 18px; text-align: center; background: var(--surface-alt); border-radius: 12px; border: 1px dashed var(--line);">
+          <div style="font-size: 32px; margin-bottom: 8px;">📅</div>
+          <strong style="display: block; font-size: 14px; color: var(--navy); margin-bottom: 4px;">Tidak Ada Jadwal Bimbingan Aktif</strong>
+          <p style="font-size: 12px; color: var(--ink-secondary); margin: 0;">Gunakan tombol "+ Ajukan Jadwal Bimbingan" di atas untuk meminta sesi review bersama dosen pembimbing.</p>
+        </div>
+      `;
     } else {
       pContainer.innerHTML = pending.map(c => `
         <div style="padding: 14px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px;">
@@ -1856,7 +1875,13 @@ async function loadStudentConsultations() {
     }
 
     if (done.length === 0) {
-      dContainer.innerHTML = `<div style="color: var(--muted); padding: 18px; text-align: center;">Belum ada riwayat bimbingan selesai.</div>`;
+      dContainer.innerHTML = `
+        <div style="color: var(--muted); padding: 36px 18px; text-align: center; background: var(--surface-alt); border-radius: 12px; border: 1px dashed var(--line);">
+          <div style="font-size: 32px; margin-bottom: 8px;">📓</div>
+          <strong style="display: block; font-size: 14px; color: var(--navy); margin-bottom: 4px;">Belum Ada Riwayat Bimbingan Selesai</strong>
+          <p style="font-size: 12px; color: var(--ink-secondary); margin: 0;">Catatan dan feedback evaluasi dari dosen setelah sesi konsultasi selesai akan diarsipkan di sini.</p>
+        </div>
+      `;
     } else {
       dContainer.innerHTML = done.map(c => `
         <div style="padding: 14px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; background: var(--surface-alt);">
@@ -1882,8 +1907,14 @@ async function loadStudentConsultations() {
 }
 
 function openRequestConsultModal() {
+  const isStudent = currentUser && currentUser.role === 'student';
+  const availableProjects = isStudent ? getUserProjects() : allProjects.filter(p => !p.archived);
   const sel = document.getElementById('consultProjectSelect');
-  sel.innerHTML = allProjects.filter(p => !p.archived).map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  if (availableProjects.length === 0) {
+    sel.innerHTML = '<option value="" disabled selected>Belum ada proyek riset aktif (Buat proyek terlebih dahulu)</option>';
+  } else {
+    sel.innerHTML = availableProjects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  }
   document.getElementById('consultDate').value = new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10);
   openModal('requestConsultModal');
 }
@@ -1891,6 +1922,10 @@ function openRequestConsultModal() {
 async function handleRequestConsultSubmit(e) {
   e.preventDefault();
   const projectId = document.getElementById('consultProjectSelect').value;
+  if (!projectId) {
+    showToast('Pilih proyek riset aktif Anda terlebih dahulu!');
+    return;
+  }
   const topic = document.getElementById('consultTopic').value.trim();
   const type = document.getElementById('consultType').value;
   const mode = document.getElementById('consultMode').value;
@@ -1990,7 +2025,13 @@ async function loadStudentResources() {
     const requests = res.requests || [];
 
     if (requests.length === 0) {
-      container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 48px;">Belum ada permohonan fasilitas riset diajukan.</div>`;
+      container.innerHTML = `
+        <div style="text-align: center; color: var(--muted); padding: 48px 24px; border: 1.5px dashed var(--line); border-radius: 12px; background: var(--surface-alt);">
+          <div style="font-size: 36px; margin-bottom: 8px;">🔬</div>
+          <h4 style="font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 4px;">Belum Ada Pengajuan Fasilitas</h4>
+          <p style="font-size: 13px; color: var(--ink-secondary); margin: 0;">Ajukan peminjaman instrumen riset (spektrofotometer, GPU cluster, 3D printer) melalui tombol di atas.</p>
+        </div>
+      `;
       return;
     }
 
@@ -2022,8 +2063,14 @@ async function loadStudentResources() {
 }
 
 function openRequestResourceModal() {
+  const isStudent = currentUser && currentUser.role === 'student';
+  const availableProjects = isStudent ? getUserProjects() : allProjects.filter(p => !p.archived);
   const sel = document.getElementById('resourceProjectSelect');
-  sel.innerHTML = allProjects.filter(p => !p.archived).map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  if (availableProjects.length === 0) {
+    sel.innerHTML = '<option value="" disabled selected>Belum ada proyek riset aktif (Buat proyek terlebih dahulu)</option>';
+  } else {
+    sel.innerHTML = availableProjects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  }
   document.getElementById('resourceDateNeeded').value = new Date(Date.now() + 86400000 * 3).toISOString().slice(0, 10);
   openModal('requestResourceModal');
 }
@@ -2031,6 +2078,10 @@ function openRequestResourceModal() {
 async function handleRequestResourceSubmit(e) {
   e.preventDefault();
   const projectId = document.getElementById('resourceProjectSelect').value;
+  if (!projectId) {
+    showToast('Pilih proyek riset aktif Anda terlebih dahulu!');
+    return;
+  }
   const resourceName = document.getElementById('resourceChoice').value;
   const dateNeeded = document.getElementById('resourceDateNeeded').value;
   const note = document.getElementById('resourceNote').value.trim();
@@ -2421,7 +2472,23 @@ function renderMissionTabContent() {
     const currentProj = active.find(p => p.id === missionSelectedProjectId) || active[0];
 
     if (!currentProj) {
-      container.innerHTML = `<div class="card" style="text-align: center; color: var(--muted); padding: 48px;">Belum ada proyek aktif untuk disupervisi.</div>`;
+      container.innerHTML = `
+        <div class="card" style="text-align: center; color: var(--muted); padding: 56px 24px; border: 1.5px dashed var(--line); border-radius: 16px; background: white;">
+          <div style="font-size: 46px; margin-bottom: 14px;">🎓</div>
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 8px;">Selamat Datang di Mission Control Dosen, ${currentUser ? currentUser.name : 'Bapak/Ibu Dosen'}!</h3>
+          <p style="font-size: 13.5px; color: var(--ink-secondary); max-width: 500px; margin: 0 auto 20px; line-height: 1.6;">
+            Saat ini belum ada proyek riset mahasiswa aktif di bawah supervisi Anda. Saat mahasiswa membuat proposal riset atau mengajukan bimbingan, proyek akan tampil di panel ini secara real-time.
+          </p>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="showPage('consultations')">
+              <span>📅 Periksa Antrean Bimbingan</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="setMissionTab('templates')">
+              <span>⚙️ Atur Template 5 Checkpoint & Rubrik</span>
+            </button>
+          </div>
+        </div>
+      `;
       return;
     }
 
@@ -2778,59 +2845,83 @@ function renderMissionTabContent() {
   } else if (currentMissionTab === 'evaluation') {
     // Mode 2: Final Evaluation & Rubric
     const forEval = allProjects.filter(p => !p.archived);
-    container.innerHTML = `
-      <div class="card">
-        <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Penilaian Rubrik STEAM 4 Pilar Resmi</h3>
-        <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">Pilih proyek untuk memberikan evaluasi terstandarisasi:</p>
-        <div style="display: grid; gap: 12px;">
-          ${forEval.map(p => `
-            <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <strong style="font-size: 15px; color: var(--navy);">${p.name}</strong>
-                <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
-                  Status: <strong>${p.status}</strong> · Progres: <strong>${p.progress}%</strong>
-                  ${p.final_score ? ` · <span style="color: var(--primary); font-weight: 800;">Skor: ${p.final_score.toFixed(1)} (${p.final_grade})</span>` : ''}
-                </div>
-              </div>
-              <button class="btn btn-primary btn-sm" onclick="openMissionEvaluateModal(${p.id}, '${p.name}')">
-                <span>${p.evaluation_recorded ? 'Ubah Penilaian Rubrik' : 'Beri Nilai Rubrik STEAM'}</span>
-              </button>
-            </div>
-          `).join('')}
+    if (forEval.length === 0) {
+      container.innerHTML = `
+        <div class="card" style="text-align: center; color: var(--muted); padding: 56px 24px; border: 1.5px dashed var(--line); border-radius: 16px; background: white;">
+          <div style="font-size: 44px; margin-bottom: 12px;">📊</div>
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 6px;">Belum Ada Proyek untuk Dinilai</h3>
+          <p style="font-size: 13.5px; color: var(--ink-secondary); max-width: 480px; margin: 0 auto 16px; line-height: 1.5;">
+            Proyek mahasiswa yang aktif akan muncul di sini untuk dinilai berdasarkan 4 pilar rubrik terstandarisasi STEAM (Completeness, Evidence, Contribution, Reproducibility).
+          </p>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="card">
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Penilaian Rubrik STEAM 4 Pilar Resmi</h3>
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">Pilih proyek untuk memberikan evaluasi terstandarisasi:</p>
+          <div style="display: grid; gap: 12px;">
+            ${forEval.map(p => `
+              <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong style="font-size: 15px; color: var(--navy);">${p.name}</strong>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+                    Status: <strong>${p.status}</strong> · Progres: <strong>${p.progress}%</strong>
+                    ${p.final_score ? ` · <span style="color: var(--primary); font-weight: 800;">Skor: ${p.final_score.toFixed(1)} (${p.final_grade})</span>` : ''}
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openMissionEvaluateModal(${p.id}, '${p.name}')">
+                  <span>${p.evaluation_recorded ? 'Ubah Penilaian Rubrik' : 'Beri Nilai Rubrik STEAM'}</span>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
   } else if (currentMissionTab === 'reproducibility') {
     // Mode 3: Reproducibility Package Compiler
-    container.innerHTML = `
-      <div class="card">
-        <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Kompilasi Standar Reproducibility Package & Arsip</h3>
-        <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">Paket ini memvalidasi kelengkapan jurnal, snapshot repositori, dan penilaian dewan juri untuk akreditasi kompetisi.</p>
-        <div style="display: grid; gap: 12px;">
-          ${allProjects.map(p => `
-            <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <strong style="font-size: 15px; color: var(--navy);">${p.name}</strong>
-                <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
-                  ${p.package_compiled ? '<span class="badge badge-teal">✓ Paket Terkompilasi</span>' : '<span class="badge badge-gray">Belum Terkompilasi</span>'}
-                  ${p.archived ? '<span class="badge badge-gray">🔒 Diarsipkan</span>' : ''}
+    if (allProjects.length === 0) {
+      container.innerHTML = `
+        <div class="card" style="text-align: center; color: var(--muted); padding: 56px 24px; border: 1.5px dashed var(--line); border-radius: 16px; background: white;">
+          <div style="font-size: 44px; margin-bottom: 12px;">📦</div>
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 6px;">Belum Ada Paket Reproducibility</h3>
+          <p style="font-size: 13.5px; color: var(--ink-secondary); max-width: 480px; margin: 0 auto 16px; line-height: 1.5;">
+            Setelah mahasiswa mengunggah seluruh checkpoint, logbook empiris, dan repositori, Anda dapat mengompilasi paket reproducibility berstandar resmi di sini.
+          </p>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="card">
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Kompilasi Standar Reproducibility Package & Arsip</h3>
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">Paket ini memvalidasi kelengkapan jurnal, snapshot repositori, dan penilaian dewan juri untuk akreditasi kompetisi.</p>
+          <div style="display: grid; gap: 12px;">
+            ${allProjects.map(p => `
+              <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong style="font-size: 15px; color: var(--navy);">${p.name}</strong>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+                    ${p.package_compiled ? '<span class="badge badge-teal">✓ Paket Terkompilasi</span>' : '<span class="badge badge-gray">Belum Terkompilasi</span>'}
+                    ${p.archived ? '<span class="badge badge-gray">🔒 Diarsipkan</span>' : ''}
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" onclick="compileReproducibilityPackage(${p.id})">
+                    <span>Kompilasi Paket JSON</span>
+                  </button>
+                  ${!p.archived ? `
+                    <button class="btn btn-danger btn-sm" onclick="archiveProject(${p.id})">
+                      <span>Arsipkan Proyek</span>
+                    </button>
+                  ` : ''}
                 </div>
               </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary btn-sm" onclick="compileReproducibilityPackage(${p.id})">
-                  <span>Kompilasi Paket JSON</span>
-                </button>
-                ${!p.archived ? `
-                  <button class="btn btn-danger btn-sm" onclick="archiveProject(${p.id})">
-                    <span>Arsipkan Proyek</span>
-                  </button>
-                ` : ''}
-              </div>
-            </div>
-          `).join('')}
+            `).join('')}
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   } else if (currentMissionTab === 'templates') {
     // Mode 4: Dynamic Checkpoint & Rubric Template Editor
     if (cachedTemplates.length === 0) {
@@ -3060,7 +3151,13 @@ async function loadLecturerConsultations() {
     const consultations = res.consultations || [];
 
     if (consultations.length === 0) {
-      container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 48px;">Belum ada permohonan bimbingan.</div>`;
+      container.innerHTML = `
+        <div style="text-align: center; color: var(--muted); padding: 56px 24px; border: 1.5px dashed var(--line); border-radius: 14px; background: var(--surface-alt);">
+          <div style="font-size: 42px; margin-bottom: 10px;">📅</div>
+          <h4 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 4px;">Belum Ada Antrean Bimbingan</h4>
+          <p style="font-size: 13px; color: var(--ink-secondary); margin: 0;">Permohonan jadwal bimbingan dan klinik riset dari mahasiswa akan tercatat di sini secara real-time.</p>
+        </div>
+      `;
       return;
     }
 
@@ -3188,7 +3285,13 @@ async function loadLecturerResources() {
     const requests = res.requests || [];
 
     if (requests.length === 0) {
-      container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 48px;">Belum ada permohonan fasilitas riset.</div>`;
+      container.innerHTML = `
+        <div style="text-align: center; color: var(--muted); padding: 56px 24px; border: 1.5px dashed var(--line); border-radius: 14px; background: var(--surface-alt);">
+          <div style="font-size: 42px; margin-bottom: 10px;">🔬</div>
+          <h4 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 4px;">Belum Ada Pengajuan Fasilitas Riset</h4>
+          <p style="font-size: 13px; color: var(--ink-secondary); margin: 0;">Pengajuan instrumen laboratorium atau komputasi HPC dari kelompok mahasiswa akan muncul di sini untuk ditinjau.</p>
+        </div>
+      `;
       return;
     }
 
