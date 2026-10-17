@@ -749,19 +749,34 @@ async function handleVerifyOtpSubmit(e) {
 function setAuthRole(role) {
   const sBtn = document.getElementById('tabStudent');
   const lBtn = document.getElementById('tabLecturer');
+  const aBtn = document.getElementById('tabAdmin');
   const label = document.getElementById('authIdLabel');
   const input = document.getElementById('authUsername');
 
   if (sBtn) sBtn.classList.toggle('active', role === 'student');
   if (lBtn) lBtn.classList.toggle('active', role === 'lecturer');
+  if (aBtn) aBtn.classList.toggle('active', role === 'admin');
 
   if (role === 'student') {
-    label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
-    input.placeholder = 'Contoh: 202610101 (NIM) atau username';
-  } else {
-    label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
-    input.placeholder = 'Contoh: 198504122010121002 (NIP / NIDN) atau username';
+    if (label) label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
+    if (input) input.placeholder = 'Contoh: 202610101 (NIM) atau budi';
+  } else if (role === 'lecturer') {
+    if (label) label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
+    if (input) input.placeholder = 'Contoh: 198504122010121002 (NIP / NIDN) atau dosen';
+  } else if (role === 'admin') {
+    if (label) label.textContent = 'ID Administrator / Username';
+    if (input) input.placeholder = 'Contoh: admin atau ADM-2026-DEV01';
   }
+}
+
+function quickFillLogin(username, password, role) {
+  setAuthRole(role);
+  const uInput = document.getElementById('authUsername');
+  const pInput = document.getElementById('authPassword');
+  if (uInput) uInput.value = username;
+  if (pInput) pInput.value = password;
+  const roleName = role === 'student' ? 'Mahasiswa' : (role === 'lecturer' ? 'Dosen' : 'Administrator');
+  showToast(`✓ Kredensial ${roleName} terisi (${username}). Silakan klik Masuk.`);
 }
 
 async function quickLoginDemo(target) {

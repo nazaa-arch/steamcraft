@@ -15,73 +15,181 @@
 
   <!-- ==================== LOGIN SCREEN ==================== -->
   <div id="loginScreen" class="login-screen">
+    <!-- Left Showcase Presentation Column -->
     <section class="login-showcase">
-      <div class="login-topline">
-        <span class="login-mark">S</span>
-        <span>Platform Kolaborasi Riset Ilmiah & Inovasi Mahasiswa</span>
+      <!-- Modern Brand Bar (Replaces legacy 'S' box) -->
+      <div class="login-brand-bar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="/logo.jpg" alt="STEAM-Craft Logo" style="width: 44px; height: 44px; border-radius: 12px; box-shadow: 0 4px 12px rgba(40, 120, 215, 0.2); border: 2px solid white; object-fit: cover;">
+          <div>
+            <div class="login-brand-title">STEAM-Craft</div>
+            <div class="login-brand-sub">Platform Riset & Kolaborasi Multidisiplin</div>
+          </div>
+        </div>
+        <span class="badge badge-teal" style="font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">
+          🏅 Standar Riset Nasional 2026
+        </span>
       </div>
 
-      <div class="login-brand-image">
-        <img src="/logo.jpg" alt="SteamCraft Logo">
-      </div>
+      <!-- Centerpiece Research Workflow & Architecture Showcase Card -->
+      <div class="login-showcase-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line-light);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; gap: 4px;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+            </div>
+            <strong style="font-size: 13px; color: var(--navy);">Siklus Kolaborasi 5-Checkpoint Riset</strong>
+          </div>
+          <span class="badge badge-blue" style="font-size: 10px; font-weight: 800;">100% Reproducible Research</span>
+        </div>
 
-      <div class="login-copy">
-        <div class="eyebrow">Science · Technology · Engineering · Art · Mathematics</div>
-        <h1>Ruang untuk Rasa Ingin Tahu <span>Lintas Disiplin.</span></h1>
-        <p>Integrasikan eksplorasi sains, implementasi teknologi, rancang bangun rekayasa, ekspresi estetika seni, dan ketelitian matematika dalam satu alur kerja berbasis reproducible research.</p>
+        <!-- 5-Stage Visual Workflow -->
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; margin-bottom: 16px;">
+          <div style="background: var(--surface-alt); padding: 8px 4px; border-radius: 10px; border: 1px solid #bfdbfe;">
+            <span style="font-size: 14px; display: block; margin-bottom: 2px;">💡</span>
+            <strong style="font-size: 11px; color: var(--navy); display: block; line-height: 1.2;">1. Inisiasi</strong>
+            <small style="font-size: 9.5px; color: #0284c7; font-weight: 700;">Proposal</small>
+          </div>
+          <div style="background: var(--surface-alt); padding: 8px 4px; border-radius: 10px; border: 1px solid #bfdbfe;">
+            <span style="font-size: 14px; display: block; margin-bottom: 2px;">🔬</span>
+            <strong style="font-size: 11px; color: var(--navy); display: block; line-height: 1.2;">2. Desain</strong>
+            <small style="font-size: 9.5px; color: #0284c7; font-weight: 700;">STEAM</small>
+          </div>
+          <div style="background: var(--surface-alt); padding: 8px 4px; border-radius: 10px; border: 1px solid #bfdbfe;">
+            <span style="font-size: 14px; display: block; margin-bottom: 2px;">📊</span>
+            <strong style="font-size: 11px; color: var(--navy); display: block; line-height: 1.2;">3. Logbook</strong>
+            <small style="font-size: 9.5px; color: #0284c7; font-weight: 700;">Empiris</small>
+          </div>
+          <div style="background: var(--surface-alt); padding: 8px 4px; border-radius: 10px; border: 1px solid #bfdbfe;">
+            <span style="font-size: 14px; display: block; margin-bottom: 2px;">📦</span>
+            <strong style="font-size: 11px; color: var(--navy); display: block; line-height: 1.2;">4. Paket</strong>
+            <small style="font-size: 9.5px; color: #0284c7; font-weight: 700;">Rilis Data</small>
+          </div>
+          <div style="background: var(--surface-alt); padding: 8px 4px; border-radius: 10px; border: 1px solid #bbf7d0;">
+            <span style="font-size: 14px; display: block; margin-bottom: 2px;">🏆</span>
+            <strong style="font-size: 11px; color: var(--navy); display: block; line-height: 1.2;">5. Sidang</strong>
+            <small style="font-size: 9.5px; color: #16a34a; font-weight: 700;">Evaluasi</small>
+          </div>
+        </div>
 
-        <div class="login-discipline">
-          <span class="disc-pill"><span class="dot dot-blue"></span> Science</span>
-          <span class="disc-pill"><span class="dot dot-teal"></span> Technology</span>
-          <span class="disc-pill"><span class="dot dot-orange"></span> Engineering</span>
-          <span class="disc-pill"><span class="dot dot-rose"></span> Art</span>
-          <span class="disc-pill"><span class="dot dot-purple"></span> Mathematics</span>
+        <!-- Telemetry & Specs Mini Bar -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; background: var(--surface-alt); padding: 10px 14px; border-radius: 12px; font-size: 11px;">
+          <div>
+            <span style="color: var(--muted); display: block; font-size: 10px;">Infrastruktur Cloud</span>
+            <strong style="color: var(--navy); font-size: 12px;">Railway Edge CDN</strong>
+          </div>
+          <div>
+            <span style="color: var(--muted); display: block; font-size: 10px;">Arsitektur Database</span>
+            <strong style="color: var(--navy); font-size: 12px;">SQLite WAL Mode</strong>
+          </div>
+          <div>
+            <span style="color: var(--muted); display: block; font-size: 10px;">Protokol Keamanan</span>
+            <strong style="color: #16a34a; font-size: 12px;">HTTPS / TLS 256-bit</strong>
+          </div>
         </div>
       </div>
 
-      <div style="font-size: 11px; color: var(--muted);">
-        STEAM-Craft &copy; 2026. Standar Inovasi Pendidikan Tinggi Nasional.
+      <!-- Hero Typography & Discipline Pills -->
+      <div class="login-copy">
+        <div class="eyebrow" style="color: var(--primary); font-weight: 800; margin-bottom: 6px;">
+          Science · Technology · Engineering · Art · Mathematics
+        </div>
+        <h1>Ruang untuk Rasa Ingin Tahu <span>Lintas Disiplin.</span></h1>
+        <p>Integrasikan eksplorasi sains, implementasi teknologi komputasi, rancang bangun rekayasa, ekspresi estetika seni, dan ketelitian matematika dalam satu alur kerja berbasis reproducible research.</p>
+
+        <div class="login-discipline" style="margin-top: 16px;">
+          <span class="disc-pill"><span class="dot dot-blue"></span> 🔬 Science</span>
+          <span class="disc-pill"><span class="dot dot-teal"></span> 💻 Technology</span>
+          <span class="disc-pill"><span class="dot dot-orange"></span> ⚙️ Engineering</span>
+          <span class="disc-pill"><span class="dot dot-rose"></span> 🎨 Art & Design</span>
+          <span class="disc-pill"><span class="dot dot-purple"></span> 📐 Mathematics</span>
+        </div>
+      </div>
+
+      <!-- Footer Endorsement -->
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--muted); padding-top: 16px; border-top: 1px solid var(--line-light); flex-wrap: wrap; gap: 8px;">
+        <span>STEAM-Craft &copy; 2026. Standar Inovasi Pendidikan Tinggi Nasional.</span>
+        <span style="display: flex; align-items: center; gap: 6px;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 6px #10b981;"></span>
+          <span style="color: var(--navy); font-weight: 700;">Server Aktif (Production)</span>
+        </span>
       </div>
     </section>
 
+    <!-- Right Login Panel Column -->
     <section class="login-panel">
       <!-- Mobile Brand Header (Visible on screens <= 900px) -->
       <div class="login-mobile-brand">
-        <img src="/logo.jpg" alt="SteamCraft" class="brand-logo-img" style="width: 44px; height: 44px;">
+        <img src="/logo.jpg" alt="SteamCraft" class="brand-logo-img" style="width: 44px; height: 44px; border-radius: 10px;">
         <div>
           <h2 style="font-size: 19px; font-weight: 900; color: var(--navy); line-height: 1.1; margin: 0;">SteamCraft</h2>
           <span style="font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px;">Ruang Kolaborasi Multidisiplin</span>
         </div>
       </div>
 
+      <!-- Main Auth Card -->
       <div class="auth-card">
         <div class="eyebrow" style="margin-bottom: 6px;">Autentikasi Terintegrasi</div>
         <h2 style="font-size: 24px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Masuk ke Workspace</h2>
-        <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Pilih peran Anda untuk mengakses ruang kerja riset STEAM.</p>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">Pilih peran Anda untuk mengakses ruang kerja riset STEAM.</p>
 
+        <!-- 3-Role Segmented Tabs (Mahasiswa, Dosen, Admin/Dev) -->
         <div class="auth-role-tabs" id="loginRoleTabs">
-          <button type="button" class="active" id="tabStudent" onclick="setAuthRole('student')">Mahasiswa</button>
-          <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">Dosen / Pembimbing</button>
+          <button type="button" class="active" id="tabStudent" onclick="setAuthRole('student')">
+            <span>👤</span> <span>Mahasiswa</span>
+          </button>
+          <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">
+            <span>👨‍🏫</span> <span>Dosen / Juri</span>
+          </button>
+          <button type="button" id="tabAdmin" onclick="setAuthRole('admin')">
+            <span>🛠️</span> <span>Admin / Dev</span>
+          </button>
         </div>
 
         <form id="authForm" onsubmit="handleLoginSubmit(event)">
           <div class="auth-field">
-            <label id="authIdLabel">NIM (Nomor Induk Mahasiswa)</label>
-            <input type="text" id="authUsername" placeholder="Contoh: 202610101 (NIM) atau username" required>
+            <label id="authIdLabel">NIM (Nomor Induk Mahasiswa) / Username</label>
+            <input type="text" id="authUsername" placeholder="Contoh: 202610101 (NIM) atau budi" required autocomplete="username">
           </div>
 
           <div class="auth-field">
             <label>Kata Sandi</label>
-            <input type="password" id="authPassword" placeholder="Masukkan kata sandi akun" required>
+            <div class="password-input-wrap">
+              <input type="password" id="authPassword" placeholder="Masukkan kata sandi akun" required autocomplete="current-password">
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('authPassword', this)" title="Lihat kata sandi">
+                👁️
+              </button>
+            </div>
           </div>
 
           <div class="auth-error" id="authError"></div>
 
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 6px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 4px; font-size: 14px; font-weight: 800;">
             <span>Masuk ke Ruang Kerja</span>
             <span>&rarr;</span>
           </button>
 
+          <!-- Quick 1-Click Fill Helper for Judges / Evaluators -->
+          <div style="margin-top: 16px; padding: 12px; background: var(--surface-alt); border-radius: 12px; border: 1px solid var(--line-light);">
+            <div style="font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: space-between;">
+              <span>⚡ Akses Uji Coba Cepat (1-Klik Isi):</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="quickFillLogin('budi', 'password123', 'student')" style="font-size: 11px; padding: 6px 4px; justify-content: center; text-align: center; border-radius: 8px;" title="Isi kredensial Mahasiswa (Budi Santoso)">
+                👤 Mahasiswa
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="quickFillLogin('dosen', 'password123', 'lecturer')" style="font-size: 11px; padding: 6px 4px; justify-content: center; text-align: center; border-radius: 8px;" title="Isi kredensial Dosen Pembimbing (Prof. Hartono)">
+                👨‍🏫 Dosen
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="quickFillLogin('admin', 'admin', 'admin')" style="font-size: 11px; padding: 6px 4px; justify-content: center; text-align: center; border-radius: 8px; background: #0f172a; color: #38bdf8; border: 1px solid #0284c7;" title="Isi kredensial Administrator & Lead Dev">
+                🛠️ Admin
+              </button>
+            </div>
+          </div>
+
+          <!-- Register Prompt CTA -->
           <div class="auth-register-card">
             <span class="prompt-text">Belum punya akun peneliti STEAM?</span>
             <button type="button" class="auth-register-btn" onclick="openRegisterUserModal()">
