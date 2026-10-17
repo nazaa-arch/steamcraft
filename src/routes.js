@@ -722,9 +722,9 @@ async function handleApiRequest(req, res, url, body) {
 
     const { notes } = body || {};
 
-    // RULE: Mahasiswa TIDAK BISA membatalkan checkpoint yang sudah diserahkan
-    if (cp.is_completed && user.role !== 'lecturer') {
-      return error('Tugas checkpoint ini telah diserahkan dan terkunci. Tindakan ini tidak bisa dibatalkan kecuali dikonfirmasi atau dibuka kembali oleh Dosen Pembimbing.', 403);
+    // RULE: Mahasiswa TIDAK BISA membatalkan checkpoint yang sudah diserahkan (kecuali Dosen atau Administrator)
+    if (cp.is_completed && user.role !== 'lecturer' && user.role !== 'admin') {
+      return error('Tugas checkpoint ini telah diserahkan dan terkunci. Tindakan ini tidak bisa dibatalkan kecuali dikonfirmasi atau dibuka kembali oleh Dosen Pembimbing atau Administrator.', 403);
     }
 
     const newStatus = cp.is_completed ? 0 : 1;
@@ -733,10 +733,10 @@ async function handleApiRequest(req, res, url, body) {
     let confirmedByLecturer = cp.confirmed_by_lecturer || 0;
 
     if (newStatus) {
-      completedBy = `${user.name} (${user.study_program || (user.role === 'student' ? 'Mahasiswa' : 'Dosen')})`;
-      if (user.role === 'lecturer') confirmedByLecturer = 1;
+      completedBy = `${user.name} (${user.study_program || (user.role === 'admin' ? 'Administrator' : (user.role === 'student' ? 'Mahasiswa' : 'Dosen'))})`;
+      if (user.role === 'lecturer' || user.role === 'admin') confirmedByLecturer = 1;
     } else {
-      // Dibuka kembali oleh dosen
+      // Dibuka kembali oleh dosen / admin
       confirmedByLecturer = 0;
     }
 
@@ -764,9 +764,10 @@ async function handleApiRequest(req, res, url, body) {
 
     db.prepare("UPDATE projects SET progress = ?, updated_at = datetime('now', 'localtime') WHERE id = ?").run(progress, projId);
 
+    const actorLabel = user.role === 'admin' ? 'Administrator' : (user.role === 'lecturer' ? 'Dosen' : 'Mahasiswa');
     const actionMsg = newStatus
-      ? `${user.role === 'lecturer' ? 'Dosen' : 'Mahasiswa'} menyerahkan tugas checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title}${notes ? ' - Catatan: ' + notes : ''}`
-      : `Dosen Pembimbing membatalkan/membuka kembali penyerahan checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title} untuk revisi tim mahasiswa`;
+      ? `${actorLabel} menyerahkan/menyetujui tugas checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title}${notes ? ' - Catatan: ' + notes : ''}`
+      : `${actorLabel} membatalkan/membuka kembali penyerahan checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title} untuk revisi tim mahasiswa`;
 
     db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
       projId, user.name, actionMsg
@@ -779,24 +780,25 @@ async function handleApiRequest(req, res, url, body) {
       completed_by: completedBy,
       confirmed_by_lecturer: Boolean(confirmedByLecturer),
       message: newStatus
-        ? 'Tugas checkpoint berhasil diserahkan kepada Dosen Pembimbing!'
+        ? 'Tugas checkpoint berhasil diserahkan/disetujui!'
         : 'Penyerahan checkpoint berhasil dibatalkan dan dibuka kembali untuk revisi tim.'
     });
   }
 
-  // Confirm Checkpoint (Lecturer official confirmation)
+  // Confirm Checkpoint (Lecturer / Admin official confirmation)
   if (pathname.match(/^\/api\/projects\/(\d+)\/checkpoints\/(\d+)\/confirm$/) && method === 'POST') {
     const [, projId, stageIdx] = pathname.match(/^\/api\/projects\/(\d+)\/checkpoints\/(\d+)\/confirm$/);
-    if (user.role !== 'lecturer') {
-      return error('Hanya Dosen Pembimbing yang memiliki wewenang mengonfirmasi checkpoint secara resmi', 403);
+    if (user.role !== 'lecturer' && user.role !== 'admin') {
+      return error('Hanya Dosen Pembimbing dan Administrator yang memiliki wewenang mengonfirmasi checkpoint secara resmi', 403);
     }
     const cp = db.prepare('SELECT * FROM checkpoints WHERE project_id = ? AND stage_index = ?').get(projId, stageIdx);
     if (!cp) return error('Checkpoint tidak ditemukan', 404);
 
     db.prepare('UPDATE checkpoints SET is_completed = 1, confirmed_by_lecturer = 1 WHERE id = ?').run(cp.id);
 
+    const actorTitle = user.role === 'admin' ? 'Administrator Sistem' : 'Dosen Pembimbing';
     db.prepare('INSERT INTO activity_logs (project_id, user_name, action_text) VALUES (?, ?, ?)').run(
-      projId, user.name, `Dosen Pembimbing memberikan konfirmasi persetujuan resmi untuk checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title}`
+      projId, user.name, `${actorTitle} memberikan konfirmasi persetujuan resmi untuk checkpoint tahap ${Number(stageIdx) + 1}: ${cp.title}`
     );
 
     return json({ success: true, confirmed: true, message: 'Checkpoint resmi disetujui dan dikonfirmasi Dosen Pembimbing!' });

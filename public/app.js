@@ -9,9 +9,12 @@ let currentRole = 'student';
 let allProjects = [];
 let selectedProjectId = null;
 
-// Helper: Filter projects strictly belonging to the currently logged in user
 function getUserProjects() {
   if (!currentUser) return [];
+  // Administrator / Lead Developer has global oversight over all projects
+  if (currentUser.role === 'admin') {
+    return allProjects;
+  }
   return allProjects.filter(p => {
     if (p.creator_id && p.creator_id === currentUser.id) return true;
     if (p.members && Array.isArray(p.members)) {
@@ -883,21 +886,21 @@ function enterWorkspace() {
 
 function updateUserProfileUI() {
   if (!currentUser) return;
-  document.getElementById('userName').textContent = currentUser.name;
-  const initial = (currentUser.name || 'U').charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = currentUser.name || (currentUser.role === 'admin' ? 'Administrator Sistem' : 'Pengguna');
+  const initial = (currentUser.name || (currentUser.role === 'admin' ? 'A' : 'U')).charAt(0).toUpperCase();
   const avatarEl = document.getElementById('userAvatar');
   if (avatarEl) {
     avatarEl.textContent = initial;
-    avatarEl.style.background = currentUser.avatar_color || 'var(--primary)';
+    avatarEl.style.background = currentUser.avatar_color || (currentUser.role === 'admin' ? '#0f172a' : 'var(--primary)');
   }
 
   let roleText = '';
   if (currentUser.role === 'admin') {
-    roleText = `🛠️ Administrator · ${currentUser.study_program || 'Sistem'}`;
+    roleText = `🛠️ Administrator · Lead Dev`;
   } else if (currentUser.role === 'lecturer') {
-    roleText = `Dosen Pembimbing · ${currentUser.study_program}`;
+    roleText = `Dosen Pembimbing · ${currentUser.study_program || 'Civitas'}`;
   } else {
-    roleText = `Mahasiswa · ${currentUser.study_program}`;
+    roleText = `Mahasiswa · ${currentUser.study_program || 'Civitas'}`;
   }
   document.getElementById('userRoleBadge').textContent = roleText;
 }
@@ -919,7 +922,13 @@ function openEditProfileModal() {
 
   const roleDisplay = document.getElementById('profileRoleDisplay');
   if (roleDisplay) {
-    roleDisplay.value = currentUser.role === 'student' ? 'Mahasiswa Peneliti' : 'Dosen Pembimbing / Dewan Juri';
+    if (currentUser.role === 'admin') {
+      roleDisplay.value = '🛠️ Administrator Sistem & Lead Developer';
+    } else if (currentUser.role === 'lecturer') {
+      roleDisplay.value = '👨‍🏫 Dosen Pembimbing / Dewan Juri';
+    } else {
+      roleDisplay.value = '👤 Mahasiswa Peneliti';
+    }
   }
 
   const facInput = document.getElementById('profileFaculty');
@@ -1031,6 +1040,16 @@ function syncNavigation() {
   });
 }
 
+function handleBrandLogoClick() {
+  if (currentRole === 'admin') {
+    showPage('admin');
+  } else if (currentRole === 'lecturer') {
+    showPage('mission');
+  } else {
+    showPage('dashboard');
+  }
+}
+
 // ==================== PAGE NAVIGATION ====================
 function showPage(pageId) {
   currentActivePage = pageId;
@@ -1044,6 +1063,39 @@ function showPage(pageId) {
   document.querySelectorAll('main.wrap > section.page').forEach(sec => {
     sec.classList.toggle('active', sec.id === pageId);
   });
+
+  // Admin Inspection Mode Banner handling
+  const inspectBanner = document.getElementById('adminInspectionBanner');
+  const inspectLabel = document.getElementById('adminInspectPageLabel');
+  if (inspectBanner) {
+    if (currentRole === 'admin' && pageId !== 'admin') {
+      inspectBanner.style.display = 'flex';
+      const pageNames = {
+        dashboard: 'Dashboard Mahasiswa Peneliti',
+        projects: 'Katalog Proyek Riset STEAM',
+        workspace: 'Ruang Kerja Riset & 5 Checkpoint',
+        recruitment: 'Open Recruitment Kolaborator',
+        studentConsultations: 'Jadwal & Bimbingan Mahasiswa',
+        studentAnnouncements: 'Pengumuman Kampus (Mahasiswa)',
+        studentResources: 'Pengajuan Fasilitas Lab Mahasiswa',
+        studentPortfolio: 'Portofolio Riset Mahasiswa',
+        mission: 'Mission Control Supervisi Dosen',
+        consultations: 'Panel Bimbingan & Konsultasi Dosen',
+        announcements: 'Manajemen Pengumuman (Dosen)',
+        resources: 'Manajemen Fasilitas & Lab Riset',
+        analytics: 'Analitik Kohort Riset Civitas'
+      };
+      if (inspectLabel) inspectLabel.textContent = `Meninjau: ${pageNames[pageId] || pageId}`;
+    } else {
+      inspectBanner.style.display = 'none';
+    }
+  }
+
+  // Smoothly scroll active button in mainNav into view
+  const activeNavBtn = document.querySelector('#mainNav button.active');
+  if (activeNavBtn) {
+    activeNavBtn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
   updateNotificationBadges();
@@ -1159,7 +1211,9 @@ function projectCardHTML(p) {
     ? '<span class="badge badge-orange">🚩 Kendala (Blocker)</span>'
     : `<span class="badge badge-gray">${p.status}</span>`;
 
+  const isAdmin = currentUser && currentUser.role === 'admin';
   const isMine = currentUser && (
+    isAdmin ||
     (p.creator_id && p.creator_id === currentUser.id) ||
     (p.members && p.members.some(m => 
       (m.user_id && m.user_id === currentUser.id) || 
@@ -1174,7 +1228,7 @@ function projectCardHTML(p) {
         <div class="project-card-top">
           <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             <span class="badge ${badgeClass}">${p.study}</span>
-            ${isMine ? '<span class="badge badge-teal" style="font-weight: 800;">⭐ Proyek Saya</span>' : ''}
+            ${isAdmin ? '<span class="badge badge-blue" style="font-weight: 800; font-size: 10px;">🛡️ Akses Admin</span>' : (isMine ? '<span class="badge badge-teal" style="font-weight: 800;">⭐ Proyek Saya</span>' : '')}
           </div>
           ${statusBadge}
         </div>
@@ -1206,7 +1260,7 @@ function projectCardHTML(p) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line);">
           <small style="color: var(--muted);">👥 ${p.members_count || (p.members ? p.members.length : 1)} Mahasiswa</small>
           <button class="btn ${isMine ? 'btn-primary' : 'btn-secondary'} btn-sm" onclick="openWorkspace(${p.id})">
-            <span>${isMine ? 'Buka Ruang Kerja &rarr;' : 'Lihat Ruang Kerja &rarr;'}</span>
+            <span>${isAdmin ? '🛡️ Buka & Kelola &rarr;' : (isMine ? 'Buka Ruang Kerja &rarr;' : 'Lihat Ruang Kerja &rarr;')}</span>
           </button>
         </div>
       </div>
@@ -1244,7 +1298,7 @@ async function loadDashboard() {
       </div>
     `;
   } else {
-    const recent = myProjects.slice(0, 3);
+    const recent = (currentUser && currentUser.role === 'admin') ? myProjects.slice(0, 6) : myProjects.slice(0, 3);
     list.innerHTML = recent.map(projectCardHTML).join('');
   }
 }

@@ -1209,7 +1209,7 @@ function seedAdminAndCivitasAccounts() {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       'admin',
-      'Administrator Sistem (Lead Dev & Architect)',
+      'Administrator Sistem',
       'admin',
       'ADM-2026-DEV01',
       'Pusat Riset & Rekayasa Sistem',
