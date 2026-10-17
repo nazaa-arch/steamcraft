@@ -62,6 +62,7 @@
         <div class="auth-role-tabs" id="loginRoleTabs">
           <button type="button" class="active" id="tabStudent" onclick="setAuthRole('student')">Mahasiswa</button>
           <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">Dosen / Juri</button>
+          <button type="button" id="tabAdmin" onclick="setAuthRole('admin')">Admin / Dev</button>
         </div>
 
         <form id="authForm" onsubmit="handleLoginSubmit(event)">
@@ -120,6 +121,10 @@
               <span>👨‍🏫 Dosen Pembimbing (Dr. Rahmat Wijaya, M.Sc.)</span>
               <span>&rarr;</span>
             </button>
+            <button type="button" class="demo-btn" onclick="quickLoginDemo('admin')" style="background: #0f172a; color: #f8fafc; border: 1px solid #334155;">
+              <span>🛠️ Administrator / Lead Dev (System & Monitoring Console)</span>
+              <span>&rarr;</span>
+            </button>
           </div>
         </div>
       </div>
@@ -168,6 +173,11 @@
         <button data-page="announcements" data-roles="lecturer">Pengumuman</button>
         <button data-page="resources" data-roles="lecturer">Lab & Fasilitas</button>
         <button data-page="analytics" data-roles="lecturer">Analitik Kohort</button>
+
+        <!-- Admin Pages -->
+        <button data-page="admin" data-roles="admin" style="background: #0f172a; color: #38bdf8; font-weight: 800;">
+          <span>🛠️ Admin Console</span>
+        </button>
       </nav>
 
       <!-- User Controls -->
@@ -846,6 +856,130 @@
                 <span>📐 <strong>Mathematics (Matematika)</strong>: Model Analitik & Statistik</span>
                 <span class="badge badge-purple">12.5%</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin / Developer Console Page -->
+      <section id="admin" class="page">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow" style="color: #6366f1;">System & Operations Governance</div>
+            <h1 class="h1">🛠️ Konsol Administrator & Lead Developer</h1>
+            <p class="sub">Manajemen sistem tingkat tinggi, pemantauan telemetri SQLite/Node.js, tata kelola akun civitas akademika, dan kontrol mode aplikasi.</p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="loadAdminDashboard()">
+              <span>🔄 Segarkan Data</span>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openSwitchModeModal()">
+              <span>⚡ Sakelar Mode Sistem</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetry Cards -->
+        <div class="stats-grid" style="margin-bottom: 24px;">
+          <div class="stat-card" style="border-left: 4px solid #6366f1;">
+            <div class="stat-label">Mode Operasional Aktif</div>
+            <div class="stat-value" id="admActiveMode" style="font-size: 20px; color: #4338ca;">Demo Lomba</div>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #10b981;">
+            <div class="stat-label">Total Akun Terdaftar</div>
+            <div class="stat-value" id="admTotalUsers">0</div>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+            <div class="stat-label">Total Proyek Riset</div>
+            <div class="stat-value" id="admTotalProjects">0</div>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+            <div class="stat-label">Penyimpanan SQLite</div>
+            <div class="stat-value" id="admDbSize" style="font-size: 20px;">0 KB</div>
+          </div>
+        </div>
+
+        <!-- Telemetry System Details Card -->
+        <div class="card" style="margin-bottom: 24px; background: #0f172a; color: #f8fafc; border: 1px solid #334155;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="font-size: 14px; color: #38bdf8;">🖥️ Server Engine & Runtime Telemetry</strong>
+              <div style="font-size: 11px; color: #94a3b8;">Spesifikasi backend runtime Node.js dan database SQLite bawaan zero-dependency</div>
+            </div>
+            <span class="badge" style="background: #1e293b; color: #38bdf8; border: 1px solid #0284c7;">Engine: Node.js + SQLite</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; font-size: 12px;">
+            <div>
+              <span style="color: #94a3b8; display: block; font-size: 11px;">Versi Node.js:</span>
+              <strong id="admNodeVer" style="color: #f1f5f9;">-</strong>
+            </div>
+            <div>
+              <span style="color: #94a3b8; display: block; font-size: 11px;">Server Uptime:</span>
+              <strong id="admUptime" style="color: #34d399;">-</strong>
+            </div>
+            <div>
+              <span style="color: #94a3b8; display: block; font-size: 11px;">Memory RAM (RSS):</span>
+              <strong id="admMemory" style="color: #f1f5f9;">-</strong>
+            </div>
+            <div>
+              <span style="color: #94a3b8; display: block; font-size: 11px;">Distribusi Proyek:</span>
+              <strong id="admProjDist" style="color: #f1f5f9;">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Governance Table -->
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h2 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 4px;">👥 Tata Kelola Akun Civitas Akademika</h2>
+              <p style="font-size: 12px; color: var(--muted); margin: 0;">Kelola akses akun mahasiswa, dosen pembimbing, juri, dan administrator.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="adminUserSearch" placeholder="Cari nama / username / NIM..." oninput="filterAdminUsers()" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; width: 220px;">
+              <button class="btn btn-primary btn-sm" onclick="openRegisterUserModal()">
+                <span>+ Daftarkan Akun Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; font-size: 12px; border-collapse: collapse;">
+              <thead>
+                <tr style="background: var(--surface-alt); text-align: left; border-bottom: 1px solid var(--line);">
+                  <th style="padding: 10px 12px;">ID & Pengguna</th>
+                  <th style="padding: 10px 12px;">Peran (Role)</th>
+                  <th style="padding: 10px 12px;">NIM / NIP</th>
+                  <th style="padding: 10px 12px;">Program Studi & Institusi</th>
+                  <th style="padding: 10px 12px; text-align: right;">Aksi Kontrol</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersTableBody">
+                <tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--muted);">Memuat daftar pengguna...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Developer Actions -->
+        <div class="card">
+          <h2 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">⚡ Operasi Pemeliharaan & Integrasi Hosting</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;">
+            <div style="background: var(--surface-alt); padding: 14px; border-radius: 10px; border: 1px solid var(--line-light);">
+              <strong style="font-size: 13px; color: var(--navy); display: block; margin-bottom: 4px;">🌐 Konfigurasi Domain steamcraft.online</strong>
+              <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px; line-height: 1.4;">
+                File <code>render.yaml</code> & <code>Dockerfile</code> siap dideploy ke Render / VPS untuk integrasi A-Record & CNAME Hostinger.
+              </p>
+              <span class="badge badge-teal" style="font-size: 10px;">Blueprint Ready</span>
+            </div>
+            <div style="background: var(--surface-alt); padding: 14px; border-radius: 10px; border: 1px solid var(--line-light);">
+              <strong style="font-size: 13px; color: var(--navy); display: block; margin-bottom: 4px;">📊 Ekspor Data Kohort Ilmiah</strong>
+              <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px; line-height: 1.4;">
+                Unduh seluruh data logbook, skor radar STEAM 5-pilar, dan riwayat checkpoint dalam format CSV.
+              </p>
+              <button class="btn btn-secondary btn-sm" onclick="exportAnalyticsCSV()" style="font-size: 11px;">
+                <span>Unduh CSV Kohort &rarr;</span>
+              </button>
             </div>
           </div>
         </div>

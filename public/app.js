@@ -443,19 +443,23 @@ async function handleRegisterSubmit(e) {
 function setAuthRole(role) {
   const sBtn = document.getElementById('tabStudent');
   const lBtn = document.getElementById('tabLecturer');
+  const aBtn = document.getElementById('tabAdmin');
   const label = document.getElementById('authIdLabel');
   const input = document.getElementById('authUsername');
 
+  if (sBtn) sBtn.classList.toggle('active', role === 'student');
+  if (lBtn) lBtn.classList.toggle('active', role === 'lecturer');
+  if (aBtn) aBtn.classList.toggle('active', role === 'admin');
+
   if (role === 'student') {
-    sBtn.classList.add('active');
-    lBtn.classList.remove('active');
     label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
     input.placeholder = 'Contoh: 202610101 atau budi';
-  } else {
-    lBtn.classList.add('active');
-    sBtn.classList.remove('active');
+  } else if (role === 'lecturer') {
     label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
     input.placeholder = 'Contoh: 198504122010121002 atau dosen';
+  } else if (role === 'admin') {
+    label.textContent = 'ID Administrator / Developer';
+    input.placeholder = 'Contoh: admin atau ADM-2026-DEV01';
   }
 }
 
@@ -464,13 +468,14 @@ async function quickLoginDemo(target) {
     let username = target;
     if (target === 'student') username = 'budi';
     else if (target === 'lecturer') username = 'dosen';
+    else if (target === 'admin') username = 'admin';
 
     const res = await api('/api/auth/switch-demo', 'POST', { username });
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
       enterWorkspace();
-      showToast(`Masuk sebagai ${res.user.name} (${res.user.study_program || (res.user.role === 'student' ? 'Mahasiswa' : 'Dosen/Juri')})`);
+      showToast(`Masuk sebagai ${res.user.name} (${res.user.role === 'admin' ? 'Administrator Sistem' : (res.user.study_program || res.user.role)})`);
     }
   } catch (e) {
     console.error(e);
@@ -531,7 +536,14 @@ function enterWorkspace() {
   syncNavigation();
   loadAllProjects();
   updateNotificationBadges();
-  showPage(currentRole === 'student' ? 'dashboard' : 'mission');
+
+  if (currentRole === 'admin') {
+    showPage('admin');
+  } else if (currentRole === 'lecturer') {
+    showPage('mission');
+  } else {
+    showPage('dashboard');
+  }
 }
 
 function updateUserProfileUI() {
@@ -544,9 +556,14 @@ function updateUserProfileUI() {
     avatarEl.style.background = currentUser.avatar_color || 'var(--primary)';
   }
 
-  const roleText = currentUser.role === 'student'
-    ? `Mahasiswa · ${currentUser.study_program}`
-    : `Dosen Pembimbing · ${currentUser.study_program}`;
+  let roleText = '';
+  if (currentUser.role === 'admin') {
+    roleText = `🛠️ Administrator · ${currentUser.study_program || 'Sistem'}`;
+  } else if (currentUser.role === 'lecturer') {
+    roleText = `Dosen Pembimbing · ${currentUser.study_program}`;
+  } else {
+    roleText = `Mahasiswa · ${currentUser.study_program}`;
+  }
   document.getElementById('userRoleBadge').textContent = roleText;
 }
 
@@ -668,7 +685,10 @@ async function handleEditProfileSubmit(e) {
 function syncNavigation() {
   document.querySelectorAll('#mainNav button').forEach(btn => {
     const roleAttr = btn.dataset.roles;
-    if (!roleAttr || roleAttr.includes(currentRole)) {
+    if (currentRole === 'admin') {
+      // Administrator has full visibility across all pages
+      btn.style.display = 'inline-block';
+    } else if (!roleAttr || roleAttr.includes(currentRole)) {
       btn.style.display = 'inline-block';
     } else {
       btn.style.display = 'none';
@@ -733,6 +753,9 @@ function showPage(pageId) {
       break;
     case 'analytics':
       loadAnalytics();
+      break;
+    case 'admin':
+      loadAdminDashboard();
       break;
   }
 }
@@ -3115,6 +3138,185 @@ async function loadAnalytics() {
 
 function exportAnalyticsCSV() {
   window.open('/api/analytics/export.csv', '_blank');
+}
+
+// ==================== ADMINISTRATOR & SYSTEM GOVERNANCE ====================
+let cachedAdminUsers = [];
+
+async function loadAdminDashboard() {
+  await Promise.all([loadAdminSystemStats(), loadAdminUsers()]);
+}
+
+async function loadAdminSystemStats() {
+  try {
+    const res = await api('/api/admin/system-stats');
+    const { system, counts } = res;
+
+    const elMode = document.getElementById('admActiveMode');
+    if (elMode) {
+      if (system.appMode === 'production') {
+        elMode.textContent = '🚀 Operasi Riil';
+        elMode.style.color = '#0d9488';
+      } else {
+        elMode.textContent = '🎯 Demo Lomba';
+        elMode.style.color = '#4338ca';
+      }
+    }
+
+    const elUsers = document.getElementById('admTotalUsers');
+    if (elUsers) elUsers.textContent = counts.totalUsers;
+
+    const elProj = document.getElementById('admTotalProjects');
+    if (elProj) elProj.textContent = counts.totalProjects;
+
+    const elDb = document.getElementById('admDbSize');
+    if (elDb) elDb.textContent = `${system.dbSizeKb || 0} KB`;
+
+    const elNode = document.getElementById('admNodeVer');
+    if (elNode) elNode.textContent = `${system.nodeVersion} (${system.platform})`;
+
+    const elUp = document.getElementById('admUptime');
+    if (elUp) {
+      const up = system.uptimeSeconds;
+      const hours = Math.floor(up / 3600);
+      const mins = Math.floor((up % 3600) / 60);
+      const secs = up % 60;
+      elUp.textContent = hours > 0 ? `${hours}j ${mins}m ${secs}s` : (mins > 0 ? `${mins}m ${secs}s` : `${secs} detik`);
+    }
+
+    const elMem = document.getElementById('admMemory');
+    if (elMem) elMem.textContent = `${system.memoryRssMb} MB`;
+
+    const elDist = document.getElementById('admProjDist');
+    if (elDist) elDist.textContent = `${counts.demoProjects} Demo · ${counts.prodProjects} Riil`;
+  } catch (err) {
+    console.error('Failed to load admin stats:', err);
+  }
+}
+
+async function loadAdminUsers() {
+  const tbody = document.getElementById('adminUsersTableBody');
+  if (!tbody) return;
+  try {
+    const res = await api('/api/admin/users');
+    cachedAdminUsers = res.users || [];
+    renderAdminUsers(cachedAdminUsers);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 20px;">Gagal memuat pengguna: ${err.message}</td></tr>`;
+  }
+}
+
+function renderAdminUsers(usersList) {
+  const tbody = document.getElementById('adminUsersTableBody');
+  if (!tbody) return;
+
+  if (usersList.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted); padding: 24px;">Tidak ada pengguna yang cocok dengan pencarian.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = usersList.map(u => {
+    let roleBadge = '';
+    if (u.role === 'admin') {
+      roleBadge = '<span class="badge" style="background:#0f172a; color:#38bdf8; border:1px solid #0284c7;">🛠️ Admin / Dev</span>';
+    } else if (u.role === 'lecturer') {
+      roleBadge = '<span class="badge badge-purple">👨‍🏫 Dosen / Juri</span>';
+    } else {
+      roleBadge = '<span class="badge badge-blue">👤 Mahasiswa</span>';
+    }
+
+    const isCore = (u.username === 'admin' || u.username === 'budi' || u.username === 'dosen');
+
+    return `
+      <tr style="border-bottom: 1px solid var(--line-light);">
+        <td style="padding: 10px 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: ${u.avatar_color || '#2878d7'}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px;">
+              ${(u.name || 'U').charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <strong style="font-size: 13px; color: var(--navy); display: block;">${u.name}</strong>
+              <small style="color: var(--muted);">@${u.username}</small>
+            </div>
+          </div>
+        </td>
+        <td style="padding: 10px 12px;">${roleBadge}</td>
+        <td style="padding: 10px 12px; font-family: monospace; font-size: 11px;">${u.identifier || '-'}</td>
+        <td style="padding: 10px 12px;">
+          <strong style="color: var(--navy);">${u.study_program}</strong>
+          <small style="display: block; color: var(--muted);">${u.university || 'Universitas Indonesia'}</small>
+        </td>
+        <td style="padding: 10px 12px; text-align: right;">
+          <div style="display: inline-flex; gap: 6px;">
+            <button class="btn btn-ghost btn-sm" onclick="adminResetPassword(${u.id}, '${u.name}')" title="Reset Kata Sandi" style="font-size: 11px; padding: 4px 8px;">
+              🔑 Reset Pass
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="adminToggleRole(${u.id}, '${u.role}', '${u.name}')" title="Ubah Peran" style="font-size: 11px; padding: 4px 8px;">
+              🔄 Peran
+            </button>
+            ${!isCore ? `
+              <button class="btn btn-ghost btn-sm" onclick="adminDeleteUser(${u.id}, '${u.name}')" title="Hapus Akun" style="color: #ef4444; font-size: 11px; padding: 4px 8px;">
+                🗑️
+              </button>
+            ` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterAdminUsers() {
+  const q = (document.getElementById('adminUserSearch')?.value || '').toLowerCase().trim();
+  if (!q) {
+    renderAdminUsers(cachedAdminUsers);
+    return;
+  }
+  const filtered = cachedAdminUsers.filter(u =>
+    u.name.toLowerCase().includes(q) ||
+    u.username.toLowerCase().includes(q) ||
+    (u.identifier && u.identifier.toLowerCase().includes(q)) ||
+    (u.study_program && u.study_program.toLowerCase().includes(q))
+  );
+  renderAdminUsers(filtered);
+}
+
+async function adminToggleRole(userId, currentRoleVal, userName) {
+  const nextRole = currentRoleVal === 'student' ? 'lecturer' : (currentRoleVal === 'lecturer' ? 'admin' : 'student');
+  const roleName = nextRole === 'student' ? 'Mahasiswa' : (nextRole === 'lecturer' ? 'Dosen' : 'Admin');
+  if (!confirm(`Ubah peran ${userName} menjadi ${roleName}?`)) return;
+
+  try {
+    const res = await api(`/api/admin/users/${userId}/role`, 'POST', { role: nextRole });
+    showToast(res.message);
+    loadAdminUsers();
+  } catch (err) {
+    alert('Gagal mengubah role: ' + err.message);
+  }
+}
+
+async function adminResetPassword(userId, userName) {
+  const newPass = prompt(`Masukkan kata sandi baru untuk ${userName}:`, 'password123');
+  if (!newPass) return;
+
+  try {
+    const res = await api(`/api/admin/users/${userId}/reset-password`, 'POST', { newPassword: newPass });
+    showToast(res.message);
+  } catch (err) {
+    alert('Gagal mereset kata sandi: ' + err.message);
+  }
+}
+
+async function adminDeleteUser(userId, userName) {
+  if (!confirm(`Hapus akun ${userName}? Tindakan ini tidak dapat dibatalkan.`)) return;
+
+  try {
+    const res = await api(`/api/admin/users/${userId}`, 'DELETE');
+    showToast(res.message);
+    loadAdminDashboard();
+  } catch (err) {
+    alert('Gagal menghapus akun: ' + err.message);
+  }
 }
 
 // Initial Launch Check

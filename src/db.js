@@ -15,7 +15,7 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('student', 'lecturer')),
+      role TEXT NOT NULL CHECK(role IN ('student', 'lecturer', 'admin')),
       identifier TEXT NOT NULL,
       study_program TEXT NOT NULL,
       faculty TEXT DEFAULT 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)',
@@ -326,6 +326,7 @@ function initDatabase() {
   seedDefaultData();
   seedScienceAndEducationProjects();
   seedProjectMembers();
+  seedAdminAndCivitasAccounts();
 }
 
 const DEFAULT_TEMPLATES = {
@@ -1117,6 +1118,145 @@ function seedProjectMembers() {
   db.exec('UPDATE projects SET is_demo = 1 WHERE id <= 13;');
 
   console.log('Project team members and task assignees seeded successfully!');
+}
+
+function upgradeUsersTableForAdmin() {
+  try {
+    const tableDef = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").get();
+    if (tableDef && tableDef.sql && !tableDef.sql.includes("'admin'")) {
+      db.exec(`
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE users_migrated (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          name TEXT NOT NULL,
+          role TEXT NOT NULL CHECK(role IN ('student', 'lecturer', 'admin')),
+          identifier TEXT NOT NULL,
+          study_program TEXT NOT NULL,
+          avatar_color TEXT DEFAULT '#2878d7',
+          password TEXT NOT NULL,
+          created_at TEXT DEFAULT (datetime('now', 'localtime')),
+          faculty TEXT DEFAULT 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)',
+          university TEXT DEFAULT 'Universitas Indonesia',
+          research_interests TEXT DEFAULT 'Sains, Teknologi, Rekayasa & Matematika',
+          bio TEXT DEFAULT '',
+          academic_links TEXT DEFAULT ''
+        );
+        INSERT INTO users_migrated (id, username, name, role, identifier, study_program, avatar_color, password, created_at, faculty, university, research_interests, bio, academic_links)
+        SELECT id, username, name, role, identifier, study_program, avatar_color, password, created_at, faculty, university, research_interests, bio, academic_links FROM users;
+        DROP TABLE users;
+        ALTER TABLE users_migrated RENAME TO users;
+        PRAGMA foreign_keys = ON;
+      `);
+      console.log('✓ Users table upgraded to support role "admin"!');
+    }
+  } catch (err) {
+    console.error('Error upgrading users table:', err.message);
+  }
+}
+
+function seedAdminAndCivitasAccounts() {
+  upgradeUsersTableForAdmin();
+
+  // 1. Seed Administrator / Lead Dev Account
+  const adminUser = db.prepare("SELECT * FROM users WHERE username = 'admin'").get();
+  if (!adminUser) {
+    db.prepare(`
+      INSERT INTO users (username, name, role, identifier, study_program, faculty, university, research_interests, bio, academic_links, avatar_color, password)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'admin',
+      'Administrator Sistem (Lead Dev & Architect)',
+      'admin',
+      'ADM-2026-DEV01',
+      'Pusat Riset & Rekayasa Sistem',
+      'Direktorat Sistem Informasi & Laboratorium Terpadu',
+      'Universitas Indonesia',
+      'System Architecture, Cloud Infrastructure, AI Pipeline & Data Science',
+      'Akun administrator utama platform STEAM-Craft untuk monitoring telemetri riset, tata kelola akses dosen & mahasiswa, audit repositori, dan kontrol mode sistem.',
+      'GitHub: github.com/steamcraft-admin · Docs: steamcraft.online/docs',
+      '#0f172a',
+      'admin2026!'
+    );
+    console.log('✓ Administrator / Lead Dev account seeded: @admin (pass: admin2026!)');
+  }
+
+  // 2. Seed Realistic Civitas Accounts for Production Mode
+  const civitasList = [
+    {
+      username: 'sarah.biotech',
+      name: 'Sarah Amanda Putri, S.Si.',
+      role: 'student',
+      identifier: '202610201',
+      study_program: 'Bioteknologi',
+      faculty: 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)',
+      university: 'Institut Pertanian Bogor',
+      research_interests: 'Bioteknologi Enzim, Biopolimer, Rekayasa Genetika Mikroba',
+      bio: 'Mahasiswa peneliti laboratorium bioteknologi mikrobial. Sedang meneliti sintesis enzim termostabil.',
+      academic_links: 'GitHub: github.com/sarahamanda · LinkedIn: linkedin.com/in/sarahamanda',
+      avatar_color: '#059669',
+      password: 'password123'
+    },
+    {
+      username: 'kevin.ai',
+      name: 'Kevin Pratama',
+      role: 'student',
+      identifier: '202610202',
+      study_program: 'Artificial Intelligence',
+      faculty: 'Fakultas Ilmu Komputer & Sains Data',
+      university: 'Universitas Indonesia',
+      research_interests: 'Computer Vision, Edge AI, Automated Defect Detection',
+      bio: 'Mahasiswa periset model deteksi objek berkecepatan tinggi pada lini produksi industri manufaktur.',
+      academic_links: 'GitHub: github.com/kevinpratama · HuggingFace: huggingface.co/kevinai',
+      avatar_color: '#2563eb',
+      password: 'password123'
+    },
+    {
+      username: 'prof.hendra',
+      name: 'Prof. Dr. Hendra Gunawan, M.Sc.',
+      role: 'lecturer',
+      identifier: '197808152003121001',
+      study_program: 'Matematika',
+      faculty: 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)',
+      university: 'Institut Teknologi Bandung',
+      research_interests: 'Analisis Harmonik, Teori Ruang Fungsi, Pemodelan Sains STEAM',
+      bio: 'Guru Besar Matematika Analisis. Pembina program riset multidisiplin dan standarisasi rubrik luaran ilmiah.',
+      academic_links: 'Scopus ID: 6602938102 · Google Scholar: Hendra Gunawan ITB',
+      avatar_color: '#1e3a8a',
+      password: 'dosen123'
+    },
+    {
+      username: 'dr.citra',
+      name: 'Dr. Citra Lestari, M.Biomed.',
+      role: 'lecturer',
+      identifier: '198302142008122003',
+      study_program: 'Biologi',
+      faculty: 'Fakultas Kedokteran & Sains Hayati',
+      university: 'Universitas Indonesia',
+      research_interests: 'Biomedika Molekuler, Biomaterial Alami, Pengujian Biokompatibilitas',
+      bio: 'Dosen pembimbing riset sintesis bahan hayati, regenerasi sel, dan aplikasi bioplastik medis.',
+      academic_links: 'ORCID: 0000-0003-4912-8821 · SINTA ID: 598214',
+      avatar_color: '#0d9488',
+      password: 'dosen123'
+    }
+  ];
+
+  const insertCivitas = db.prepare(`
+    INSERT INTO users (username, name, role, identifier, study_program, faculty, university, research_interests, bio, academic_links, avatar_color, password)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  for (const c of civitasList) {
+    const exists = db.prepare('SELECT id FROM users WHERE username = ?').get(c.username);
+    if (!exists) {
+      insertCivitas.run(
+        c.username, c.name, c.role, c.identifier, c.study_program,
+        c.faculty, c.university, c.research_interests, c.bio, c.academic_links,
+        c.avatar_color, c.password
+      );
+    }
+  }
+  console.log('✓ Civitas accounts seeded successfully for production mode!');
 }
 
 function getAppMode() {
