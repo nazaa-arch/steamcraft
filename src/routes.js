@@ -168,7 +168,7 @@ async function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname === '/api/auth/register' && method === 'POST') {
-    const { username, name, role, identifier, nim, nip, study_program, password, email } = body || {};
+    const { username, name, role, identifier, nim, nip, study_program, password, email, university, faculty } = body || {};
     const idVal = identifier || nim || nip;
     const userHandle = username || (idVal ? idVal.toLowerCase().replace(/[^a-z0-9_]/g, '') : '');
     if (!name || !role || !idVal) {
@@ -196,11 +196,20 @@ async function handleApiRequest(req, res, url, body) {
       const securePasswordHash = hashPassword(password || 'password123');
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+      const defaultFaculty = (study_program && study_program.includes('Pendidikan'))
+        ? 'Fakultas Keguruan dan Ilmu Pendidikan (FKIP)'
+        : (study_program === 'Artificial Intelligence' || study_program === 'Sains Data')
+          ? 'Fakultas Ilmu Komputer & Sains Data'
+          : 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)';
+
+      const userUniv = university && String(university).trim() ? String(university).trim() : 'Universitas Indonesia';
+      const userFaculty = faculty && String(faculty).trim() ? String(faculty).trim() : defaultFaculty;
+
       const insert = db.prepare(`
-        INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password, email, email_verified)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+        INSERT INTO users (username, name, role, identifier, study_program, faculty, university, avatar_color, password, email, email_verified)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
       `);
-      const info = insert.run(userHandle, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash, cleanEmail);
+      const info = insert.run(userHandle, name, role, idVal, study_program || 'Sains Data', userFaculty, userUniv, avatarColor, securePasswordHash, cleanEmail);
       const newUserId = info.lastInsertRowid;
 
       // Auto-acknowledge existing historical announcements for new users so their unread counter starts clean at 0

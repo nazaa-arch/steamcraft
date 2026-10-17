@@ -1969,6 +1969,101 @@ html, body {
   }
 }
 
+/* ==================== MODERN AUTH & REGISTRATION POLISH ==================== */
+.auth-register-card {
+  margin-top: 20px;
+  padding: 16px;
+  background: linear-gradient(180deg, var(--surface-alt) 0%, #f8fafc 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.auth-register-card .prompt-text {
+  font-size: 13px;
+  color: var(--ink-secondary);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.auth-register-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--primary);
+  background: white;
+  border: 1.5px solid var(--primary-light);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(40, 120, 215, 0.08);
+}
+
+.auth-register-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px rgba(40, 120, 215, 0.25);
+  transform: translateY(-1px);
+}
+
+.reg-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 44px !important;
+  box-sizing: border-box;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--navy);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 640px) {
+  .reg-grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
 
 
 

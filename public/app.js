@@ -409,33 +409,111 @@ function openRegisterUserModal() {
     errDiv.textContent = '';
     errDiv.style.display = 'none';
   }
-  handleRegisterRoleChange('student');
+  const matchNote = document.getElementById('regPasswordMatchNote');
+  if (matchNote) {
+    matchNote.textContent = '';
+    matchNote.style.color = 'var(--muted)';
+  }
+  // Reset password inputs type
+  ['regPassword', 'regPasswordConfirm'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.type = 'password';
+  });
+  setRegisterRole('student');
   openModal('registerUserModal');
 }
 
-function handleRegisterRoleChange(role) {
+function setRegisterRole(role) {
+  const hiddenRole = document.getElementById('regRole');
+  if (hiddenRole) hiddenRole.value = role;
+
+  const btnStudent = document.getElementById('regRoleBtnStudent');
+  const btnLecturer = document.getElementById('regRoleBtnLecturer');
   const label = document.getElementById('regIdentifierLabel');
   const input = document.getElementById('regIdentifier');
-  if (!label || !input) return;
+  const hint = document.getElementById('regIdentifierHint');
 
   if (role === 'lecturer') {
-    label.textContent = 'NIP (Nomor Induk Pegawai) *';
-    input.placeholder = 'Contoh: 198504122010121002';
+    if (btnLecturer) {
+      btnLecturer.style.background = 'var(--primary)';
+      btnLecturer.style.color = 'white';
+      btnLecturer.style.boxShadow = '0 2px 6px rgba(40,120,215,0.3)';
+    }
+    if (btnStudent) {
+      btnStudent.style.background = 'transparent';
+      btnStudent.style.color = 'var(--muted)';
+      btnStudent.style.boxShadow = 'none';
+    }
+    if (label) label.textContent = 'NIP (Nomor Induk Pegawai) *';
+    if (input) input.placeholder = 'Contoh: 198504122010121002';
+    if (hint) hint.textContent = 'Nomor Induk Pegawai / NIDN resmi Anda';
   } else {
-    label.textContent = 'NIM (Nomor Induk Mahasiswa) *';
-    input.placeholder = 'Contoh: 202610145';
+    if (btnStudent) {
+      btnStudent.style.background = 'var(--primary)';
+      btnStudent.style.color = 'white';
+      btnStudent.style.boxShadow = '0 2px 6px rgba(40,120,215,0.3)';
+    }
+    if (btnLecturer) {
+      btnLecturer.style.background = 'transparent';
+      btnLecturer.style.color = 'var(--muted)';
+      btnLecturer.style.boxShadow = 'none';
+    }
+    if (label) label.textContent = 'NIM (Nomor Induk Mahasiswa) *';
+    if (input) input.placeholder = 'Contoh: 202610145';
+    if (hint) hint.textContent = 'Nomor Induk Mahasiswa aktif Anda';
+  }
+}
+
+function handleRegisterRoleChange(role) {
+  setRegisterRole(role);
+}
+
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btnEl) btnEl.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    if (btnEl) btnEl.textContent = '👁️';
+  }
+}
+
+function checkRegisterPasswordMatch() {
+  const p1 = document.getElementById('regPassword')?.value || '';
+  const p2 = document.getElementById('regPasswordConfirm')?.value || '';
+  const note = document.getElementById('regPasswordMatchNote');
+  if (!note) return;
+
+  if (!p2) {
+    note.textContent = '';
+    return;
+  }
+
+  if (p1 === p2) {
+    note.textContent = '✓ Kata sandi cocok';
+    note.style.color = '#10b981';
+    note.style.fontWeight = '700';
+  } else {
+    note.textContent = '✗ Kata sandi belum cocok';
+    note.style.color = '#ef4444';
+    note.style.fontWeight = '700';
   }
 }
 
 async function handleRegisterSubmit(e) {
   e.preventDefault();
-  const name = document.getElementById('regName').value.trim();
-  const username = document.getElementById('regUsername').value.trim();
-  const role = document.getElementById('regRole').value;
-  const identifier = document.getElementById('regIdentifier').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const study_program = document.getElementById('regStudy').value;
-  const password = document.getElementById('regPassword').value;
+  const name = document.getElementById('regName')?.value.trim();
+  const username = document.getElementById('regUsername')?.value.trim().toLowerCase();
+  const role = document.getElementById('regRole')?.value || 'student';
+  const identifier = document.getElementById('regIdentifier')?.value.trim();
+  const email = document.getElementById('regEmail')?.value.trim();
+  const study_program = document.getElementById('regStudy')?.value;
+  const university = document.getElementById('regUniversity')?.value;
+  const password = document.getElementById('regPassword')?.value;
+  const passwordConfirm = document.getElementById('regPasswordConfirm')?.value;
+  const termsChecked = document.getElementById('regTerms')?.checked;
   const errDiv = document.getElementById('registerError');
   const btn = document.getElementById('btnSubmitRegister');
 
@@ -444,7 +522,42 @@ async function handleRegisterSubmit(e) {
     errDiv.style.display = 'none';
   }
 
-  if (btn) btn.disabled = true;
+  if (!name || !username || !identifier || !email || !password) {
+    if (errDiv) {
+      errDiv.textContent = 'Harap lengkapi semua field yang wajib diisi (*).';
+      errDiv.style.display = 'block';
+    }
+    return;
+  }
+
+  if (password.length < 6) {
+    if (errDiv) {
+      errDiv.textContent = 'Kata sandi minimal 6 karakter.';
+      errDiv.style.display = 'block';
+    }
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    if (errDiv) {
+      errDiv.textContent = 'Konfirmasi kata sandi tidak cocok. Harap periksa kembali.';
+      errDiv.style.display = 'block';
+    }
+    return;
+  }
+
+  if (!termsChecked) {
+    if (errDiv) {
+      errDiv.textContent = 'Harap setujui pernyataan integritas riset sebelum mendaftar.';
+      errDiv.style.display = 'block';
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳ Mendaftarkan akun...</span>';
+  }
 
   try {
     const payload = {
@@ -454,6 +567,8 @@ async function handleRegisterSubmit(e) {
       password,
       role,
       study_program,
+      university,
+      identifier,
       nim: role === 'student' ? identifier : undefined,
       nip: role === 'lecturer' ? identifier : undefined
     };
@@ -479,7 +594,10 @@ async function handleRegisterSubmit(e) {
       errDiv.style.display = 'block';
     }
   } finally {
-    if (btn) btn.disabled = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>✨ Buat Akun & Verifikasi Email</span> <span>&rarr;</span>';
+    }
   }
 }
 

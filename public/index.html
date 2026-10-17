@@ -82,9 +82,11 @@
             <span>&rarr;</span>
           </button>
 
-          <div style="margin-top: 16px; text-align: center; border-top: 1px solid var(--line-light); padding-top: 14px;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="openRegisterUserModal()" style="font-size: 12.5px; color: var(--primary);">
-              Belum memiliki akun terdaftar? <strong>Daftar Akun Civitas Baru &rarr;</strong>
+          <div class="auth-register-card">
+            <span class="prompt-text">Belum punya akun peneliti STEAM?</span>
+            <button type="button" class="auth-register-btn" onclick="openRegisterUserModal()">
+              <span>✨ Daftar Akun Baru Sekarang</span>
+              <span>&rarr;</span>
             </button>
           </div>
         </form>
@@ -1723,82 +1725,150 @@
 
   <!-- Register New User Modal (Production / Live Mode) -->
   <div class="modal-overlay" id="registerUserModal">
-    <div class="modal-box" style="max-width: 520px;">
+    <div class="modal-box" style="max-width: 560px;">
       <button class="modal-close" onclick="closeModal('registerUserModal')">&times;</button>
-      <div class="eyebrow" style="color: var(--primary);">Registrasi Civitas Akademika</div>
-      <h2 style="font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Daftar Akun Peneliti Baru</h2>
+      <div class="eyebrow" style="color: var(--primary);">✨ Registrasi Civitas Riset STEAM</div>
+      <h2 style="font-size: 21px; font-weight: 900; color: var(--navy); margin-bottom: 4px;">Daftar Akun Peneliti Baru</h2>
       <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">
-        Daftarkan akun resmi mahasiswa atau dosen untuk mengakses ruang kerja riset STEAM.
+        Lengkapi identitas resmi Anda untuk bergabung dalam ekosistem riset terintegrasi STEAM-Craft.
       </p>
 
-      <form id="registerUserForm" onsubmit="handleRegisterSubmit(event)">
-        <div class="field" style="margin-bottom: 12px;">
-          <label>Nama Lengkap dengan Gelar *</label>
-          <input type="text" id="regName" placeholder="Contoh: Rian Hidayat, S.Si." required>
+      <!-- Role Selector Tabs -->
+      <div style="margin-bottom: 18px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">Pilih Peran Akademik Anda *</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg); padding: 4px; border-radius: 12px; border: 1px solid var(--line);">
+          <button type="button" id="regRoleBtnStudent" onclick="setRegisterRole('student')" style="border-radius: 8px; font-weight: 700; padding: 10px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; border: none; background: var(--primary); color: white; box-shadow: 0 2px 6px rgba(40,120,215,0.3);">
+            <span>👤</span> <span>Mahasiswa Peneliti</span>
+          </button>
+          <button type="button" id="regRoleBtnLecturer" onclick="setRegisterRole('lecturer')" style="border-radius: 8px; font-weight: 700; padding: 10px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; border: none; background: transparent; color: var(--muted);">
+            <span>👨‍🏫</span> <span>Dosen / Pembimbing</span>
+          </button>
         </div>
+        <input type="hidden" id="regRole" value="student">
+      </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+      <form id="registerUserForm" onsubmit="handleRegisterSubmit(event)">
+        <!-- Row 1: Nama & Username -->
+        <div class="reg-grid-2col">
+          <div class="field">
+            <label>Nama Lengkap dengan Gelar *</label>
+            <input type="text" id="regName" placeholder="Contoh: Rian Hidayat, S.Si." required>
+          </div>
           <div class="field">
             <label>Username Login *</label>
-            <input type="text" id="regUsername" placeholder="Contoh: rian_steam" required>
-          </div>
-          <div class="field">
-            <label>Peran Pengguna *</label>
-            <select id="regRole" required onchange="handleRegisterRoleChange(this.value)">
-              <option value="student">Mahasiswa Peneliti</option>
-              <option value="lecturer">Dosen Pembimbing / Juri</option>
-            </select>
+            <input type="text" id="regUsername" placeholder="Contoh: rian_steam" required autocomplete="username">
+            <small style="color: var(--muted); font-size: 10.5px; display: block; margin-top: 2px;">Huruf kecil, angka, atau underscore (_)</small>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <!-- Row 2: Identitas NIM/NIP & Program Studi -->
+        <div class="reg-grid-2col">
           <div class="field">
             <label id="regIdentifierLabel">NIM (Nomor Induk Mahasiswa) *</label>
             <input type="text" id="regIdentifier" placeholder="Contoh: 202610145" required>
+            <small id="regIdentifierHint" style="color: var(--muted); font-size: 10.5px; display: block; margin-top: 2px;">Nomor Induk Mahasiswa aktif Anda</small>
           </div>
           <div class="field">
-            <label>Program Studi</label>
+            <label>Program Studi Riset *</label>
             <select id="regStudy" required>
-              <optgroup label="Kelompok MIPA (Sains Murni)">
-                <option value="Biologi">Biologi (Murni)</option>
-                <option value="Kimia">Kimia (Murni)</option>
-                <option value="Fisika">Fisika (Murni)</option>
-                <option value="Matematika">Matematika (Murni)</option>
-              </optgroup>
-              <optgroup label="Kelompok Pendidikan Sains">
-                <option value="Pendidikan Biologi">Pendidikan Biologi</option>
-                <option value="Pendidikan Kimia">Pendidikan Kimia</option>
-                <option value="Pendidikan Fisika">Pendidikan Fisika</option>
-                <option value="Pendidikan Matematika">Pendidikan Matematika</option>
-              </optgroup>
               <optgroup label="Kelompok Sains Terapan & Komputasi">
                 <option value="Sains Data" selected>Sains Data</option>
                 <option value="Artificial Intelligence">Artificial Intelligence</option>
                 <option value="Sains Aktuaria">Sains Aktuaria</option>
                 <option value="Bioteknologi">Bioteknologi</option>
               </optgroup>
+              <optgroup label="Kelompok MIPA (Sains Murni)">
+                <option value="Biologi">Biologi (Murni)</option>
+                <option value="Kimia">Kimia (Murni)</option>
+                <option value="Fisika">Fisika (Murni)</option>
+                <option value="Matematika">Matematika (Murni)</option>
+              </optgroup>
+              <optgroup label="Kelompok Pendidikan Sains & Teknologi">
+                <option value="Pendidikan Biologi">Pendidikan Biologi</option>
+                <option value="Pendidikan Kimia">Pendidikan Kimia</option>
+                <option value="Pendidikan Fisika">Pendidikan Fisika</option>
+                <option value="Pendidikan Matematika">Pendidikan Matematika</option>
+              </optgroup>
             </select>
           </div>
         </div>
 
-        <div class="field" style="margin-bottom: 12px;">
-          <label>Email Civitas / Kampus *</label>
-          <input type="email" id="regEmail" placeholder="Contoh: rian.hidayat@ui.ac.id atau rian@gmail.com" required>
-          <small style="color: var(--muted); font-size: 11px;">Kode OTP verifikasi 6 digit akan dikirimkan ke alamat email ini.</small>
+        <!-- Row 3: Institusi & Email -->
+        <div class="reg-grid-2col">
+          <div class="field">
+            <label>Institusi / Perguruan Tinggi *</label>
+            <select id="regUniversity" required>
+              <option value="Universitas Indonesia" selected>Universitas Indonesia (UI)</option>
+              <option value="Institut Teknologi Bandung">Institut Teknologi Bandung (ITB)</option>
+              <option value="Universitas Gadjah Mada">Universitas Gadjah Mada (UGM)</option>
+              <option value="Institut Pertanian Bogor">Institut Pertanian Bogor (IPB)</option>
+              <option value="Institut Teknologi Sepuluh Nopember">Institut Teknologi Sepuluh Nopember (ITS)</option>
+              <option value="Universitas Pendidikan Indonesia">Universitas Pendidikan Indonesia (UPI)</option>
+              <option value="Universitas Negeri Malang">Universitas Negeri Malang (UM)</option>
+              <option value="Universitas Airlangga">Universitas Airlangga (UNAIR)</option>
+              <option value="Universitas Diponegoro">Universitas Diponegoro (UNDIP)</option>
+              <option value="Universitas Brawijaya">Universitas Brawijaya (UB)</option>
+              <option value="Universitas Negeri Yogyakarta">Universitas Negeri Yogyakarta (UNY)</option>
+              <option value="Perguruan Tinggi Lainnya">Perguruan Tinggi Lainnya</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Email Kampus / Aktif *</label>
+            <input type="email" id="regEmail" placeholder="nama@kampus.ac.id atau email aktif" required autocomplete="email">
+            <small style="color: var(--muted); font-size: 10.5px; display: block; margin-top: 2px;">✉️ Kode OTP 6 digit akan dikirim ke email ini</small>
+          </div>
         </div>
 
-        <div class="field" style="margin-bottom: 18px;">
-          <label>Kata Sandi Akun *</label>
-          <input type="password" id="regPassword" placeholder="Minimal 6 karakter" required minlength="6">
+        <!-- Row 4: Kata Sandi & Konfirmasi -->
+        <div class="reg-grid-2col">
+          <div class="field">
+            <label>Kata Sandi Akun *</label>
+            <div class="password-input-wrap">
+              <input type="password" id="regPassword" placeholder="Minimal 6 karakter" required minlength="6" oninput="checkRegisterPasswordMatch()" autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regPassword', this)" title="Lihat kata sandi">
+                👁️
+              </button>
+            </div>
+            <small style="color: var(--muted); font-size: 10.5px; display: block; margin-top: 2px;">Minimal 6 karakter</small>
+          </div>
+          <div class="field">
+            <label>Konfirmasi Kata Sandi *</label>
+            <div class="password-input-wrap">
+              <input type="password" id="regPasswordConfirm" placeholder="Ulangi kata sandi" required minlength="6" oninput="checkRegisterPasswordMatch()" autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regPasswordConfirm', this)" title="Lihat kata sandi">
+                👁️
+              </button>
+            </div>
+            <small id="regPasswordMatchNote" style="font-size: 10.5px; display: block; margin-top: 2px; color: var(--muted);"></small>
+          </div>
         </div>
 
-        <div class="auth-error" id="registerError" style="margin-bottom: 12px; display: none; color: #dc2626; font-size: 12px; background: #fee2e2; padding: 8px 12px; border-radius: 8px;"></div>
+        <!-- Syarat Integritas Riset Checkbox -->
+        <div style="margin: 14px 0 16px;">
+          <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--ink-secondary); cursor: pointer;">
+            <input type="checkbox" id="regTerms" required checked style="margin-top: 2.5px; accent-color: var(--primary);">
+            <span>Saya menyatakan bahwa identitas akademik di atas adalah benar serta berkomitmen menjunjung integritas ilmiah dan etika riset multidisiplin STEAM.</span>
+          </label>
+        </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('registerUserModal')">Batal</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitRegister">
-            <span>Daftar & Verifikasi Email &rarr;</span>
+        <!-- Error Div -->
+        <div class="auth-error" id="registerError" style="margin-bottom: 14px; display: none; color: #dc2626; font-size: 12px; background: #fee2e2; padding: 10px 14px; border-radius: 10px; border-left: 3px solid #dc2626;"></div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('registerUserModal')">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitRegister" style="padding: 10px 20px;">
+            <span>✨ Buat Akun & Verifikasi Email</span>
+            <span>&rarr;</span>
           </button>
+        </div>
+
+        <!-- Back to Login Link -->
+        <div style="text-align: center; margin-top: 14px; font-size: 12.5px; color: var(--muted);">
+          Sudah memiliki akun terdaftar? 
+          <a href="#" onclick="closeModal('registerUserModal'); return false;" style="font-weight: 800; color: var(--primary); text-decoration: underline; text-underline-offset: 2px;">
+            Masuk ke Akun Anda &rarr;
+          </a>
         </div>
       </form>
     </div>
