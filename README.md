@@ -1,80 +1,78 @@
-# 🚀 STEAM-Craft — Ruang Kolaborasi Multidisiplin
+# 🚀 STEAM-Craft — Ruang Kolaborasi Multidisiplin (React + TypeScript)
 
-**STEAM-Craft** adalah platform web terpadu untuk kolaborasi riset ilmiah dan inovasi mahasiswa berbasis pendekatan **STEAM** (*Science, Technology, Engineering, Art, Mathematics*).
+**STEAM-Craft** adalah platform web terpadu untuk inkubasi dan kolaborasi riset ilmiah mahasiswa dan dosen berbasis pendekatan **STEAM** (*Science, Technology, Engineering, Art, and Mathematics*).
 
-Aplikasi ini mentransformasikan prototipe statis menjadi **aplikasi produksi nyata (Full-Stack Real Application)** dengan backend server, database relasional SQLite persisten, antarmuka modern yang responsif, manajemen multi-role (Mahasiswa & Dosen/Juri), asisten AI Copilot riset cerdas, serta sistem evaluasi rubrik terstandarisasi.
+Direkayasa ulang secara penuh menggunakan arsitektur **React 19 + TypeScript + Vite** modern, mempertahankan seluruh integritas alur kerja riset, manajemen peran multi-role, 13 proyek penelitian unggulan, penilaian rubrik 4 pilar standar nasional, dan asisten riset cerdas.
 
 ---
 
 ## 🌟 Fitur Utama
 
 ### 🎓 1. Portal Mahasiswa (Student Workspace)
-- **Dashboard Progres & Metrik**: Menampilkan statistik proyek aktif, persentase checkpoint, kolaborator, dan status kendala teknis (blocker).
-- **Katalog Proyek Multidisiplin**: Pencarian cerdas, filter berdasarkan program studi (Sains Data, AI, Aktuaria, Bioteknologi, Robotika) dan status riset.
-- **Wizard Pembuatan Proyek**: 3-step wizard inisialisasi alur kerja ilmiah terstandarisasi dengan integrasi template:
+- **Dashboard Progres & Metrik**: Menampilkan statistik proyek aktif, persentase rata-rata checkpoint, total kolaborator, dan status kendala teknis (blocker).
+- **Katalog Proyek Multidisiplin**: Pencarian instan dan filter multi-kategori (Sains Data, AI, Biologi, Kimia, Fisika, Matematika, Bioteknologi) dan status riset.
+- **Inisiasi Proyek Riset Baru**: Wizard pendaftaran proyek baru dengan 4 template ilmiah:
   - *Analisis Data / AI*
   - *Eksperimen / Laboratorium*
   - *Model Risiko / Aktuaria*
   - *Proyek Bebas / Lintas Disiplin*
 - **Ruang Kerja (Workspace) Interaktif**:
-  - **Pipeline Metode Ilmiah 5 Tahap**: Checkpoint interaktif dengan update progres persentase otomatis.
-  - **AI Research Copilot**: Asisten riset berbasis AI yang menganalisis konteks proyek secara dinamis, memberikan tinjauan metodologi, checklist langkah nyata, mitigasi risiko bias/error, serta fitur tanya jawab (chat) interaktif.
-  - **Jurnal Riset Ilmiah (Audit Trail)**: Catatan riset terstruktur dengan kategori (*Observasi, Metodologi, Eksperimen, Evaluasi, Blocker, Catatan Umum*).
-  - **Snapshot Versi & Repositori**: Riwayat rilis iterasi (v1.0, v2.0, dst.) dan integrasi tautan repositori eksternal (*GitHub, GitLab, Google Drive, Kaggle*).
-  - **Klinik Blocker & Review**: Tombol penanda blocker dengan alasan teknis yang langsung memicu notifikasi pembimbing, serta pengajuan review resmi.
-- **Open Recruitment Kolaborasi**: Mencari dan melamar posisi anggota tim riset lintas program studi.
-- **Jadwal & Bimbingan**: Pengajuan jadwal bimbingan tatap muka atau daring (*Google Meet, Ruang Dosen, Lab*), catatan persiapan, dan log umpan balik dosen.
-- **Papan Pengumuman**: Informasi terpusat dengan filter kategori (*Metodologi, Tenggat, Fasilitas*) serta fitur bookmark dan penanda baca.
-- **Pengajuan Fasilitas Lab**: Sistem peminjaman fasilitas (*GPU Workstation RTX 4090, Printer 3D, Sensor IoT, Spektrofotometer*) dengan pelacakan status persetujuan.
-- **Portofolio Mahasiswa**: Showcase pencapaian akademik, nilai akhir rubrik, serta ekspor portofolio ke **CSV** dan **JSON**.
+  - **Pipeline Metode Ilmiah 5 Tahap**: Checkpoint interaktif dengan kalkulasi progres persentase otomatis dan log assignee penanggung jawab.
+  - **Jurnal & Logbook Laboratorium**: Catatan terperinci observasi harian dengan filter kategori (*Metodologi, Eksperimen, Data, Blocker, Validasi*) dan lampiran file.
+  - **Jejak Versi & Reproducibility**: Riwayat rilis iterasi (v1.0, v2.0, dst.) dan integrasi repositori kode eksternal (*GitHub*).
+  - **Struktur Tim & Kolaborator**: Tinjauan anggota multidisiplin, status open recruitment, serta persetujuan pelamar.
+  - **AI Research Copilot**: Asisten riset kontekstual untuk validasi metodologi, checklist langkah nyata, dan mitigasi bias eksperimen.
+- **Pusat Rekrutmen (Open Recruitment)**: Eksplorasi tim yang sedang mencari keahlian khusus lintas departemen dan pendaftaran kolaborasi 1-klik.
+- **Jadwal & Bimbingan**: Pengajuan bimbingan tatap muka atau daring, catatan agenda, dan log umpan balik dosen.
+- **Ajukan Fasilitas Lab**: Alokasi peminjaman fasilitas (*GPU Workstation RTX 4090, Printer 3D, Modul LoRa, Spektrofotometer UV-Vis*).
+- **Portofolio Riset Mahasiswa**: Profil radar 5 pilar STEAM, rekam jejak riset terselesaikan, dan ekspor paket kelayakan ilmiah.
 
 ### 👨‍🏫 2. Portal Dosen & Juri (Faculty Command)
-- **Mission Control 4-in-1**:
-  1. *Supervisi & Blocker Clinic*: Tinjauan proyek aktif, pemberian umpan balik terstruktur, dan penanganan kendala teknis.
-  2. *Evaluasi Rubrik STEAM Resmi*: Penilaian 4 pilar terstandarisasi (Kelengkapan 25%, Bukti Empiris 25%, Kontribusi 25%, Reproducibility 25%) dengan kalkulasi otomatis nilai akhir dan predikat huruf.
-  3. *Reproducibility Package Compiler & Arsip*: Kompilasi satu klik paket verifikasi open science JSON dan pengarsipan proyek terkunci.
-  4. *Editor Template & Bobot*: Kustomisasi tahapan checkpoint dan validasi total bobot 100%.
-- **Antrean Bimbingan**: Penerimaan, penolakan, penjadwalan, dan penyimpanan feedback sesi bimbingan.
-- **Pusat Pengumuman (Broadcasting)**: Publikasi instruksi kepada seluruh mahasiswa atau tim tertentu, lengkap dengan fitur penyematan (*Pinned*).
-- **Manajemen Fasilitas & Lab**: Verifikasi dan persetujuan permohonan peminjaman alat/komputasi.
-- **Analitik Kohort**: Visualisasi progres kohort, distribusi bidang ilmu, bottleneck tahapan riset, dan ekspor data kohort ke **CSV**.
+- **Mission Control Master-Detail**:
+  - Tinjauan proyek aktif dan penanganan kendala teknis (Blocker Clinic).
+  - Form penilaian rubrik 4 pilar standar nasional (Kelengkapan 25%, Bukti Empiris 25%, Kontribusi 25%, Reproducibility 25%) dengan kalkulasi otomatis nilai akhir dan predikat grade.
+- **Antrean Bimbingan**: Konfirmasi, penjadwalan, dan pencatatan umpan balik sesi bimbingan.
+- **Pusat Siaran Pengumuman**: Publikasi instruksi resmi, filter kategori, dan penyematan (*Pinned*).
+- **Tata Kelola Lab**: Persetujuan dan verifikasi permohonan peminjaman instrumen riset.
+- **Analitik Kohort**: Metrik agregat performa mahasiswa, distribusi riset per program studi, dan kepatuhan standar data terbuka.
+
+### 🛠️ 3. Administrator Sistem
+- **Dual Mode Switcher**: Beralih instan antara Mode Demo (Showcase Lomba dengan 13 proyek sampel) dan Mode Operasional Riil.
+- **Manajemen Pengguna**: Tata kelola akun civitas akademika, pencarian, dan penyesuaian peran.
+- **Audit & Ekspor Data**: Unduh cadangan database dalam format JSON dan reset ke konfigurasi pabrik.
 
 ---
 
 ## 🛠️ Arsitektur Teknologi
 
-- **Runtime**: Node.js (v20+ / v22+ / v24+)
-- **Database**: Native SQLite (`node:sqlite` DatabaseSync) dengan mode WAL berkinerja tinggi
-- **Backend API**: RESTful API terintegrasi pada server HTTP mandiri (*Zero External Dependencies*)
-- **Frontend**: Vanilla JavaScript SPA, Semantic HTML5, CSS Modern (Glassmorphism, CSS Custom Properties, Responsive Mobile/Desktop)
-- **Keamanan & Sesi**: Autentikasi berbasis peran (*Role-Based Access Control*) dengan akun demo instan 1-klik
+- **Frontend Framework**: React 19 dengan TypeScript
+- **Bundler & Dev Server**: Vite (host: 0.0.0.0, port: 3000)
+- **Styling**: Modern CSS Design System & Tailwind CSS Integration
+- **Icons**: Lucide Icons
+- **State & Persistence**: In-memory + LocalStorage State Management terintegrasi
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
+## 🚀 Menjalankan Aplikasi
 
-### Opsi 1: Menjalankan Cepat di Windows (Rekomendasi)
-Cukup **klik dua kali** file:
-```
-start.bat
-```
-Server akan aktif dan browser otomatis membuka alamat: `http://localhost:3000`.
+Jalankan perintah berikut pada terminal:
 
-### Opsi 2: Menjalankan via Terminal / Command Prompt
 ```bash
-node server.js
+npm run dev
 ```
-Lalu buka browser Anda di:
-```
-http://localhost:3000
+
+Aplikasi akan berjalan di:
+`http://localhost:3000`
+
+Untuk build produksi:
+```bash
+npm run build
 ```
 
 ---
 
 ## 🔑 Akun Demo Siap Pakai
 
-Aplikasi telah dilengkapi tombol **Akses Demo 1-Klik** di halaman depan:
-- **Akun Mahasiswa**: `budi` (Budi Santoso — Sains Data, NIM: 202610101)
-- **Akun Dosen / Juri**: `dosen` (Dr. Rahmat Wijaya, M.Sc. — NIP: 198504122010121002)
-
-Anda juga dapat berpindah peran kapan saja saat aplikasi berjalan dengan menekan tombol **"🔄 Tukar Peran"** pada bilah navigasi atas.
+- **Mahasiswa**: `budi` / `202610101` (Budi Santoso — Sains Data, pass: `password123`)
+- **Dosen**: `dosen` / `198504122010121002` (Dr. Rahmat Wijaya, M.Sc., pass: `dosen123`)
+- **Admin**: `admin` (Administrator Sistem, pass: `admin2026!`)

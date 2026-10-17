@@ -1,0 +1,8 @@
+{
+  "name": "STEAM-Craft",
+  "description": "Platform Workspace Riset & Kolaborasi Multidisiplin Mahasiswa dan Dosen berbasis STEAM (Science, Technology, Engineering, Art, and Mathematics).",
+  "version": "1.0.0",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
