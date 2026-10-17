@@ -107,6 +107,10 @@ async function runTests() {
     password: 'newpassword2026'
   });
   assert.strictEqual(checkNewLogin.status, 200, 'Harus bisa login dengan password yang baru direset');
+  // Kembalikan password ke password123 agar idempotent
+  await request(`/api/admin/users/${testStudent.id}/reset-password`, 'POST', {
+    newPassword: 'password123'
+  });
   console.log('✓ Reset kata sandi pengguna berhasil dan terverifikasi.');
 
   console.log('\n=== SEMUA 7 PENGUJIAN AKUN ADMINISTRATOR & TATA KELOLA SUKSES 100% ===');

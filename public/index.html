@@ -44,25 +44,11 @@
       <div class="auth-card">
         <div class="eyebrow" style="margin-bottom: 6px;">Autentikasi Terintegrasi</div>
         <h2 style="font-size: 24px; font-weight: 900; color: var(--navy); margin-bottom: 6px;">Masuk ke Workspace</h2>
-        <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Pilih peran Anda untuk mengakses ruang kerja atau gunakan akun demo cepat.</p>
-
-        <div class="app-mode-switch-bar" style="margin-bottom: 16px; background: #f1f5f9; border-radius: 10px; padding: 4px; display: flex; gap: 4px;">
-          <button type="button" class="btn btn-sm active" id="loginModeDemoBtn" onclick="setLoginAppMode('demo')" style="flex: 1; font-size: 11px; padding: 6px; font-weight: 800;">
-            🎯 Mode Demo (Lomba)
-          </button>
-          <button type="button" class="btn btn-sm btn-ghost" id="loginModeProdBtn" onclick="setLoginAppMode('production')" style="flex: 1; font-size: 11px; padding: 6px; font-weight: 800;">
-            🚀 Mode Operasi Riil
-          </button>
-        </div>
-
-        <div id="loginModeNotice" style="font-size: 11px; color: var(--primary); background: var(--primary-light); padding: 8px 12px; border-radius: 8px; margin-bottom: 14px; font-weight: 600;">
-          🎯 Mode Demo Lomba: Akses instan ke 13 proyek riset multidisiplin dan akun demo cepat.
-        </div>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Pilih peran Anda untuk mengakses ruang kerja riset STEAM.</p>
 
         <div class="auth-role-tabs" id="loginRoleTabs">
           <button type="button" class="active" id="tabStudent" onclick="setAuthRole('student')">Mahasiswa</button>
-          <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">Dosen / Juri</button>
-          <button type="button" id="tabAdmin" onclick="setAuthRole('admin')">Admin / Dev</button>
+          <button type="button" id="tabLecturer" onclick="setAuthRole('lecturer')">Dosen / Pembimbing</button>
         </div>
 
         <form id="authForm" onsubmit="handleLoginSubmit(event)">
@@ -119,10 +105,6 @@
             </button>
             <button type="button" class="demo-btn" onclick="quickLoginDemo('lecturer')">
               <span>👨‍🏫 Dosen Pembimbing (Dr. Rahmat Wijaya, M.Sc.)</span>
-              <span>&rarr;</span>
-            </button>
-            <button type="button" class="demo-btn" onclick="quickLoginDemo('admin')" style="background: #0f172a; color: #f8fafc; border: 1px solid #334155;">
-              <span>🛠️ Administrator / Lead Dev (System & Monitoring Console)</span>
               <span>&rarr;</span>
             </button>
           </div>
@@ -182,6 +164,12 @@
 
       <!-- User Controls -->
       <div class="user-controls">
+        <!-- Special Developer / Administrator Mode Indicator Pill -->
+        <div id="devModeIndicator" style="display: none; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #38bdf8; padding: 4px 12px; border-radius: 20px;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
+          <span style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px;">MODE KHUSUS DEV / ADMIN</span>
+        </div>
+
         <div class="user-badge" id="topUserBadge" onclick="openEditProfileModal()" title="Klik untuk mengedit identitas & profil peneliti STEAM" tabindex="0" role="button">
           <div class="user-avatar" id="userAvatar">B</div>
           <div class="user-info">

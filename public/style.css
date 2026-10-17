@@ -1430,3 +1430,18 @@ button {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
+
+/* Developer / Administrator Special Mode Styling */
+body.dev-mode-active .topbar {
+  border-bottom: 2px solid #38bdf8;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+}
+
+#devModeIndicator {
+  animation: devPulse 3s infinite ease-in-out;
+}
+
+@keyframes devPulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(56, 189, 248, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(56, 189, 248, 0.8); }
+}

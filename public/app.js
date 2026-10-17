@@ -264,35 +264,15 @@ function applyAppModeUI(mode) {
     }
   }
 
-  // 2. Login Screen Switcher & Notice
-  const loginDemoBtn = document.getElementById('loginModeDemoBtn');
-  const loginProdBtn = document.getElementById('loginModeProdBtn');
-  const loginNotice = document.getElementById('loginModeNotice');
-  const demoBox = document.getElementById('demoQuickLoginBox');
-
-  if (loginDemoBtn && loginProdBtn) {
+  // 2. Admin Console Mode Badge if loaded
+  const admMode = document.getElementById('admActiveMode');
+  if (admMode) {
     if (mode === 'production') {
-      loginProdBtn.classList.add('active');
-      loginProdBtn.classList.remove('btn-ghost');
-      loginDemoBtn.classList.remove('active');
-      loginDemoBtn.classList.add('btn-ghost');
-      if (loginNotice) {
-        loginNotice.style.background = '#f0fdf4';
-        loginNotice.style.color = '#15803d';
-        loginNotice.innerHTML = '🚀 <strong>Mode Operasi Riil Aktif</strong>: Lingkungan kerja bersih untuk civitas akademika nyata. Masuk dengan akun terdaftar Anda atau daftar akun baru.';
-      }
-      if (demoBox) demoBox.style.display = 'none';
+      admMode.textContent = '🚀 Operasi Riil';
+      admMode.style.color = '#0d9488';
     } else {
-      loginDemoBtn.classList.add('active');
-      loginDemoBtn.classList.remove('btn-ghost');
-      loginProdBtn.classList.remove('active');
-      loginProdBtn.classList.add('btn-ghost');
-      if (loginNotice) {
-        loginNotice.style.background = 'var(--primary-light)';
-        loginNotice.style.color = 'var(--primary)';
-        loginNotice.innerHTML = '🎯 <strong>Mode Demo Lomba Aktif</strong>: Akses instan ke 13 proyek riset multidisiplin dan login cepat 1-klik akun demo untuk evaluasi juri.';
-      }
-      if (demoBox) demoBox.style.display = 'block';
+      admMode.textContent = '🎯 Demo Lomba';
+      admMode.style.color = '#4338ca';
     }
   }
 }
@@ -443,23 +423,18 @@ async function handleRegisterSubmit(e) {
 function setAuthRole(role) {
   const sBtn = document.getElementById('tabStudent');
   const lBtn = document.getElementById('tabLecturer');
-  const aBtn = document.getElementById('tabAdmin');
   const label = document.getElementById('authIdLabel');
   const input = document.getElementById('authUsername');
 
   if (sBtn) sBtn.classList.toggle('active', role === 'student');
   if (lBtn) lBtn.classList.toggle('active', role === 'lecturer');
-  if (aBtn) aBtn.classList.toggle('active', role === 'admin');
 
   if (role === 'student') {
     label.textContent = 'NIM (Nomor Induk Mahasiswa) / Username';
     input.placeholder = 'Contoh: 202610101 atau budi';
-  } else if (role === 'lecturer') {
+  } else {
     label.textContent = 'NIP (Nomor Induk Pegawai) / Username';
     input.placeholder = 'Contoh: 198504122010121002 atau dosen';
-  } else if (role === 'admin') {
-    label.textContent = 'ID Administrator / Developer';
-    input.placeholder = 'Contoh: admin atau ADM-2026-DEV01';
   }
 }
 
@@ -468,14 +443,13 @@ async function quickLoginDemo(target) {
     let username = target;
     if (target === 'student') username = 'budi';
     else if (target === 'lecturer') username = 'dosen';
-    else if (target === 'admin') username = 'admin';
 
     const res = await api('/api/auth/switch-demo', 'POST', { username });
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
       enterWorkspace();
-      showToast(`Masuk sebagai ${res.user.name} (${res.user.role === 'admin' ? 'Administrator Sistem' : (res.user.study_program || res.user.role)})`);
+      showToast(`Masuk sebagai ${res.user.name} (${res.user.study_program || (res.user.role === 'student' ? 'Mahasiswa' : 'Dosen/Juri')})`);
     }
   } catch (e) {
     console.error(e);
@@ -522,15 +496,35 @@ async function toggleRoleSwitch() {
 
 function logout() {
   currentUser = null;
+  currentRole = 'student';
+  const devPill = document.getElementById('devModeIndicator');
+  if (devPill) devPill.style.display = 'none';
+  const topModeBtn = document.getElementById('topAppModeBtn');
+  if (topModeBtn) topModeBtn.style.display = 'none';
+  document.body.classList.remove('dev-mode-active');
   document.getElementById('workspaceApp').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'grid';
-  applyAppModeUI(currentAppMode);
   showToast('Anda telah keluar.');
 }
 
 function enterWorkspace() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('workspaceApp').style.display = 'block';
+
+  const devPill = document.getElementById('devModeIndicator');
+  const topModeBtn = document.getElementById('topAppModeBtn');
+
+  if (currentRole === 'admin') {
+    if (devPill) devPill.style.display = 'inline-flex';
+    if (topModeBtn) topModeBtn.style.display = 'inline-flex';
+    document.body.classList.add('dev-mode-active');
+    showToast('🛠️ Mode Khusus Administrator & Lead Developer Aktif.');
+  } else {
+    if (devPill) devPill.style.display = 'none';
+    if (topModeBtn) topModeBtn.style.display = 'none';
+    document.body.classList.remove('dev-mode-active');
+  }
+
   applyAppModeUI(currentAppMode);
   updateUserProfileUI();
   syncNavigation();
