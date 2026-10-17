@@ -7,7 +7,26 @@
 let currentUser = null;
 let currentRole = 'student';
 let allProjects = [];
-let selectedProjectId = 1;
+let selectedProjectId = null;
+
+// Helper: Filter projects strictly belonging to the currently logged in user
+function getUserProjects() {
+  if (!currentUser) return [];
+  return allProjects.filter(p => {
+    if (p.creator_id && p.creator_id === currentUser.id) return true;
+    if (p.members && Array.isArray(p.members)) {
+      return p.members.some(m => 
+        (m.user_id && m.user_id === currentUser.id) || 
+        (m.identifier && currentUser.identifier && String(m.identifier).toLowerCase() === String(currentUser.identifier).toLowerCase()) ||
+        (m.name && currentUser.name && m.name.toLowerCase() === currentUser.name.toLowerCase())
+      );
+    }
+    if (currentUser.role === 'lecturer' && p.lecturer && currentUser.name && p.lecturer.toLowerCase().includes(currentUser.name.toLowerCase())) {
+      return true;
+    }
+    return false;
+  });
+}
 let currentActivePage = 'dashboard';
 let currentMissionTab = 'supervision';
 let missionSelectedProjectId = null;
@@ -183,10 +202,11 @@ async function updateNotificationBadges() {
 
 // Helper: API Client
 async function api(endpoint, method = 'GET', body = null) {
-  const options = {
-    method,
-    headers: { 'Content-Type': 'application/json' }
-  };
+  const headers = { 'Content-Type': 'application/json' };
+  if (currentUser && currentUser.id) {
+    headers['X-User-Id'] = String(currentUser.id);
+  }
+  const options = { method, headers };
   if (body) options.body = JSON.stringify(body);
 
   try {
@@ -405,6 +425,8 @@ async function handleRegisterSubmit(e) {
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
+      localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      selectedProjectId = null;
       closeModal('registerUserModal');
       enterWorkspace();
       showToast(`Registrasi berhasil! Selamat datang, ${res.user.name}`);
@@ -448,6 +470,8 @@ async function quickLoginDemo(target) {
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
+      localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      selectedProjectId = null;
       enterWorkspace();
       showToast(`Masuk sebagai ${res.user.name} (${res.user.study_program || (res.user.role === 'student' ? 'Mahasiswa' : 'Dosen/Juri')})`);
     }
@@ -468,6 +492,8 @@ async function handleLoginSubmit(e) {
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
+      localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      selectedProjectId = null;
       enterWorkspace();
       showToast(`Selamat datang, ${res.user.name}`);
     }
@@ -484,6 +510,8 @@ async function toggleRoleSwitch() {
     if (res.user) {
       currentUser = res.user;
       currentRole = res.user.role;
+      localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      selectedProjectId = null;
       updateUserProfileUI();
       syncNavigation();
       showPage(currentRole === 'student' ? 'dashboard' : 'mission');
@@ -495,8 +523,11 @@ async function toggleRoleSwitch() {
 }
 
 function logout() {
+  localStorage.removeItem('steamcraft_user');
+  api('/api/auth/logout', 'POST').catch(() => {});
   currentUser = null;
   currentRole = 'student';
+  selectedProjectId = null;
   const devPill = document.getElementById('devModeIndicator');
   if (devPill) devPill.style.display = 'none';
   const topModeBtn = document.getElementById('topAppModeBtn');
@@ -716,6 +747,14 @@ function showPage(pageId) {
       loadProjectsCatalog();
       break;
     case 'workspace':
+      if (!selectedProjectId) {
+        const myProjs = getUserProjects();
+        if (myProjs.length > 0) {
+          selectedProjectId = myProjs[0].id;
+        } else if (currentUser && currentUser.role === 'admin' && allProjects.length > 0) {
+          selectedProjectId = allProjects[0].id;
+        }
+      }
       loadWorkspace(selectedProjectId);
       break;
     case 'recruitment':
@@ -771,17 +810,25 @@ async function loadAllProjects() {
 }
 
 function renderDashboardStats() {
-  const activeCount = allProjects.filter(p => !p.archived).length;
-  const doneCps = allProjects.reduce((acc, p) => acc + (p.checks ? p.checks.filter(Boolean).length : 0), 0);
-  const totalCps = allProjects.length * 5;
-  const avgProgress = totalCps > 0 ? Math.round((doneCps / totalCps) * 100) : 0;
-  const totalMembers = allProjects.reduce((acc, p) => acc + (p.members_count || 1), 0);
-  const activeBlockers = allProjects.filter(p => p.blocker && !p.archived).length;
+  const isStudent = currentRole === 'student';
+  const myProjects = isStudent ? getUserProjects() : allProjects.filter(p => !p.archived);
 
-  document.getElementById('statProjects').textContent = activeCount;
-  document.getElementById('statChecks').textContent = `${avgProgress}%`;
-  document.getElementById('statPeople').textContent = totalMembers;
-  document.getElementById('statBlockers').textContent = activeBlockers;
+  const activeCount = myProjects.filter(p => !p.archived).length;
+  const doneCps = myProjects.reduce((acc, p) => acc + (p.checks ? p.checks.filter(Boolean).length : 0), 0);
+  const totalCps = myProjects.length * 5;
+  const avgProgress = totalCps > 0 ? Math.round((doneCps / totalCps) * 100) : 0;
+  const totalMembers = myProjects.reduce((acc, p) => acc + (p.members_count || (p.members ? p.members.length : 1)), 0);
+  const activeBlockers = myProjects.filter(p => p.blocker && !p.archived).length;
+
+  const statProjects = document.getElementById('statProjects');
+  const statChecks = document.getElementById('statChecks');
+  const statPeople = document.getElementById('statPeople');
+  const statBlockers = document.getElementById('statBlockers');
+
+  if (statProjects) statProjects.textContent = activeCount;
+  if (statChecks) statChecks.textContent = `${avgProgress}%`;
+  if (statPeople) statPeople.textContent = (isStudent && myProjects.length === 0) ? 0 : totalMembers;
+  if (statBlockers) statBlockers.textContent = activeBlockers;
 }
 
 function projectCardHTML(p) {
@@ -802,11 +849,23 @@ function projectCardHTML(p) {
     ? '<span class="badge badge-orange">🚩 Kendala (Blocker)</span>'
     : `<span class="badge badge-gray">${p.status}</span>`;
 
+  const isMine = currentUser && (
+    (p.creator_id && p.creator_id === currentUser.id) ||
+    (p.members && p.members.some(m => 
+      (m.user_id && m.user_id === currentUser.id) || 
+      (m.identifier && currentUser.identifier && String(m.identifier).toLowerCase() === String(currentUser.identifier).toLowerCase()) ||
+      (m.name && currentUser.name && m.name.toLowerCase() === currentUser.name.toLowerCase())
+    ))
+  );
+
   return `
-    <div class="project-card">
+    <div class="project-card" style="${isMine ? 'border: 2px solid var(--primary-light); box-shadow: 0 4px 12px rgba(40,120,215,0.08);' : ''}">
       <div>
         <div class="project-card-top">
-          <span class="badge ${badgeClass}">${p.study}</span>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <span class="badge ${badgeClass}">${p.study}</span>
+            ${isMine ? '<span class="badge badge-teal" style="font-weight: 800;">⭐ Proyek Saya</span>' : ''}
+          </div>
           ${statusBadge}
         </div>
         <h3>${p.name}</h3>
@@ -836,8 +895,8 @@ function projectCardHTML(p) {
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line);">
           <small style="color: var(--muted);">👥 ${p.members_count || (p.members ? p.members.length : 1)} Mahasiswa</small>
-          <button class="btn btn-secondary btn-sm" onclick="openWorkspace(${p.id})">
-            <span>Buka Ruang Kerja &rarr;</span>
+          <button class="btn ${isMine ? 'btn-primary' : 'btn-secondary'} btn-sm" onclick="openWorkspace(${p.id})">
+            <span>${isMine ? 'Buka Ruang Kerja &rarr;' : 'Lihat Ruang Kerja &rarr;'}</span>
           </button>
         </div>
       </div>
@@ -849,21 +908,32 @@ async function loadDashboard() {
   await loadAllProjects();
   const list = document.getElementById('dashboardProjectsList');
   if (!list) return;
-  const recent = allProjects.slice(0, 3);
-  if (recent.length === 0) {
+
+  const myProjects = getUserProjects();
+
+  if (myProjects.length === 0) {
     list.innerHTML = `
-      <div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 48px; background: white; border: 1px dashed var(--line); border-radius: 12px;">
-        <div style="font-size: 36px; margin-bottom: 12px;">🧪</div>
-        <h3 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 8px;">Belum Ada Proyek Riset Aktif</h3>
-        <p style="font-size: 13px; margin-bottom: 16px; max-width: 480px; margin-left: auto; margin-right: auto;">
-          Anda sedang berada dalam <strong>Mode Operasi Riil Kampus</strong>. Mulai kolaborasi riset multidisiplin dengan membuat proyek baru.
+      <div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 52px 24px; background: white; border: 1.5px dashed var(--line); border-radius: 16px;">
+        <div style="font-size: 46px; margin-bottom: 12px;">🧪</div>
+        <h3 style="font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 8px;">Selamat Datang di STEAM-Craft, ${currentUser ? currentUser.name : 'Peneliti'}!</h3>
+        <p style="font-size: 13.5px; color: var(--ink-secondary); margin-bottom: 20px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+          Akun Anda sudah terdaftar di database kampus. Anda belum memiliki proyek riset aktif. Mulai kolaborasi riset multidisiplin dengan membuat proyek baru atau temukan tim di rekrutmen terbuka.
         </p>
-        <button class="btn btn-primary" onclick="openNewProjectModal()">
-          <span>+ Buat Proyek Riset Baru</span>
-        </button>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="openNewProjectModal()">
+            <span>+ Buat Proyek Riset Baru</span>
+          </button>
+          <button class="btn btn-secondary" onclick="showPage('projects')">
+            <span>🔍 Jelajahi Katalog Proyek Kampus</span>
+          </button>
+          <button class="btn btn-ghost" onclick="showPage('recruitment')">
+            <span>👥 Rekrutmen Kolaborator</span>
+          </button>
+        </div>
       </div>
     `;
   } else {
+    const recent = myProjects.slice(0, 3);
     list.innerHTML = recent.map(projectCardHTML).join('');
   }
 }
@@ -877,8 +947,13 @@ function filterProjects() {
   const query = (document.getElementById('searchProjects')?.value || '').toLowerCase();
   const study = document.getElementById('filterStudy')?.value || '';
   const status = document.getElementById('filterStatus')?.value || '';
+  const scope = document.getElementById('filterScope')?.value || 'all';
+
+  const myProjects = getUserProjects();
+  const myIds = new Set(myProjects.map(p => p.id));
 
   const filtered = allProjects.filter(p => {
+    if (scope === 'mine' && !myIds.has(p.id)) return false;
     const matchQ = !query || p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query) || (p.goal && p.goal.toLowerCase().includes(query));
     const matchS = !study || p.study === study;
     const matchSt = !status || p.status === status;
@@ -888,7 +963,14 @@ function filterProjects() {
   const list = document.getElementById('allProjectsList');
   if (list) {
     if (filtered.length === 0) {
-      list.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 48px;">Tidak ada proyek yang sesuai dengan kriteria filter.</div>`;
+      list.innerHTML = scope === 'mine'
+        ? `<div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 48px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
+            <strong style="font-size: 15px; color: var(--navy);">Anda belum memiliki proyek riset sendiri.</strong>
+            <p style="font-size: 13px; margin: 8px 0 16px;">Mulai buat proyek riset STEAM baru atau pilih "Semua Proyek Kampus".</p>
+            <button class="btn btn-primary btn-sm" onclick="openNewProjectModal()">+ Buat Proyek Baru</button>
+          </div>`
+        : `<div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 48px;">Tidak ada proyek yang sesuai dengan kriteria filter.</div>`;
     } else {
       list.innerHTML = filtered.map(projectCardHTML).join('');
     }
@@ -902,8 +984,27 @@ async function openWorkspace(id) {
 }
 
 async function loadWorkspace(projectId) {
+  const emptyState = document.getElementById('wsEmptyState');
+  const contentWrapper = document.getElementById('wsContentWrapper');
+
+  if (!projectId) {
+    if (emptyState) emptyState.style.display = 'block';
+    if (contentWrapper) contentWrapper.style.display = 'none';
+    return;
+  }
+
   try {
     const res = await api(`/api/projects/${projectId}`);
+    if (!res || !res.project) {
+      if (emptyState) emptyState.style.display = 'block';
+      if (contentWrapper) contentWrapper.style.display = 'none';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+    if (contentWrapper) contentWrapper.style.display = 'block';
+    selectedProjectId = projectId;
+
     const { project, checkpoints, journals, versions, activity, rubric, members } = res;
 
     // Header info
@@ -989,6 +1090,8 @@ async function loadWorkspace(projectId) {
 
   } catch (err) {
     console.error(err);
+    if (emptyState) emptyState.style.display = 'block';
+    if (contentWrapper) contentWrapper.style.display = 'none';
   }
 }
 
@@ -1985,11 +2088,18 @@ async function loadStudentPortfolio() {
     }
   }
 
-  // Calculate or extract STEAM Pillar Scores
-  let scores = { S: 90, T: 85, E: 82, A: 76, M: 92 };
-  const pWithScores = allProjects.find(p => p.steam_scores);
+  const myProjects = getUserProjects();
+
+  // Calculate or extract STEAM Pillar Scores for this student's projects
+  let scores = { S: 0, T: 0, E: 0, A: 0, M: 0 };
+  const pWithScores = myProjects.find(p => p.steam_scores);
   if (pWithScores && pWithScores.steam_scores) {
     try { scores = JSON.parse(pWithScores.steam_scores); } catch (e) {}
+  } else if (myProjects.length > 0) {
+    const avgProg = Math.round(myProjects.reduce((a, b) => a + (b.progress || 0), 0) / myProjects.length);
+    scores = { S: avgProg, T: avgProg, E: avgProg, A: Math.max(0, avgProg - 10), M: avgProg };
+  } else if (currentUser && currentUser.role === 'admin') {
+    scores = { S: 90, T: 85, E: 82, A: 76, M: 92 };
   }
 
   // Render SVG Radar Spider Chart
@@ -2028,7 +2138,23 @@ async function loadStudentPortfolio() {
   const container = document.getElementById('portfolioProjectsList');
   if (!container) return;
 
-  container.innerHTML = allProjects.map(p => `
+  const displayList = (currentUser && currentUser.role === 'admin') ? allProjects : myProjects;
+
+  if (displayList.length === 0) {
+    container.innerHTML = `
+      <div class="card" style="text-align: center; color: var(--muted); padding: 48px 24px; border: 1.5px dashed var(--line); border-radius: 12px; background: white;">
+        <div style="font-size: 38px; margin-bottom: 10px;">📊</div>
+        <h4 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 6px;">Belum Ada Portofolio Riset</h4>
+        <p style="font-size: 13px; color: var(--ink-secondary); margin-bottom: 16px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+          Proyek riset STEAM yang Anda buat atau ikuti akan otomatis terdata di sini beserta nilai akhir, evaluasi dosen, dan penilaian pilar STEAM.
+        </p>
+        <button class="btn btn-sm btn-primary" onclick="openNewProjectModal()">+ Mulai Proyek Pertama Anda</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = displayList.map(p => `
     <div style="border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 14px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
         <div>
@@ -3317,13 +3443,32 @@ async function adminDeleteUser(userId, userName) {
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadAppMode();
-    const res = await api('/api/auth/me');
-    if (res.user) {
-      currentUser = res.user;
-      currentRole = res.user.role;
-      enterWorkspace();
+    const savedUserJson = localStorage.getItem('steamcraft_user');
+    if (savedUserJson) {
+      try {
+        const savedUser = JSON.parse(savedUserJson);
+        if (savedUser && savedUser.id) {
+          currentUser = savedUser;
+          currentRole = savedUser.role || 'student';
+          const res = await api('/api/auth/me');
+          if (res.user) {
+            currentUser = res.user;
+            currentRole = res.user.role;
+            localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+          }
+          enterWorkspace();
+          return;
+        }
+      } catch (err) {
+        localStorage.removeItem('steamcraft_user');
+      }
     }
+    // If not authenticated, ensure login screen is visible
+    document.getElementById('loginScreen').style.display = 'grid';
+    document.getElementById('workspaceApp').style.display = 'none';
   } catch (e) {
     // If not authenticated, keep login screen
+    document.getElementById('loginScreen').style.display = 'grid';
+    document.getElementById('workspaceApp').style.display = 'none';
   }
 });

@@ -6,10 +6,11 @@ const { generateGuidance, answerUserQuery } = require('./ai');
 // In-memory active session for simplicity and instant presentation
 let currentSessionUser = null;
 
-function getCurrentUser() {
-  if (!currentSessionUser) {
-    // Default to Budi Santoso (student) on initial launch
-    currentSessionUser = db.prepare("SELECT * FROM users WHERE username = 'budi'").get();
+function getCurrentUser(req) {
+  const headerUserId = req && req.headers ? (req.headers['x-user-id'] || req.headers['X-User-Id']) : null;
+  if (headerUserId) {
+    const u = db.prepare('SELECT * FROM users WHERE id = ?').get(headerUserId);
+    if (u) return u;
   }
   return currentSessionUser;
 }
@@ -17,7 +18,7 @@ function getCurrentUser() {
 function handleApiRequest(req, res, url, body) {
   const method = req.method;
   const pathname = url.pathname;
-  const user = getCurrentUser();
+  const user = getCurrentUser(req);
 
   // Helper senders
   const json = (data, status = 200) => {
@@ -48,7 +49,12 @@ function handleApiRequest(req, res, url, body) {
 
   // ===================== AUTH ROUTES =====================
   if (pathname === '/api/auth/me' && method === 'GET') {
-    return json({ user, appMode: getAppMode() });
+    return json({ user: user || null, appMode: getAppMode() });
+  }
+
+  if (pathname === '/api/auth/logout' && method === 'POST') {
+    currentSessionUser = null;
+    return json({ success: true, message: 'Berhasil keluar dari sesi.' });
   }
 
   if (pathname === '/api/auth/switch-demo' && method === 'POST') {

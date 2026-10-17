@@ -273,6 +273,10 @@
         <div class="card" style="margin-bottom: 24px; padding: 16px;">
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <input type="text" id="searchProjects" placeholder="Cari nama proyek, masalah riset, atau kata kunci..." style="flex: 1; min-width: 240px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;" oninput="filterProjects()">
+            <select id="filterScope" style="padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-weight: 700; background: var(--surface-alt);" onchange="filterProjects()">
+              <option value="all">🌐 Semua Proyek Kampus</option>
+              <option value="mine">👤 Proyek Riset Saya</option>
+            </select>
             <select id="filterStudy" style="padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;" onchange="filterProjects()">
               <option value="">Semua Program Studi (13 Prodi MIPA & Pendidikan)</option>
               <optgroup label="Sains Murni (MIPA)">
@@ -311,6 +315,24 @@
 
       <!-- ================= 3. RUANG KERJA (WORKSPACE) ================= -->
       <section id="workspace" class="page">
+        <!-- Clean Empty State for New Users without Projects -->
+        <div id="wsEmptyState" style="display: none; text-align: center; padding: 60px 24px; background: white; border-radius: 16px; border: 1.5px dashed var(--line); margin-top: 10px;">
+          <div style="font-size: 52px; margin-bottom: 16px;">🧪</div>
+          <h2 style="font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 8px;">Ruang Kerja Riset Belum Dipilih</h2>
+          <p style="font-size: 14px; color: var(--ink-secondary); max-width: 520px; margin: 0 auto 24px; line-height: 1.6;">
+            Anda belum memiliki proyek riset aktif. Buat proyek riset STEAM baru untuk mengaktifkan laboratorium digital, panduan 5 checkpoint, pencatatan jurnal empiris, dan manajemen kelompok riset Anda.
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openNewProjectModal()">
+              <span>+ Buat Proyek Riset Baru</span>
+            </button>
+            <button class="btn btn-secondary" onclick="showPage('projects')">
+              <span>🔍 Jelajahi Katalog Proyek Kampus</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="wsContentWrapper">
         <div class="workspace-header">
           <div class="ws-top">
             <div>
@@ -491,6 +513,7 @@
             </div>
           </div>
         </div>
+        </div> <!-- /#wsContentWrapper -->
       </section>
 
       <!-- ================= 4. OPEN RECRUITMENT ================= -->
