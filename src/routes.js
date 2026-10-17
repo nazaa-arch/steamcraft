@@ -499,6 +499,28 @@ async function handleApiRequest(req, res, url, body) {
     }
   }
 
+  if (pathname === '/api/admin/database/optimize' && method === 'POST') {
+    if (!user || user.role !== 'admin') return error('Akses ditolak: Hanya Administrator', 403);
+    try {
+      db.exec('PRAGMA optimize;');
+      db.exec('VACUUM;');
+      let dbSizeKb = 0;
+      try {
+        const dataDir = process.env.DATA_DIR || path.join(__dirname, '..');
+        const dbFile = path.join(dataDir, 'steamcraft.db');
+        const stats = fs.statSync(dbFile);
+        dbSizeKb = Math.round(stats.size / 1024);
+      } catch (err) {}
+      return json({ 
+        success: true, 
+        message: 'Database SQLite berhasil dioptimalkan dan divacuum (WAL Mode aktif).',
+        dbSizeKb
+      });
+    } catch (e) {
+      return error('Gagal mengoptimasi database: ' + e.message, 500);
+    }
+  }
+
   // ===================== PROJECTS ROUTES =====================
   if (pathname === '/api/projects' && method === 'GET') {
     const search = url.searchParams.get('q') || '';

@@ -3861,6 +3861,16 @@ async function loadAdminSystemStats() {
 
     const elDist = document.getElementById('admProjDist');
     if (elDist) elDist.textContent = `${counts.demoProjects} Demo · ${counts.prodProjects} Riil`;
+
+    const elUsersBreakdown = document.getElementById('admUsersBreakdown');
+    if (elUsersBreakdown && counts) {
+      elUsersBreakdown.textContent = `${counts.studentUsers} Mahasiswa · ${counts.lecturerUsers} Dosen · ${counts.adminUsers} Admin`;
+    }
+
+    const elProjectsBreakdown = document.getElementById('admProjectsBreakdown');
+    if (elProjectsBreakdown && counts) {
+      elProjectsBreakdown.textContent = `${counts.totalProjects} Riset (${counts.prodProjects} Riil, ${counts.demoProjects} Demo)`;
+    }
   } catch (err) {
     console.error('Failed to load admin stats:', err);
   }
@@ -3872,7 +3882,7 @@ async function loadAdminUsers() {
   try {
     const res = await api('/api/admin/users');
     cachedAdminUsers = res.users || [];
-    renderAdminUsers(cachedAdminUsers);
+    filterAdminUsers();
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 20px;">Gagal memuat pengguna: ${err.message}</td></tr>`;
   }
@@ -3883,7 +3893,7 @@ function renderAdminUsers(usersList) {
   if (!tbody) return;
 
   if (usersList.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted); padding: 24px;">Tidak ada pengguna yang cocok dengan pencarian.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted); padding: 32px 16px;">Tidak ada pengguna yang cocok dengan kriteria pencarian/filter.</td></tr>`;
     return;
   }
 
@@ -3897,41 +3907,29 @@ function renderAdminUsers(usersList) {
       roleBadge = '<span class="badge badge-blue">👤 Mahasiswa</span>';
     }
 
-    const isCore = (u.username === 'admin' || u.username === 'budi' || u.username === 'dosen');
-
     return `
-      <tr style="border-bottom: 1px solid var(--line-light);">
-        <td style="padding: 10px 12px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 28px; height: 28px; border-radius: 50%; background: ${u.avatar_color || '#2878d7'}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px;">
+      <tr style="border-bottom: 1px solid var(--line-light); transition: background 0.15s ease;" onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background='transparent'">
+        <td style="padding: 12px 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${u.avatar_color || '#2878d7'}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.12);">
               ${(u.name || 'U').charAt(0).toUpperCase()}
             </div>
             <div>
-              <strong style="font-size: 13px; color: var(--navy); display: block;">${u.name}</strong>
-              <small style="color: var(--muted);">@${u.username}</small>
+              <strong style="font-size: 13.5px; color: var(--navy); display: block; line-height: 1.2;">${u.name}</strong>
+              <small style="color: var(--muted); font-size: 11px;">@${u.username} · ID #${u.id}</small>
             </div>
           </div>
         </td>
-        <td style="padding: 10px 12px;">${roleBadge}</td>
-        <td style="padding: 10px 12px; font-family: monospace; font-size: 11px;">${u.identifier || '-'}</td>
-        <td style="padding: 10px 12px;">
-          <strong style="color: var(--navy);">${u.study_program}</strong>
-          <small style="display: block; color: var(--muted);">${u.university || 'Universitas Indonesia'}</small>
+        <td style="padding: 12px 14px;">${roleBadge}</td>
+        <td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--ink);">${u.identifier || '-'}</td>
+        <td style="padding: 12px 14px;">
+          <strong style="color: var(--navy); font-size: 12.5px; display: block;">${u.study_program}</strong>
+          <small style="display: block; color: var(--muted); font-size: 11px;">${u.university || 'Universitas Indonesia'}</small>
         </td>
-        <td style="padding: 10px 12px; text-align: right;">
-          <div style="display: inline-flex; gap: 6px;">
-            <button class="btn btn-ghost btn-sm" onclick="adminResetPassword(${u.id}, '${u.name}')" title="Reset Kata Sandi" style="font-size: 11px; padding: 4px 8px;">
-              🔑 Reset Pass
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="adminToggleRole(${u.id}, '${u.role}', '${u.name}')" title="Ubah Peran" style="font-size: 11px; padding: 4px 8px;">
-              🔄 Peran
-            </button>
-            ${!isCore ? `
-              <button class="btn btn-ghost btn-sm" onclick="adminDeleteUser(${u.id}, '${u.name}')" title="Hapus Akun" style="color: #ef4444; font-size: 11px; padding: 4px 8px;">
-                🗑️
-              </button>
-            ` : ''}
-          </div>
+        <td style="padding: 12px 14px; text-align: right;">
+          <button class="btn btn-secondary btn-sm" onclick="openAdminEditUserModal(${u.id})" style="font-size: 11.5px; padding: 6px 12px; gap: 5px;" title="Kelola Akun, Ubah Peran atau Reset Sandi">
+            <span>⚙️ Kelola Akun</span>
+          </button>
         </td>
       </tr>
     `;
@@ -3940,54 +3938,130 @@ function renderAdminUsers(usersList) {
 
 function filterAdminUsers() {
   const q = (document.getElementById('adminUserSearch')?.value || '').toLowerCase().trim();
-  if (!q) {
-    renderAdminUsers(cachedAdminUsers);
-    return;
+  const roleFilter = document.getElementById('adminUserRoleFilter')?.value || '';
+
+  let filtered = cachedAdminUsers || [];
+
+  if (roleFilter) {
+    filtered = filtered.filter(u => u.role === roleFilter);
   }
-  const filtered = cachedAdminUsers.filter(u =>
-    u.name.toLowerCase().includes(q) ||
-    u.username.toLowerCase().includes(q) ||
-    (u.identifier && u.identifier.toLowerCase().includes(q)) ||
-    (u.study_program && u.study_program.toLowerCase().includes(q))
-  );
+
+  if (q) {
+    filtered = filtered.filter(u =>
+      (u.name && u.name.toLowerCase().includes(q)) ||
+      (u.username && u.username.toLowerCase().includes(q)) ||
+      (u.identifier && u.identifier.toLowerCase().includes(q)) ||
+      (u.study_program && u.study_program.toLowerCase().includes(q)) ||
+      (u.email && u.email.toLowerCase().includes(q))
+    );
+  }
+
   renderAdminUsers(filtered);
 }
 
-async function adminToggleRole(userId, currentRoleVal, userName) {
-  const nextRole = currentRoleVal === 'student' ? 'lecturer' : (currentRoleVal === 'lecturer' ? 'admin' : 'student');
-  const roleName = nextRole === 'student' ? 'Mahasiswa' : (nextRole === 'lecturer' ? 'Dosen' : 'Admin');
-  if (!confirm(`Ubah peran ${userName} menjadi ${roleName}?`)) return;
+function openAdminEditUserModal(userId) {
+  const user = (cachedAdminUsers || []).find(u => u.id === Number(userId));
+  if (!user) return;
 
-  try {
-    const res = await api(`/api/admin/users/${userId}/role`, 'POST', { role: nextRole });
-    showToast(res.message);
-    loadAdminUsers();
-  } catch (err) {
-    alert('Gagal mengubah role: ' + err.message);
+  document.getElementById('adminEditUserId').value = user.id;
+  document.getElementById('adminEditUserName').value = user.name;
+  document.getElementById('adminEditUserHandle').value = `@${user.username}`;
+  document.getElementById('adminEditUserIdentifier').value = user.identifier || '-';
+  document.getElementById('adminEditUserRole').value = user.role;
+  document.getElementById('adminEditUserPassword').value = '';
+
+  const subtitle = document.getElementById('adminEditUserSubtitle');
+  if (subtitle) {
+    subtitle.textContent = `Kelola hak akses dan kata sandi untuk akun civitas ${user.name} (${user.study_program}).`;
+  }
+
+  const isCore = (user.username === 'admin' || user.username === 'budi' || user.username === 'dosen');
+  const btnDel = document.getElementById('btnAdminDeleteUser');
+  if (btnDel) {
+    if (isCore) {
+      btnDel.style.display = 'none';
+    } else {
+      btnDel.style.display = 'inline-flex';
+    }
+  }
+
+  openModal('adminEditUserModal');
+}
+
+function adminSetDefaultPass() {
+  const passInput = document.getElementById('adminEditUserPassword');
+  if (passInput) {
+    passInput.value = 'password123';
+    showToast('Kata sandi default "password123" telah diisi.');
   }
 }
 
-async function adminResetPassword(userId, userName) {
-  const newPass = prompt(`Masukkan kata sandi baru untuk ${userName}:`, 'password123');
-  if (!newPass) return;
+async function handleAdminEditUserSubmit(e) {
+  if (e) e.preventDefault();
+  const userId = document.getElementById('adminEditUserId').value;
+  const newRole = document.getElementById('adminEditUserRole').value;
+  const newPass = document.getElementById('adminEditUserPassword').value.trim();
+
+  if (!userId) return;
+
+  const btnSave = document.getElementById('btnAdminSaveUser');
+  if (btnSave) btnSave.disabled = true;
 
   try {
-    const res = await api(`/api/admin/users/${userId}/reset-password`, 'POST', { newPassword: newPass });
-    showToast(res.message);
+    // 1. Update Role if needed
+    const currentUserObj = (cachedAdminUsers || []).find(u => u.id === Number(userId));
+    if (currentUserObj && currentUserObj.role !== newRole) {
+      await api(`/api/admin/users/${userId}/role`, 'POST', { role: newRole });
+    }
+
+    // 2. Reset Password if provided
+    if (newPass) {
+      if (newPass.length < 6) {
+        alert('Kata sandi baru minimal 6 karakter!');
+        if (btnSave) btnSave.disabled = false;
+        return;
+      }
+      await api(`/api/admin/users/${userId}/reset-password`, 'POST', { newPassword: newPass });
+    }
+
+    showToast('✓ Data akun pengguna berhasil diperbarui.');
+    closeModal('adminEditUserModal');
+    await loadAdminDashboard();
   } catch (err) {
-    alert('Gagal mereset kata sandi: ' + err.message);
+    alert('Gagal memperbarui akun: ' + err.message);
+  } finally {
+    if (btnSave) btnSave.disabled = false;
   }
 }
 
-async function adminDeleteUser(userId, userName) {
-  if (!confirm(`Hapus akun ${userName}? Tindakan ini tidak dapat dibatalkan.`)) return;
+async function handleAdminDeleteUserFromModal() {
+  const userId = document.getElementById('adminEditUserId').value;
+  const userName = document.getElementById('adminEditUserName').value;
+
+  if (!userId) return;
+  if (!confirm(`Apakah Anda yakin ingin menghapus akun ${userName}? Tindakan ini bersifat permanen.`)) return;
 
   try {
     const res = await api(`/api/admin/users/${userId}`, 'DELETE');
-    showToast(res.message);
-    loadAdminDashboard();
+    showToast(res.message || `Akun ${userName} berhasil dihapus.`);
+    closeModal('adminEditUserModal');
+    await loadAdminDashboard();
   } catch (err) {
     alert('Gagal menghapus akun: ' + err.message);
+  }
+}
+
+async function adminOptimizeDatabase() {
+  try {
+    showToast('⚡ Menjalankan VACUUM dan optimasi SQLite...');
+    const res = await api('/api/admin/database/optimize', 'POST');
+    showToast(`✓ ${res.message} Ukuran: ${res.dbSizeKb || 0} KB`);
+    const elDb = document.getElementById('admDbSize');
+    if (elDb && res.dbSizeKb) {
+      elDb.textContent = `${res.dbSizeKb} KB`;
+    }
+  } catch (err) {
+    alert('Gagal mengoptimasi database: ' + err.message);
   }
 }
 
