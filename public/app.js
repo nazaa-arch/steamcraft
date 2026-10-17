@@ -203,6 +203,10 @@ async function updateNotificationBadges() {
 // Helper: API Client
 async function api(endpoint, method = 'GET', body = null) {
   const headers = { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem('steamcraft_token');
+  if (token) {
+    headers['Authorization'] = 'Bearer ' + token;
+  }
   if (currentUser && currentUser.id) {
     headers['X-User-Id'] = String(currentUser.id);
   }
@@ -426,6 +430,7 @@ async function handleRegisterSubmit(e) {
       currentUser = res.user;
       currentRole = res.user.role;
       localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      if (res.token) localStorage.setItem('steamcraft_token', res.token);
       selectedProjectId = null;
       closeModal('registerUserModal');
       enterWorkspace();
@@ -471,6 +476,7 @@ async function quickLoginDemo(target) {
       currentUser = res.user;
       currentRole = res.user.role;
       localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      if (res.token) localStorage.setItem('steamcraft_token', res.token);
       selectedProjectId = null;
       enterWorkspace();
       showToast(`Masuk sebagai ${res.user.name} (${res.user.study_program || (res.user.role === 'student' ? 'Mahasiswa' : 'Dosen/Juri')})`);
@@ -493,6 +499,7 @@ async function handleLoginSubmit(e) {
       currentUser = res.user;
       currentRole = res.user.role;
       localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      if (res.token) localStorage.setItem('steamcraft_token', res.token);
       selectedProjectId = null;
       enterWorkspace();
       showToast(`Selamat datang, ${res.user.name}`);
@@ -511,6 +518,7 @@ async function toggleRoleSwitch() {
       currentUser = res.user;
       currentRole = res.user.role;
       localStorage.setItem('steamcraft_user', JSON.stringify(res.user));
+      if (res.token) localStorage.setItem('steamcraft_token', res.token);
       selectedProjectId = null;
       updateUserProfileUI();
       syncNavigation();
@@ -523,6 +531,7 @@ async function toggleRoleSwitch() {
 }
 
 function logout() {
+  localStorage.removeItem('steamcraft_token');
   localStorage.removeItem('steamcraft_user');
   api('/api/auth/logout', 'POST').catch(() => {});
   currentUser = null;

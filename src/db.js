@@ -2,7 +2,11 @@ const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
 const fs = require('node:fs');
 
-const dbPath = path.join(__dirname, '..', 'steamcraft.db');
+const dataDir = process.env.DATA_DIR || path.join(__dirname, '..');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+const dbPath = path.join(dataDir, 'steamcraft.db');
 const db = new DatabaseSync(dbPath);
 
 // Enable WAL mode for high performance concurrency
@@ -211,6 +215,14 @@ function initDatabase() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
       updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      expires_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
 
@@ -1276,6 +1288,8 @@ function setAppMode(mode) {
 
 module.exports = {
   db,
+  dbPath,
+  dataDir,
   initDatabase,
   DEFAULT_TEMPLATES,
   getAppMode,

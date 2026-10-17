@@ -1,16 +1,35 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { db, DEFAULT_TEMPLATES, getAppMode, setAppMode } = require('./db');
+const { db, dbPath, dataDir, DEFAULT_TEMPLATES, getAppMode, setAppMode } = require('./db');
 const { generateGuidance, answerUserQuery } = require('./ai');
+const {
+  hashPassword,
+  verifyPassword,
+  createSession,
+  getUserByToken,
+  destroySession,
+  backupDatabase
+} = require('./security');
 
 // In-memory active session for simplicity and instant presentation
 let currentSessionUser = null;
 
 function getCurrentUser(req) {
-  const headerUserId = req && req.headers ? (req.headers['x-user-id'] || req.headers['X-User-Id']) : null;
-  if (headerUserId) {
-    const u = db.prepare('SELECT * FROM users WHERE id = ?').get(headerUserId);
-    if (u) return u;
+  if (req && req.headers) {
+    // 1. Primary: Cryptographic Bearer token in Authorization header
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7).trim();
+      const u = getUserByToken(db, token);
+      if (u) return u;
+    }
+
+    // 2. Fallback: X-User-Id header (for internal tests / backwards compatibility)
+    const headerUserId = req.headers['x-user-id'] || req.headers['X-User-Id'];
+    if (headerUserId) {
+      const u = db.prepare('SELECT * FROM users WHERE id = ?').get(headerUserId);
+      if (u) return u;
+    }
   }
   return currentSessionUser;
 }
@@ -53,6 +72,11 @@ function handleApiRequest(req, res, url, body) {
   }
 
   if (pathname === '/api/auth/logout' && method === 'POST') {
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7).trim();
+      destroySession(db, token);
+    }
     currentSessionUser = null;
     return json({ success: true, message: 'Berhasil keluar dari sesi.' });
   }
@@ -71,7 +95,8 @@ function handleApiRequest(req, res, url, body) {
     }
     if (targetUser) {
       currentSessionUser = targetUser;
-      return json({ success: true, user: targetUser });
+      const token = createSession(db, targetUser.id);
+      return json({ success: true, user: targetUser, token });
     }
     return error('User tidak ditemukan');
   }
@@ -93,15 +118,25 @@ function handleApiRequest(req, res, url, body) {
 
     if (!found) return error('Username atau identitas (NIM/NIP) tidak terdaftar', 401);
 
-    const isValidPass = (found.password === password) ||
-      (password === 'demo') ||
-      (found.role === 'admin' && (password === 'admin' || password === 'admin123' || password === 'admin2026!' || password === 'developer' || password === 'dev'));
+    const isDirectMatch = verifyPassword(password, found.password);
+    const isDevAdminBypass = (found.role === 'admin' && (password === 'admin' || password === 'admin123' || password === 'admin2026!' || password === 'developer' || password === 'dev'));
+    const isDemoBypass = password === 'demo';
 
-    if (!isValidPass) {
+    if (!isDirectMatch && !isDevAdminBypass && !isDemoBypass) {
       return error('Kata sandi salah', 401);
     }
+
+    // Auto-upgrade legacy plaintext password to secure scrypt hash
+    if (!found.password.includes(':')) {
+      try {
+        const upgradedHash = hashPassword(password);
+        db.prepare('UPDATE users SET password = ? WHERE id = ?').run(upgradedHash, found.id);
+      } catch (e) {}
+    }
+
+    const token = createSession(db, found.id);
     currentSessionUser = found;
-    return json({ success: true, user: found });
+    return json({ success: true, user: found, token });
   }
 
   if (pathname === '/api/auth/register' && method === 'POST') {
@@ -113,14 +148,16 @@ function handleApiRequest(req, res, url, body) {
     try {
       const colors = ['#2878d7', '#37b6a0', '#8060d5', '#ed7b64', '#f4b33e'];
       const avatarColor = colors[Math.floor(Math.random() * colors.length)];
+      const securePasswordHash = hashPassword(password || 'password123');
       const insert = db.prepare(`
         INSERT INTO users (username, name, role, identifier, study_program, avatar_color, password)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
-      const info = insert.run(username, name, role, idVal, study_program || 'Sains Terapan', avatarColor, password || 'password123');
+      const info = insert.run(username, name, role, idVal, study_program || 'Sains Terapan', avatarColor, securePasswordHash);
       const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+      const token = createSession(db, newUser.id);
       currentSessionUser = newUser;
-      return json({ success: true, user: newUser });
+      return json({ success: true, user: newUser, token });
     } catch (e) {
       return error('Pendaftaran gagal: ' + e.message);
     }
@@ -249,7 +286,8 @@ function handleApiRequest(req, res, url, body) {
     const pass = newPassword || 'password123';
     const target = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     if (!target) return error('Pengguna tidak ditemukan', 404);
-    db.prepare('UPDATE users SET password = ? WHERE id = ?').run(pass, id);
+    const secureHash = hashPassword(pass);
+    db.prepare('UPDATE users SET password = ? WHERE id = ?').run(secureHash, id);
     return json({ success: true, message: `Kata sandi akun ${target.name} berhasil direset.` });
   }
 
@@ -262,6 +300,37 @@ function handleApiRequest(req, res, url, body) {
     }
     db.prepare('DELETE FROM users WHERE id = ?').run(id);
     return json({ success: true, message: `Akun ${target.name} (@${target.username}) berhasil dihapus.` });
+  }
+
+  // ===================== DATABASE BACKUP ROUTES =====================
+  if (pathname === '/api/admin/backups' && method === 'GET') {
+    const backupDir = path.join(dataDir, 'backups');
+    let list = [];
+    if (fs.existsSync(backupDir)) {
+      list = fs.readdirSync(backupDir)
+        .filter(f => f.startsWith('steamcraft_backup_') && f.endsWith('.db'))
+        .map(f => {
+          const s = fs.statSync(path.join(backupDir, f));
+          return {
+            filename: f,
+            sizeBytes: s.size,
+            sizeKb: Math.round(s.size / 1024),
+            mtime: s.mtime
+          };
+        })
+        .sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
+    }
+    return json({ backups: list });
+  }
+
+  if (pathname === '/api/admin/backups' && method === 'POST') {
+    const backupDir = path.join(dataDir, 'backups');
+    try {
+      const resBackup = backupDatabase(dbPath, backupDir);
+      return json(resBackup);
+    } catch (e) {
+      return error('Gagal membuat cadangan database: ' + e.message, 500);
+    }
   }
 
   // ===================== PROJECTS ROUTES =====================
