@@ -194,3 +194,30 @@ export interface ActivityLog {
   action_text: string;
   created_at: string;
 }
+
+export interface PeerFeedbackRating {
+  technical: number; // 1-5 (Kontribusi Teknis & Eksekusi)
+  collaboration: number; // 1-5 (Kolaborasi Multidisiplin & Komunikasi)
+  scientificRigor: number; // 1-5 (Ketelitian Ilmiah & Problem Solving)
+  reliability: number; // 1-5 (Keandalan & Tanggung Jawab Tim)
+}
+
+export interface PeerFeedback {
+  id: number;
+  project_id: number;
+  reviewer_id?: number | null;
+  reviewer_name: string;
+  reviewer_study?: string;
+  reviewer_role?: string;
+  reviewee_id?: number | null;
+  reviewee_name: string;
+  reviewee_study?: string;
+  reviewee_role?: string;
+  ratings: PeerFeedbackRating;
+  overall_score: number; // 1-5 scale
+  strengths: string;
+  improvements: string;
+  badges: string[];
+  created_at: string;
+}
+

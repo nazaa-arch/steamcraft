@@ -12,7 +12,8 @@ import {
   ResourceRequest,
   Rubric,
   AppMode,
-  PageName
+  PageName,
+  PeerFeedback
 } from '../types';
 import {
   INITIAL_USERS,
@@ -26,6 +27,7 @@ import {
   INITIAL_RESOURCE_REQUESTS,
   INITIAL_APPLICATIONS,
   INITIAL_RUBRICS,
+  INITIAL_PEER_FEEDBACKS,
   DEFAULT_TEMPLATES
 } from '../data/initialData';
 
@@ -44,6 +46,7 @@ interface AppContextType {
   announcements: Announcement[];
   resourceRequests: ResourceRequest[];
   rubrics: Rubric[];
+  peerFeedbacks: PeerFeedback[];
   users: User[];
   activeModal: string | null;
   modalData: any;
@@ -90,6 +93,9 @@ interface AppContextType {
     feedback: string
   ) => void;
 
+  // Peer-to-Peer Feedback
+  addPeerFeedback: (data: Omit<PeerFeedback, 'id' | 'created_at' | 'overall_score'>) => void;
+
   // Announcements
   markAnnouncementRead: (id: number) => void;
   markAllAnnouncementsRead: () => void;
@@ -116,6 +122,7 @@ const STORAGE_KEYS = {
   ANNOUNCEMENTS: 'steamcraft_announcements',
   RESOURCES: 'steamcraft_resources',
   RUBRICS: 'steamcraft_rubrics',
+  PEER_FEEDBACKS: 'steamcraft_peer_feedbacks',
   USERS: 'steamcraft_users'
 };
 
@@ -197,6 +204,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_RUBRICS;
   });
 
+  const [peerFeedbacks, setPeerFeedbacks] = useState<PeerFeedback[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.PEER_FEEDBACKS);
+    return saved ? JSON.parse(saved) : INITIAL_PEER_FEEDBACKS;
+  });
+
   // UI state
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [modalData, setModalData] = useState<any>(null);
@@ -258,6 +270,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RUBRICS, JSON.stringify(rubrics));
   }, [rubrics]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PEER_FEEDBACKS, JSON.stringify(peerFeedbacks));
+  }, [peerFeedbacks]);
 
   // Toast Helper
   const showToast = (msg: string) => {
@@ -742,6 +758,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     closeModal();
   };
 
+  // Peer-to-Peer Feedback
+  const addPeerFeedback = (data: Omit<PeerFeedback, 'id' | 'created_at' | 'overall_score'>) => {
+    const scores = [data.ratings.technical, data.ratings.collaboration, data.ratings.scientificRigor, data.ratings.reliability];
+    const overall = Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2));
+    const newFeedback: PeerFeedback = {
+      ...data,
+      id: Date.now(),
+      overall_score: overall,
+      created_at: new Date().toISOString()
+    };
+    setPeerFeedbacks(prev => [newFeedback, ...prev]);
+    showToast(`✓ Feedback terstruktur untuk ${data.reviewee_name} berhasil dikirim!`);
+    closeModal();
+  };
+
   // System Administration
   const resetAllData = () => {
     localStorage.clear();
@@ -758,6 +789,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setResourceRequests(INITIAL_RESOURCE_REQUESTS);
     setApplications(INITIAL_APPLICATIONS);
     setRubrics(INITIAL_RUBRICS);
+    setPeerFeedbacks(INITIAL_PEER_FEEDBACKS);
     showToast('✓ Seluruh data sistem telah direset ke setelan bawaan demo.');
   };
 
@@ -775,7 +807,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       announcements,
       resourceRequests,
       applications,
-      rubrics
+      rubrics,
+      peerFeedbacks
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -797,6 +830,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         announcements,
         resourceRequests,
         rubrics,
+        peerFeedbacks,
         users,
         activeModal,
         modalData,
@@ -832,6 +866,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateResourceStatus,
 
         saveRubric,
+        addPeerFeedback,
 
         markAnnouncementRead,
         markAllAnnouncementsRead,

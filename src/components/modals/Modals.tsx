@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Check, Bookmark, Calendar, Clock, MapPin, Send, Sparkles } from 'lucide-react';
+import { X, Check, Bookmark, Calendar, Clock, MapPin, Send, Sparkles, Star, Award, ThumbsUp } from 'lucide-react';
 import { User, Project } from '../../types';
 
 export const Modals: React.FC = () => {
@@ -17,7 +17,9 @@ export const Modals: React.FC = () => {
     applyRecruitment,
     addAnnouncement,
     registerUser,
-    toggleSaveAnnouncement
+    toggleSaveAnnouncement,
+    addPeerFeedback,
+    members
   } = useApp();
 
   if (!activeModal) return null;
@@ -34,6 +36,7 @@ export const Modals: React.FC = () => {
         {activeModal === 'consultation' && <ConsultationModalContent data={modalData} onClose={closeModal} />}
         {activeModal === 'resource' && <ResourceModalContent data={modalData} onClose={closeModal} />}
         {activeModal === 'apply' && <ApplyModalContent project={modalData} onClose={closeModal} />}
+        {activeModal === 'peerFeedback' && <PeerFeedbackModalContent data={modalData} onClose={closeModal} />}
         {activeModal === 'announcementDetail' && <AnnouncementDetailContent ann={modalData} onClose={closeModal} />}
         {activeModal === 'newAnnouncement' && <NewAnnouncementContent onClose={closeModal} />}
         {activeModal === 'register' && <RegisterModalContent onClose={closeModal} />}
@@ -904,3 +907,393 @@ const RegisterModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     </form>
   );
 };
+
+/* ==================== 9. PEER-TO-PEER FEEDBACK MODAL ==================== */
+const PeerFeedbackModalContent: React.FC<{ data?: any; onClose: () => void }> = ({ data, onClose }) => {
+  const { members, currentUser, addPeerFeedback, projects } = useApp();
+  const projectId = data?.projectId || projects[0]?.id || 1;
+  const projectMembers = members.filter(m => m.project_id === projectId);
+
+  // Exclude current user by default for peer review
+  const otherMembers = projectMembers.filter(m => m.name !== currentUser?.name);
+  const candidateMembers = otherMembers.length > 0 ? otherMembers : projectMembers;
+
+  const [selectedRevieweeName, setSelectedRevieweeName] = useState<string>(
+    data?.revieweeName || candidateMembers[0]?.name || ''
+  );
+
+  const selectedMember = projectMembers.find(m => m.name === selectedRevieweeName) || candidateMembers[0];
+  const isSelfReview = selectedMember && currentUser && selectedMember.name === currentUser.name;
+
+  // Ratings (1-5)
+  const [techRating, setTechRating] = useState<number>(5);
+  const [collabRating, setCollabRating] = useState<number>(5);
+  const [rigorRating, setRigorRating] = useState<number>(5);
+  const [reliabilityRating, setReliabilityRating] = useState<number>(5);
+
+  // Qualitative notes
+  const [strengths, setStrengths] = useState('');
+  const [improvements, setImprovements] = useState('');
+
+  // Selected Badges
+  const availableBadges = [
+    'Teliti & Presisi',
+    'Problem Solver',
+    'Kolaborator Hebat',
+    'Visualisasi Unggul',
+    'Pekerja Keras',
+    'Inovatif',
+    'Komunikasi Efektif',
+    'Riset Lab Teladan',
+    'Keahlian Teoretis'
+  ];
+  const [selectedBadges, setSelectedBadges] = useState<string[]>(['Teliti & Presisi', 'Kolaborator Hebat']);
+
+  const strengthSuggestions = [
+    'Sangat teliti dalam validasi data dan metodologi eksperimen.',
+    'Komunikasi lintas disiplin sangat lancar dan mudah dipahami.',
+    'Cepat tanggap memecahkan anomali data dan kendala teknis.',
+    'Dokumentasi logbook dan penulisan laporan sangat terstruktur.'
+  ];
+
+  const improvementSuggestions = [
+    'Dapat menambahkan diagram alir untuk konsep matematis/algoritma.',
+    'Bisa meningkatkan kecepatan update logbook harian di workspace.',
+    'Tingkatkan keterlibatan aktif dalam sesi bimbingan bersama dosen.'
+  ];
+
+  const toggleBadge = (badge: string) => {
+    setSelectedBadges(prev =>
+      prev.includes(badge) ? prev.filter(b => b !== badge) : [...prev, badge]
+    );
+  };
+
+  const avgScore = Number(((techRating + collabRating + rigorRating + reliabilityRating) / 4).toFixed(2));
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 4.5) return 'Sangat Unggul & Teladan';
+    if (score >= 4.0) return 'Baik & Memuaskan';
+    if (score >= 3.0) return 'Cukup Sesuai Standar';
+    return 'Perlu Peningkatan Fokus';
+  };
+
+  const getStarLabel = (rating: number) => {
+    switch (rating) {
+      case 5: return 'Sangat Baik (5/5)';
+      case 4: return 'Baik (4/5)';
+      case 3: return 'Cukup (3/5)';
+      case 2: return 'Kurang (2/5)';
+      case 1: return 'Perlu Bimbingan (1/5)';
+      default: return `${rating}/5`;
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMember || isSelfReview) return;
+
+    addPeerFeedback({
+      project_id: projectId,
+      reviewer_id: currentUser?.id || null,
+      reviewer_name: currentUser?.name || 'Rekan Peneliti',
+      reviewer_study: currentUser?.study_program || 'Sains Data',
+      reviewer_role: 'Peneliti Anggota',
+      reviewee_id: selectedMember.user_id || null,
+      reviewee_name: selectedMember.name,
+      reviewee_study: selectedMember.study_program,
+      reviewee_role: selectedMember.role,
+      ratings: {
+        technical: techRating,
+        collaboration: collabRating,
+        scientificRigor: rigorRating,
+        reliability: reliabilityRating
+      },
+      strengths: strengths.trim() || 'Kontribusi rekan sangat membantu kemajuan checkpoint penelitian tim.',
+      improvements: improvements.trim() || 'Pertahankan ketelitian dan komunikasi yang sudah berjalan baik.',
+      badges: selectedBadges
+    });
+  };
+
+  // Helper star selector renderer
+  const renderStarInput = (val: number, setter: (n: number) => void) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        {[1, 2, 3, 4, 5].map(star => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setter(star)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '3px',
+              cursor: 'pointer',
+              color: star <= val ? '#f59e0b' : '#cbd5e1',
+              transition: 'transform 0.15s ease'
+            }}
+            title={`${star} dari 5 bintang`}
+          >
+            <Star size={20} fill={star <= val ? '#f59e0b' : 'none'} />
+          </button>
+        ))}
+      </div>
+      <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--navy)' }}>
+        {getStarLabel(val)}
+      </span>
+    </div>
+  );
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="eyebrow" style={{ color: 'var(--accent-teal)' }}>
+        Evaluasi Sejawat Formatif (360° Peer Review)
+      </div>
+      <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+        Beri Peer Feedback Tim Riset
+      </h2>
+      <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '18px' }}>
+        Berikan penilaian formatif terstruktur atas kontribusi teknis, ketelitian ilmiah, kolaborasi multidisiplin, dan keandalan rekan tim Anda.
+      </p>
+
+      {/* Reviewee Selector */}
+      <div className="auth-field">
+        <label>Pilih Rekan Tim yang Dinilai</label>
+        <select
+          value={selectedRevieweeName}
+          onChange={e => setSelectedRevieweeName(e.target.value)}
+          required
+        >
+          {projectMembers.map(m => (
+            <option key={m.id} value={m.name} disabled={m.name === currentUser?.name}>
+              {m.name} — {m.role} ({m.study_program}) {m.name === currentUser?.name ? '(Anda — Tidak dapat menilai diri sendiri)' : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {isSelfReview && (
+        <div style={{ background: '#fff1f2', border: '1px solid #fecdd3', padding: '10px 14px', borderRadius: '10px', color: '#9f1239', fontSize: '12px', marginBottom: '14px' }}>
+          ⚠️ Evaluasi sejawat dirancang untuk menilai kontribusi rekan tim. Silakan pilih rekan kolaborator lainnya pada daftar di atas.
+        </div>
+      )}
+
+      {selectedMember && !isSelfReview && (
+        <div
+          style={{
+            background: 'var(--surface-alt)',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: '1px solid var(--line)',
+            marginBottom: '16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '8px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              className="user-avatar"
+              style={{ backgroundColor: selectedMember.avatar_color || '#2878d7', width: '36px', height: '36px', fontSize: '14px' }}
+            >
+              {selectedMember.name.charAt(0)}
+            </div>
+            <div>
+              <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--navy)' }}>
+                {selectedMember.name}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                {selectedMember.study_program} · {selectedMember.role}
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              padding: '6px 12px',
+              borderRadius: '20px',
+              background: '#fef3c7',
+              border: '1px solid #fde68a',
+              color: '#92400e',
+              fontWeight: 800,
+              fontSize: '12.5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Star size={14} fill="#f59e0b" color="#f59e0b" />
+            <span>Skor Evaluasi: {avgScore} / 5.0 ({getScoreLabel(avgScore)})</span>
+          </div>
+        </div>
+      )}
+
+      {/* 4 Structured Dimensions */}
+      <div
+        style={{
+          background: 'white',
+          border: '1px solid var(--line)',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>
+              1. Kontribusi Teknis & Eksekusi Tugas
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Penyelesaian kode, analisis data, instrumentasi laboratorium, atau rancang bangun
+            </div>
+          </div>
+          {renderStarInput(techRating, setTechRating)}
+        </div>
+
+        <div style={{ borderTop: '1px solid var(--line-light)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>
+              2. Kolaborasi Multidisiplin & Komunikasi
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Kemampuan berkomunikasi terbuka, mendengarkan, dan menjembatani disiplin ilmu lain
+            </div>
+          </div>
+          {renderStarInput(collabRating, setCollabRating)}
+        </div>
+
+        <div style={{ borderTop: '1px solid var(--line-light)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>
+              3. Ketelitian Ilmiah & Problem Solving
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Akurasi data, kepatuhan reproduktibilitas riset, dan inisiatif mengatasi kendala
+            </div>
+          </div>
+          {renderStarInput(rigorRating, setRigorRating)}
+        </div>
+
+        <div style={{ borderTop: '1px solid var(--line-light)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>
+              4. Keandalan & Tanggung Jawab Tim
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Ketepatan waktu checkpoint, kesiapan hadir bimbingan, dan konsistensi kerja tim
+            </div>
+          </div>
+          {renderStarInput(reliabilityRating, setReliabilityRating)}
+        </div>
+      </div>
+
+      {/* Recognition Badges */}
+      <div className="auth-field">
+        <label>Sematkan Lencana Apresiasi (Badges) Ilmiah</label>
+        <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 8px 0' }}>
+          Pilih satu atau beberapa lencana apresiasi yang mencerminkan etos kerja rekan.
+        </p>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {availableBadges.map(badge => {
+            const isSelected = selectedBadges.includes(badge);
+            return (
+              <button
+                key={badge}
+                type="button"
+                onClick={() => toggleBadge(badge)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: isSelected ? '1.5px solid var(--accent-teal)' : '1px solid var(--line)',
+                  background: isSelected ? '#f0fdf4' : 'var(--surface-alt)',
+                  color: isSelected ? '#0f766e' : 'var(--ink-secondary)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {isSelected ? '✓ ' : '+ '}
+                {badge}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Qualitative Strengths */}
+      <div className="auth-field">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <label style={{ margin: 0 }}>💡 Kekuatan & Kontribusi Menonjol Rekan</label>
+          <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Deskripsikan kontribusi nyata</span>
+        </div>
+        <textarea
+          rows={3}
+          placeholder="Tuliskan kontribusi nyata rekan yang paling berharga bagi kemajuan riset..."
+          value={strengths}
+          onChange={e => setStrengths(e.target.value)}
+          required
+        />
+        {/* Quick Suggestion Chips */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+          <span style={{ fontSize: '10.5px', color: 'var(--muted)', alignSelf: 'center' }}>Saran cepat:</span>
+          {strengthSuggestions.map((s, idx) => (
+            <button
+              key={idx}
+              type="button"
+              className="btn btn-ghost btn-sm"
+              style={{ fontSize: '10.5px', padding: '2px 8px', borderRadius: '12px', background: '#f8fafc' }}
+              onClick={() => setStrengths(prev => (prev ? `${prev} ${s}` : s))}
+            >
+              + {s.slice(0, 38)}...
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Constructive Improvements */}
+      <div className="auth-field" style={{ marginTop: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <label style={{ margin: 0 }}>🌱 Saran Pengembangan Ilmiah Konstruktif</label>
+          <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Rekomendasi pengembangan diri</span>
+        </div>
+        <textarea
+          rows={3}
+          placeholder="Berikan masukan positif untuk meningkatkan kualitas riset berikutnya..."
+          value={improvements}
+          onChange={e => setImprovements(e.target.value)}
+          required
+        />
+        {/* Quick Suggestion Chips */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+          <span style={{ fontSize: '10.5px', color: 'var(--muted)', alignSelf: 'center' }}>Saran cepat:</span>
+          {improvementSuggestions.map((s, idx) => (
+            <button
+              key={idx}
+              type="button"
+              className="btn btn-ghost btn-sm"
+              style={{ fontSize: '10.5px', padding: '2px 8px', borderRadius: '12px', background: '#f8fafc' }}
+              onClick={() => setImprovements(prev => (prev ? `${prev} ${s}` : s))}
+            >
+              + {s.slice(0, 38)}...
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '22px', borderTop: '1px solid var(--line)', paddingTop: '16px' }}>
+        <button type="button" className="btn btn-ghost" onClick={onClose}>
+          Batal
+        </button>
+        <button type="submit" className="btn btn-primary" disabled={isSelfReview}>
+          <Send size={13} />
+          <span>Kirim Peer Review Ilmiah</span>
+        </button>
+      </div>
+    </form>
+  );
+};
+

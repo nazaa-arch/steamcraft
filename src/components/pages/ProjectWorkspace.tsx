@@ -17,7 +17,10 @@ import {
   X,
   FileCode,
   Tag,
-  Paperclip
+  Paperclip,
+  Star,
+  ThumbsUp,
+  MessageSquare
 } from 'lucide-react';
 
 export const ProjectWorkspace: React.FC = () => {
@@ -37,11 +40,27 @@ export const ProjectWorkspace: React.FC = () => {
     updateApplicationStatus,
     toggleBlocker,
     rubrics,
+    peerFeedbacks,
+    addPeerFeedback,
     currentUser,
     openModal
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'checkpoints' | 'journals' | 'versions' | 'team' | 'evaluation'>('checkpoints');
+  const [activeTab, setActiveTab] = useState<'checkpoints' | 'journals' | 'versions' | 'team' | 'peerFeedback' | 'evaluation'>('checkpoints');
+  const [peerFilterReviewee, setPeerFilterReviewee] = useState<string>('all');
+  const [peerFilterBadge, setPeerFilterBadge] = useState<string>('all');
+  const [peerSearchKeyword, setPeerSearchKeyword] = useState<string>('');
+  const [showInlineFeedback, setShowInlineFeedback] = useState<boolean>(false);
+
+  // Inline feedback form state
+  const [inlineRevieweeName, setInlineRevieweeName] = useState<string>('');
+  const [inlineTechRating, setInlineTechRating] = useState<number>(5);
+  const [inlineCollabRating, setInlineCollabRating] = useState<number>(5);
+  const [inlineRigorRating, setInlineRigorRating] = useState<number>(5);
+  const [inlineReliabilityRating, setInlineReliabilityRating] = useState<number>(5);
+  const [inlineStrengths, setInlineStrengths] = useState<string>('');
+  const [inlineImprovements, setInlineImprovements] = useState<string>('');
+  const [inlineBadges, setInlineBadges] = useState<string[]>(['Teliti & Presisi', 'Kolaborator Hebat']);
 
   // Form states
   const [newCpTitle, setNewCpTitle] = useState('');
@@ -78,6 +97,7 @@ export const ProjectWorkspace: React.FC = () => {
   const projectMembers = members.filter(m => m.project_id === currentProject.id);
   const projectApplications = applications.filter(a => a.project_id === currentProject.id);
   const projectRubric = rubrics.find(r => r.project_id === currentProject.id);
+  const projectPeerFeedbacks = peerFeedbacks.filter(f => f.project_id === currentProject.id);
 
   // Checkpoint calculation
   const completedCount = projectCheckpoints.filter(c => c.is_completed === 1).length;
@@ -296,6 +316,12 @@ export const ProjectWorkspace: React.FC = () => {
           onClick={() => setActiveTab('team')}
         >
           Kolaborator Tim ({projectMembers.length})
+        </button>
+        <button
+          className={`inspector-subtab-btn ${activeTab === 'peerFeedback' ? 'active' : ''}`}
+          onClick={() => setActiveTab('peerFeedback')}
+        >
+          Peer Feedback ({projectPeerFeedbacks.length})
         </button>
         <button
           className={`inspector-subtab-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
@@ -683,34 +709,104 @@ export const ProjectWorkspace: React.FC = () => {
 
               {/* Roster Grid */}
               <div className="team-roster-grid">
-                {projectMembers.map(m => (
-                  <div key={m.id} className={`member-card ${m.is_lead ? 'is-lead' : ''}`}>
-                    <div
-                      className="user-avatar"
-                      style={{ backgroundColor: m.avatar_color || '#2878d7', width: '38px', height: '38px' }}
-                    >
-                      {m.name.charAt(0)}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <strong style={{ fontSize: '13px', color: 'var(--navy)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {m.name}
-                        </strong>
-                        {m.is_lead === 1 && (
-                          <span className="badge badge-blue" style={{ fontSize: '9px', padding: '1px 5px' }}>
-                            Lead
+                {projectMembers.map(m => {
+                  const mReviews = projectPeerFeedbacks.filter(f => f.reviewee_name === m.name);
+                  const mAvg =
+                    mReviews.length > 0
+                      ? (mReviews.reduce((acc, cur) => acc + cur.overall_score, 0) / mReviews.length).toFixed(1)
+                      : null;
+
+                  return (
+                    <div key={m.id} className={`member-card ${m.is_lead ? 'is-lead' : ''}`} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div
+                          className="user-avatar"
+                          style={{ backgroundColor: m.avatar_color || '#2878d7', width: '38px', height: '38px', flexShrink: 0 }}
+                        >
+                          {m.name.charAt(0)}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <strong style={{ fontSize: '13px', color: 'var(--navy)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {m.name}
+                            </strong>
+                            {m.is_lead === 1 && (
+                              <span className="badge badge-blue" style={{ fontSize: '9px', padding: '1px 5px' }}>
+                                Lead
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700 }}>
+                            {m.role}
+                          </div>
+                          <div style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                            {m.study_program} · {m.identifier}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Peer Review Summary & Quick Action */}
+                      <div
+                        style={{
+                          marginTop: '12px',
+                          paddingTop: '8px',
+                          borderTop: '1px solid var(--line-light)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '6px'
+                        }}
+                      >
+                        {mAvg ? (
+                          <span
+                            style={{
+                              fontSize: '10.5px',
+                              background: '#fef3c7',
+                              color: '#92400e',
+                              border: '1px solid #fde68a',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontWeight: 800,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}
+                          >
+                            ★ {mAvg} ({mReviews.length} ulasan)
                           </span>
+                        ) : (
+                          <span style={{ fontSize: '10.5px', color: 'var(--muted)' }}>Belum ada ulasan</span>
                         )}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700 }}>
-                        {m.role}
-                      </div>
-                      <div style={{ fontSize: '10px', color: 'var(--muted)' }}>
-                        {m.study_program} · {m.identifier}
+
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                            onClick={() => {
+                              setActiveTab('peerFeedback');
+                              setPeerFilterReviewee(m.name);
+                            }}
+                            title="Lihat ulasan sejawat anggota ini"
+                          >
+                            Lihat
+                          </button>
+                          {m.name !== currentUser?.name && (
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                              onClick={() => openModal('peerFeedback', { projectId: currentProject.id, revieweeName: m.name })}
+                              title="Beri feedback sejawat untuk anggota ini"
+                            >
+                              ⭐ Review
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Recruitment Requirements */}
@@ -795,7 +891,923 @@ export const ProjectWorkspace: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 5: EVALUATION & AI ASSISTANT */}
+          {/* TAB 5: PEER-TO-PEER FEEDBACK */}
+          {activeTab === 'peerFeedback' && (() => {
+            // Team metrics calculations
+            const totalProjectFeedbacks = projectPeerFeedbacks.length;
+            const avgTeamScore =
+              totalProjectFeedbacks > 0
+                ? Number(
+                    (
+                      projectPeerFeedbacks.reduce((acc, cur) => acc + cur.overall_score, 0) /
+                      totalProjectFeedbacks
+                    ).toFixed(2)
+                  )
+                : 0;
+
+            const avgDimTech =
+              totalProjectFeedbacks > 0
+                ? Number(
+                    (
+                      projectPeerFeedbacks.reduce((acc, cur) => acc + cur.ratings.technical, 0) /
+                      totalProjectFeedbacks
+                    ).toFixed(2)
+                  )
+                : 0;
+
+            const avgDimCollab =
+              totalProjectFeedbacks > 0
+                ? Number(
+                    (
+                      projectPeerFeedbacks.reduce((acc, cur) => acc + cur.ratings.collaboration, 0) /
+                      totalProjectFeedbacks
+                    ).toFixed(2)
+                  )
+                : 0;
+
+            const avgDimRigor =
+              totalProjectFeedbacks > 0
+                ? Number(
+                    (
+                      projectPeerFeedbacks.reduce((acc, cur) => acc + cur.ratings.scientificRigor, 0) /
+                      totalProjectFeedbacks
+                    ).toFixed(2)
+                  )
+                : 0;
+
+            const avgDimRel =
+              totalProjectFeedbacks > 0
+                ? Number(
+                    (
+                      projectPeerFeedbacks.reduce((acc, cur) => acc + cur.ratings.reliability, 0) /
+                      totalProjectFeedbacks
+                    ).toFixed(2)
+                  )
+                : 0;
+
+            // Members coverage
+            const reviewedMemberNames = new Set(projectPeerFeedbacks.map(f => f.reviewee_name));
+            const coveragePct = projectMembers.length > 0 ? Math.round((reviewedMemberNames.size / projectMembers.length) * 100) : 0;
+            const totalBadgesEarned = projectPeerFeedbacks.reduce((acc, cur) => acc + (cur.badges ? cur.badges.length : 0), 0);
+
+            // Filter logic
+            const filteredFeedbacks = projectPeerFeedbacks.filter(fb => {
+              if (peerFilterReviewee !== 'all' && fb.reviewee_name !== peerFilterReviewee) {
+                return false;
+              }
+              if (peerFilterBadge !== 'all' && (!fb.badges || !fb.badges.includes(peerFilterBadge))) {
+                return false;
+              }
+              if (peerSearchKeyword.trim()) {
+                const kw = peerSearchKeyword.toLowerCase();
+                const matchStrengths = fb.strengths?.toLowerCase().includes(kw);
+                const matchImprovements = fb.improvements?.toLowerCase().includes(kw);
+                const matchReviewer = fb.reviewer_name?.toLowerCase().includes(kw);
+                const matchReviewee = fb.reviewee_name?.toLowerCase().includes(kw);
+                if (!matchStrengths && !matchImprovements && !matchReviewer && !matchReviewee) {
+                  return false;
+                }
+              }
+              return true;
+            });
+
+            const allAvailableBadges = [
+              'Teliti & Presisi',
+              'Problem Solver',
+              'Kolaborator Hebat',
+              'Visualisasi Unggul',
+              'Pekerja Keras',
+              'Inovatif',
+              'Komunikasi Efektif',
+              'Riset Lab Teladan',
+              'Keahlian Teoretis'
+            ];
+
+            const strengthSuggestions = [
+              'Sangat teliti dalam validasi data dan metodologi eksperimen.',
+              'Komunikasi lintas disiplin sangat lancar dan mudah dipahami.',
+              'Cepat tanggap memecahkan anomali data dan kendala teknis.',
+              'Dokumentasi logbook dan penulisan laporan sangat terstruktur.'
+            ];
+
+            const improvementSuggestions = [
+              'Dapat menambahkan diagram alir untuk konsep matematis/algoritma.',
+              'Bisa meningkatkan kecepatan update logbook harian di workspace.',
+              'Tingkatkan keterlibatan aktif dalam sesi bimbingan bersama dosen.'
+            ];
+
+            // Inline form handlers
+            const handleInlinePeerSubmit = (e: React.FormEvent) => {
+              e.preventDefault();
+              const targetMember = projectMembers.find(m => m.name === inlineRevieweeName) || projectMembers.find(m => m.name !== currentUser?.name) || projectMembers[0];
+              if (!targetMember || targetMember.name === currentUser?.name) return;
+
+              addPeerFeedback({
+                project_id: currentProject.id,
+                reviewer_id: currentUser?.id || null,
+                reviewer_name: currentUser?.name || 'Rekan Peneliti',
+                reviewer_study: currentUser?.study_program || 'Sains Data',
+                reviewer_role: 'Peneliti Anggota',
+                reviewee_id: targetMember.user_id || null,
+                reviewee_name: targetMember.name,
+                reviewee_study: targetMember.study_program,
+                reviewee_role: targetMember.role,
+                ratings: {
+                  technical: inlineTechRating,
+                  collaboration: inlineCollabRating,
+                  scientificRigor: inlineRigorRating,
+                  reliability: inlineReliabilityRating
+                },
+                strengths: inlineStrengths.trim() || 'Kontribusi rekan sangat membantu kemajuan checkpoint penelitian tim.',
+                improvements: inlineImprovements.trim() || 'Pertahankan ketelitian dan komunikasi yang sudah berjalan baik.',
+                badges: inlineBadges
+              });
+
+              setShowInlineFeedback(false);
+              setInlineStrengths('');
+              setInlineImprovements('');
+            };
+
+            const toggleInlineBadge = (b: string) => {
+              setInlineBadges(prev => (prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]));
+            };
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                {/* Header & Overview Card */}
+                <div className="card" style={{ padding: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '20px' }}>
+                    <div>
+                      <div className="eyebrow" style={{ color: 'var(--accent-teal)' }}>
+                        Evaluasi Sejawat Formatif (360° Peer Review)
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy)', margin: '2px 0 6px 0' }}>
+                        Peer-to-Peer Feedback & Evaluasi Kontribusi Rekan Tim
+                      </h3>
+                      <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', margin: 0, maxWidth: '720px', lineHeight: 1.6 }}>
+                        Fitur penjaminan mutu riset kolaboratif: Anggota tim saling memberikan umpan balik formatif terstruktur
+                        berdasarkan 4 pilar kompetensi riset (Teknis, Kolaborasi, Ketelitian Ilmiah, dan Keandalan) serta apresiasi lencana ilmiah.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className={`btn ${showInlineFeedback ? 'btn-secondary' : 'btn-ghost'} btn-sm`}
+                        onClick={() => {
+                          setShowInlineFeedback(!showInlineFeedback);
+                          if (!inlineRevieweeName) {
+                            const firstOther = projectMembers.find(m => m.name !== currentUser?.name);
+                            if (firstOther) setInlineRevieweeName(firstOther.name);
+                          }
+                        }}
+                      >
+                        <MessageSquare size={13} />
+                        <span>{showInlineFeedback ? 'Tutup Form Cepat' : 'Tulis Ulasan di Sini'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => openModal('peerFeedback', { projectId: currentProject.id })}
+                      >
+                        <Star size={13} fill="currentColor" />
+                        <span>+ Beri Feedback Rekan (Modal)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 4 Team Summary Tiles */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '22px' }}>
+                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Total Ulasan Sejawat
+                      </span>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '2px' }}>
+                        {totalProjectFeedbacks} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>ulasan</span>
+                      </div>
+                      <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
+                        ✓ Formatif aktif
+                      </span>
+                    </div>
+
+                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Skor Rata-Rata Tim
+                      </span>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#b45309', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        ★ {avgTeamScore > 0 ? avgTeamScore : '0.0'} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>/ 5.0</span>
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--ink-secondary)' }}>
+                        {avgTeamScore >= 4.5 ? 'Predikat: Sangat Unggul' : avgTeamScore >= 4.0 ? 'Predikat: Baik' : 'Predikat: Cukup'}
+                      </span>
+                    </div>
+
+                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Cakupan Evaluasi 360°
+                      </span>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '2px' }}>
+                        {coveragePct}%
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                        {reviewedMemberNames.size} dari {projectMembers.length} anggota dinilai
+                      </span>
+                    </div>
+
+                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Lencana Tersemat
+                      </span>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#0d9488', marginTop: '2px' }}>
+                        {totalBadgesEarned} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>penghargaan</span>
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                        Lencana etos kerja riset
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Team Dimension Strengths Progress Meters */}
+                  <div style={{ background: 'white', border: '1px solid var(--line)', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                        Rata-Rata Kompetensi Tim Berdasarkan 4 Dimensi Riset
+                      </h4>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Skala 1.0 - 5.0</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--navy)', fontWeight: 700 }}>1. Kontribusi Teknis</span>
+                          <strong style={{ color: '#2563eb' }}>{avgDimTech} / 5.0</strong>
+                        </div>
+                        <div className="progress-track" style={{ height: '7px' }}>
+                          <div className="progress-fill" style={{ width: `${(avgDimTech / 5) * 100}%`, background: '#2563eb' }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--navy)', fontWeight: 700 }}>2. Kolaborasi & Komunikasi</span>
+                          <strong style={{ color: '#0d9488' }}>{avgDimCollab} / 5.0</strong>
+                        </div>
+                        <div className="progress-track" style={{ height: '7px' }}>
+                          <div className="progress-fill" style={{ width: `${(avgDimCollab / 5) * 100}%`, background: '#0d9488' }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--navy)', fontWeight: 700 }}>3. Ketelitian Ilmiah</span>
+                          <strong style={{ color: '#7c3aed' }}>{avgDimRigor} / 5.0</strong>
+                        </div>
+                        <div className="progress-track" style={{ height: '7px' }}>
+                          <div className="progress-fill" style={{ width: `${(avgDimRigor / 5) * 100}%`, background: '#7c3aed' }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--navy)', fontWeight: 700 }}>4. Keandalan Tim</span>
+                          <strong style={{ color: '#ea580c' }}>{avgDimRel} / 5.0</strong>
+                        </div>
+                        <div className="progress-track" style={{ height: '7px' }}>
+                          <div className="progress-fill" style={{ width: `${(avgDimRel / 5) * 100}%`, background: '#ea580c' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Inline Quick Feedback Form (Collapsible) */}
+                {showInlineFeedback && (
+                  <form
+                    onSubmit={handleInlinePeerSubmit}
+                    className="card"
+                    style={{
+                      padding: '24px',
+                      background: '#f8fafc',
+                      border: '2px solid var(--accent-teal)',
+                      borderRadius: '14px',
+                      boxShadow: '0 4px 14px rgba(13, 148, 136, 0.08)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '18px' }}>✍️</span>
+                        <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                          Tulis Ulasan Sejawat Langsung (Inline Fast Review)
+                        </h4>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setShowInlineFeedback(false)}
+                      >
+                        ✕ Batal
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+                      <div className="auth-field" style={{ margin: 0 }}>
+                        <label>Pilih Rekan Tim yang Dinilai</label>
+                        <select
+                          value={inlineRevieweeName}
+                          onChange={e => setInlineRevieweeName(e.target.value)}
+                          required
+                        >
+                          {projectMembers.map(m => (
+                            <option key={m.id} value={m.name} disabled={m.name === currentUser?.name}>
+                              {m.name} — {m.role} ({m.study_program}) {m.name === currentUser?.name ? '(Anda)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>Penilai Aktif:</span>
+                        <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 800 }}>
+                          {currentUser?.name || 'Mahasiswa Peneliti'} ({currentUser?.study_program || 'Sains Data'})
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 4 Dimension Star Inputs */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', background: 'white', padding: '16px', borderRadius: '12px', border: '1px solid var(--line)', marginBottom: '16px' }}>
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', marginBottom: '4px' }}>
+                          1. Kontribusi Teknis ({inlineTechRating}/5)
+                        </div>
+                        <div style={{ display: 'flex', gap: '3px' }}>
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setInlineTechRating(s)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: s <= inlineTechRating ? '#f59e0b' : '#cbd5e1' }}
+                            >
+                              <Star size={18} fill={s <= inlineTechRating ? '#f59e0b' : 'none'} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', marginBottom: '4px' }}>
+                          2. Kolaborasi ({inlineCollabRating}/5)
+                        </div>
+                        <div style={{ display: 'flex', gap: '3px' }}>
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setInlineCollabRating(s)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: s <= inlineCollabRating ? '#f59e0b' : '#cbd5e1' }}
+                            >
+                              <Star size={18} fill={s <= inlineCollabRating ? '#f59e0b' : 'none'} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', marginBottom: '4px' }}>
+                          3. Ketelitian Ilmiah ({inlineRigorRating}/5)
+                        </div>
+                        <div style={{ display: 'flex', gap: '3px' }}>
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setInlineRigorRating(s)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: s <= inlineRigorRating ? '#f59e0b' : '#cbd5e1' }}
+                            >
+                              <Star size={18} fill={s <= inlineRigorRating ? '#f59e0b' : 'none'} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', marginBottom: '4px' }}>
+                          4. Keandalan Tim ({inlineReliabilityRating}/5)
+                        </div>
+                        <div style={{ display: 'flex', gap: '3px' }}>
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setInlineReliabilityRating(s)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: s <= inlineReliabilityRating ? '#f59e0b' : '#cbd5e1' }}
+                            >
+                              <Star size={18} fill={s <= inlineReliabilityRating ? '#f59e0b' : 'none'} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Lencana Apresiasi */}
+                    <div style={{ marginBottom: '14px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '6px' }}>
+                        Sematkan Lencana Apresiasi:
+                      </span>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {allAvailableBadges.map(b => {
+                          const isSel = inlineBadges.includes(b);
+                          return (
+                            <button
+                              key={b}
+                              type="button"
+                              onClick={() => toggleInlineBadge(b)}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '16px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: isSel ? '1.5px solid var(--accent-teal)' : '1px solid var(--line)',
+                                background: isSel ? '#f0fdf4' : 'white',
+                                color: isSel ? '#0f766e' : 'var(--ink-secondary)'
+                              }}
+                            >
+                              {isSel ? '✓ ' : '+ '}
+                              {b}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Qualitative Texts */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                      <div className="auth-field" style={{ margin: 0 }}>
+                        <label>💡 Kekuatan & Kontribusi Menonjol Rekan</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Jelaskan kontribusi nyata rekan dalam riset..."
+                          value={inlineStrengths}
+                          onChange={e => setInlineStrengths(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="auth-field" style={{ margin: 0 }}>
+                        <label>🌱 Saran Pengembangan Konstruktif</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Berikan masukan positif untuk checkpoint berikutnya..."
+                          value={inlineImprovements}
+                          onChange={e => setInlineImprovements(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setShowInlineFeedback(false)}
+                      >
+                        Batal
+                      </button>
+                      <button type="submit" className="btn btn-primary btn-sm">
+                        <Send size={13} />
+                        <span>Kirim Ulasan Sejawat Sekarang</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Team Members Scorecard Summary */}
+                <div className="card" style={{ padding: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                        Rapor Feedback per Anggota Tim ({projectMembers.length} Peneliti)
+                      </h4>
+                      <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
+                        Klik tombol untuk memberikan ulasan atau melihat rincian masukan untuk masing-masing rekan
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                    {projectMembers.map(member => {
+                      const received = projectPeerFeedbacks.filter(f => f.reviewee_name === member.name);
+                      const avgMemberScore =
+                        received.length > 0
+                          ? (received.reduce((acc, cur) => acc + cur.overall_score, 0) / received.length).toFixed(1)
+                          : null;
+
+                      // Member specific dimensions
+                      const memTech = received.length > 0 ? (received.reduce((a, b) => a + b.ratings.technical, 0) / received.length).toFixed(1) : '-';
+                      const memCollab = received.length > 0 ? (received.reduce((a, b) => a + b.ratings.collaboration, 0) / received.length).toFixed(1) : '-';
+                      const memRigor = received.length > 0 ? (received.reduce((a, b) => a + b.ratings.scientificRigor, 0) / received.length).toFixed(1) : '-';
+                      const memRel = received.length > 0 ? (received.reduce((a, b) => a + b.ratings.reliability, 0) / received.length).toFixed(1) : '-';
+
+                      const memberBadges = Array.from(new Set(received.flatMap(f => f.badges || [])));
+
+                      return (
+                        <div
+                          key={member.id}
+                          style={{
+                            background: 'var(--surface-alt)',
+                            border: '1px solid var(--line)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div
+                                  className="user-avatar"
+                                  style={{ backgroundColor: member.avatar_color || '#2878d7', width: '36px', height: '36px', fontSize: '13px' }}
+                                >
+                                  {member.name.charAt(0)}
+                                </div>
+                                <div>
+                                  <strong style={{ fontSize: '13.5px', color: 'var(--navy)', display: 'block' }}>
+                                    {member.name}
+                                  </strong>
+                                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                                    {member.study_program}
+                                  </span>
+                                </div>
+                              </div>
+                              {avgMemberScore ? (
+                                <span
+                                  style={{
+                                    background: '#fef3c7',
+                                    color: '#b45309',
+                                    border: '1px solid #fde68a',
+                                    padding: '3px 8px',
+                                    borderRadius: '12px',
+                                    fontSize: '11.5px',
+                                    fontWeight: 800,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                >
+                                  ★ {avgMemberScore}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '10.5px', color: 'var(--muted)', background: 'white', padding: '2px 6px', borderRadius: '10px' }}>
+                                  Belum Dinilai
+                                </span>
+                              )}
+                            </div>
+
+                            <div style={{ fontSize: '11.5px', color: 'var(--primary)', fontWeight: 700, marginBottom: '6px' }}>
+                              {member.role}
+                            </div>
+
+                            <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '10px' }}>
+                              {received.length} ulasan sejawat diterima
+                            </div>
+
+                            {/* 4 Dimension Mini Matrix */}
+                            {received.length > 0 && (
+                              <div
+                                style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(4, 1fr)',
+                                  gap: '4px',
+                                  background: 'white',
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  border: '1px solid var(--line)',
+                                  marginBottom: '10px',
+                                  textAlign: 'center'
+                                }}
+                              >
+                                <div>
+                                  <span style={{ fontSize: '9.5px', color: 'var(--muted)', display: 'block' }}>Teknis</span>
+                                  <strong style={{ fontSize: '11.5px', color: '#2563eb' }}>{memTech}</strong>
+                                </div>
+                                <div>
+                                  <span style={{ fontSize: '9.5px', color: 'var(--muted)', display: 'block' }}>Kolab</span>
+                                  <strong style={{ fontSize: '11.5px', color: '#0d9488' }}>{memCollab}</strong>
+                                </div>
+                                <div>
+                                  <span style={{ fontSize: '9.5px', color: 'var(--muted)', display: 'block' }}>Teliti</span>
+                                  <strong style={{ fontSize: '11.5px', color: '#7c3aed' }}>{memRigor}</strong>
+                                </div>
+                                <div>
+                                  <span style={{ fontSize: '9.5px', color: 'var(--muted)', display: 'block' }}>Andal</span>
+                                  <strong style={{ fontSize: '11.5px', color: '#ea580c' }}>{memRel}</strong>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Member Badges */}
+                            {memberBadges.length > 0 && (
+                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                                {memberBadges.slice(0, 3).map((b, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="badge badge-teal"
+                                    style={{ fontSize: '9.5px', padding: '2px 7px' }}
+                                  >
+                                    🏷️ {b}
+                                  </span>
+                                ))}
+                                {memberBadges.length > 3 && (
+                                  <span style={{ fontSize: '9.5px', color: 'var(--muted)', alignSelf: 'center' }}>
+                                    +{memberBadges.length - 3} lainnya
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{ borderTop: '1px solid var(--line)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => setPeerFilterReviewee(member.name)}
+                              style={{ fontSize: '11px', padding: '3px 8px' }}
+                            >
+                              Filter Ulasan
+                            </button>
+
+                            {member.name !== currentUser?.name && (
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => openModal('peerFeedback', { projectId: currentProject.id, revieweeName: member.name })}
+                                style={{ fontSize: '11px', padding: '4px 10px' }}
+                              >
+                                <Star size={12} fill="currentColor" />
+                                <span>Beri Ulasan</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Filter and Search Bar */}
+                <div
+                  className="card"
+                  style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+                        Anggota:
+                      </span>
+                      <select
+                        value={peerFilterReviewee}
+                        onChange={e => setPeerFilterReviewee(e.target.value)}
+                        style={{ fontSize: '12px', padding: '5px 10px', width: 'auto' }}
+                      >
+                        <option value="all">Semua Anggota Tim ({projectPeerFeedbacks.length})</option>
+                        {projectMembers.map(m => (
+                          <option key={m.id} value={m.name}>
+                            {m.name} ({projectPeerFeedbacks.filter(f => f.reviewee_name === m.name).length})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+                        Lencana:
+                      </span>
+                      <select
+                        value={peerFilterBadge}
+                        onChange={e => setPeerFilterBadge(e.target.value)}
+                        style={{ fontSize: '12px', padding: '5px 10px', width: 'auto' }}
+                      >
+                        <option value="all">Semua Lencana</option>
+                        {allAvailableBadges.map(b => (
+                          <option key={b} value={b}>
+                            {b}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="text"
+                        placeholder="Cari komentar / nama..."
+                        value={peerSearchKeyword}
+                        onChange={e => setPeerSearchKeyword(e.target.value)}
+                        style={{ fontSize: '12px', padding: '5px 10px', width: '180px' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {(peerFilterReviewee !== 'all' || peerFilterBadge !== 'all' || peerSearchKeyword.trim() !== '') && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        style={{ fontSize: '11px', padding: '4px 8px' }}
+                        onClick={() => {
+                          setPeerFilterReviewee('all');
+                          setPeerFilterBadge('all');
+                          setPeerSearchKeyword('');
+                        }}
+                      >
+                        ✕ Reset Filter
+                      </button>
+                    )}
+                    <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
+                      Menampilkan {filteredFeedbacks.length} ulasan
+                    </span>
+                  </div>
+                </div>
+
+                {/* Feedbacks List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {filteredFeedbacks.length === 0 ? (
+                    <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--muted)' }}>
+                      <Star size={36} style={{ color: '#cbd5e1', margin: '0 auto 10px' }} />
+                      <h4 style={{ fontSize: '15px', color: 'var(--navy)', marginBottom: '6px' }}>
+                        Belum ada ulasan sejawat yang sesuai kriteria filter
+                      </h4>
+                      <p style={{ fontSize: '12.5px', marginBottom: '16px', maxWidth: '480px', margin: '0 auto 16px' }}>
+                        Berikan apresiasi dan masukan konstruktif pertama untuk meningkatkan kualitas riset multidisiplin tim.
+                      </p>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => openModal('peerFeedback', { projectId: currentProject.id })}
+                      >
+                        <span>Beri Ulasan Sejawat Sekarang &rarr;</span>
+                      </button>
+                    </div>
+                  ) : (
+                    filteredFeedbacks.map(fb => (
+                      <div
+                        key={fb.id}
+                        className="card"
+                        style={{
+                          padding: '20px 22px',
+                          borderLeft: '4px solid var(--accent-teal)',
+                          transition: 'box-shadow 0.2s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <div
+                                className="user-avatar"
+                                style={{ backgroundColor: '#2878d7', width: '28px', height: '28px', fontSize: '11px' }}
+                              >
+                                {fb.reviewer_name?.charAt(0) || 'P'}
+                              </div>
+                              <strong style={{ fontSize: '13.5px', color: 'var(--navy)' }}>
+                                {fb.reviewer_name}
+                              </strong>
+                              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                                ({fb.reviewer_study || 'STEAM'})
+                              </span>
+                              <span style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 900 }}>&rarr;</span>
+                              <div
+                                className="user-avatar"
+                                style={{ backgroundColor: '#0d9488', width: '28px', height: '28px', fontSize: '11px' }}
+                              >
+                                {fb.reviewee_name?.charAt(0) || 'R'}
+                              </div>
+                              <strong style={{ fontSize: '13.5px', color: 'var(--navy)' }}>
+                                {fb.reviewee_name}
+                              </strong>
+                              <span className="badge badge-blue" style={{ fontSize: '10.5px' }}>
+                                {fb.reviewee_role || 'Peneliti'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px', marginLeft: '36px' }}>
+                              Diterbitkan pada: {new Date(fb.created_at).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              background: '#fef3c7',
+                              border: '1px solid #fde68a',
+                              padding: '5px 12px',
+                              borderRadius: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              color: '#92400e',
+                              fontWeight: 800,
+                              fontSize: '13px'
+                            }}
+                          >
+                            <Star size={15} fill="#f59e0b" color="#f59e0b" />
+                            <span>Skor Evaluasi: {fb.overall_score.toFixed(1)} / 5.0</span>
+                          </div>
+                        </div>
+
+                        {/* 4 Dimension Breakdown Bar */}
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+                            gap: '10px',
+                            background: 'var(--surface-alt)',
+                            padding: '12px 16px',
+                            borderRadius: '10px',
+                            marginBottom: '14px',
+                            fontSize: '11.5px'
+                          }}
+                        >
+                          <div>
+                            <span style={{ color: 'var(--muted)', display: 'block', fontSize: '10.5px' }}>
+                              1. Kontribusi Teknis & Eksekusi:
+                            </span>
+                            <strong style={{ color: 'var(--navy)', fontSize: '12px' }}>
+                              {'★'.repeat(fb.ratings.technical)}{'☆'.repeat(5 - fb.ratings.technical)} ({fb.ratings.technical}/5)
+                            </strong>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--muted)', display: 'block', fontSize: '10.5px' }}>
+                              2. Kolaborasi & Komunikasi:
+                            </span>
+                            <strong style={{ color: 'var(--navy)', fontSize: '12px' }}>
+                              {'★'.repeat(fb.ratings.collaboration)}{'☆'.repeat(5 - fb.ratings.collaboration)} ({fb.ratings.collaboration}/5)
+                            </strong>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--muted)', display: 'block', fontSize: '10.5px' }}>
+                              3. Ketelitian Ilmiah & Problem Solving:
+                            </span>
+                            <strong style={{ color: 'var(--navy)', fontSize: '12px' }}>
+                              {'★'.repeat(fb.ratings.scientificRigor)}{'☆'.repeat(5 - fb.ratings.scientificRigor)} ({fb.ratings.scientificRigor}/5)
+                            </strong>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--muted)', display: 'block', fontSize: '10.5px' }}>
+                              4. Keandalan & Tanggung Jawab:
+                            </span>
+                            <strong style={{ color: 'var(--navy)', fontSize: '12px' }}>
+                              {'★'.repeat(fb.ratings.reliability)}{'☆'.repeat(5 - fb.ratings.reliability)} ({fb.ratings.reliability}/5)
+                            </strong>
+                          </div>
+                        </div>
+
+                        {/* Badges */}
+                        {fb.badges && fb.badges.length > 0 && (
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                            {fb.badges.map((b, idx) => (
+                              <span key={idx} className="badge badge-teal" style={{ fontSize: '11px', padding: '3px 8px' }}>
+                                🏆 {b}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Qualitative Comments */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          <div style={{ background: '#f0fdf4', padding: '12px 16px', borderRadius: '10px', borderLeft: '4px solid #0d9488' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', display: 'block', marginBottom: '4px', letterSpacing: '0.4px' }}>
+                              💡 Kekuatan & Kontribusi Menonjol
+                            </span>
+                            <p style={{ fontSize: '13px', color: 'var(--ink)', margin: 0, lineHeight: 1.6 }}>
+                              "{fb.strengths}"
+                            </p>
+                          </div>
+
+                          <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '10px', borderLeft: '4px solid #3b82f6' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', display: 'block', marginBottom: '4px', letterSpacing: '0.4px' }}>
+                              🌱 Saran Pengembangan Ilmiah Konstruktif
+                            </span>
+                            <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', margin: 0, lineHeight: 1.6 }}>
+                              "{fb.improvements}"
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* TAB 6: EVALUATION & AI ASSISTANT */}
           {activeTab === 'evaluation' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* STEAM 5-Pillar Score Cards */}
@@ -946,6 +1958,41 @@ export const ProjectWorkspace: React.FC = () => {
                 <Send size={14} />
               </button>
             </form>
+          </div>
+
+          {/* Peer Review Status Widget */}
+          <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--accent-teal)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Star size={16} fill="#f59e0b" color="#f59e0b" />
+                <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                  Evaluasi Sejawat Tim
+                </h4>
+              </div>
+              <span className="badge badge-teal" style={{ fontSize: '10px' }}>
+                {projectPeerFeedbacks.length} Ulasan
+              </span>
+            </div>
+
+            <p style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', margin: '0 0 10px 0', lineHeight: 1.5 }}>
+              Ulasan 360° formatif antar kolaborator tim untuk meninjau kontribusi teknis dan ketelitian riset.
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-alt)', padding: '8px 12px', borderRadius: '8px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Skor Rata-Rata:</span>
+              <strong style={{ fontSize: '13px', color: '#b45309' }}>
+                ★ {projectPeerFeedbacks.length > 0 ? (projectPeerFeedbacks.reduce((a, b) => a + b.overall_score, 0) / projectPeerFeedbacks.length).toFixed(1) : '0.0'} / 5.0
+              </strong>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              style={{ width: '100%', fontSize: '11.5px' }}
+              onClick={() => setActiveTab('peerFeedback')}
+            >
+              <span>Buka Tab Peer Feedback &rarr;</span>
+            </button>
           </div>
 
           {/* Quick Project Summary Card */}

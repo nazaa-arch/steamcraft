@@ -9,7 +9,8 @@ import {
   Consultation,
   Announcement,
   ResourceRequest,
-  Rubric
+  Rubric,
+  PeerFeedback
 } from '../types';
 
 export const DEFAULT_TEMPLATES = {
@@ -1045,3 +1046,122 @@ export const INITIAL_RUBRICS: Rubric[] = [
     updated_at: '2026-10-15 16:00:00'
   }
 ];
+
+export const INITIAL_PEER_FEEDBACKS: PeerFeedback[] = [
+  {
+    id: 1,
+    project_id: 1,
+    reviewer_id: 1,
+    reviewer_name: 'Budi Santoso',
+    reviewer_study: 'Sains Data',
+    reviewer_role: 'Ketua Tim & Lead Data Scientist',
+    reviewee_id: 14,
+    reviewee_name: 'Tiara Safitri',
+    reviewee_study: 'Pendidikan Fisika',
+    reviewee_role: 'Instrumentasi & Kalibrasi Sensor',
+    ratings: {
+      technical: 5,
+      collaboration: 5,
+      scientificRigor: 4,
+      reliability: 5
+    },
+    overall_score: 4.8,
+    strengths: 'Tiara sangat cermat dalam melakukan kalibrasi fisik sensor BME280 di ruang terkendali. Deviasi suhu dan kelembaban berhasil ditekan hingga di bawah 0.2 C.',
+    improvements: 'Dapat menambahkan dokumentasi prosedur kalibrasi dalam format Markdown standar di repositori.',
+    badges: ['Teliti & Presisi', 'Kolaborator Hebat', 'Problem Solver'],
+    created_at: '2026-10-14 14:30:00'
+  },
+  {
+    id: 2,
+    project_id: 1,
+    reviewer_id: 14,
+    reviewer_name: 'Tiara Safitri',
+    reviewer_study: 'Pendidikan Fisika',
+    reviewer_role: 'Instrumentasi & Kalibrasi Sensor',
+    reviewee_id: 15,
+    reviewee_name: 'Hendra Kusuma',
+    reviewee_study: 'Matematika',
+    reviewee_role: 'Pemodelan Deret Waktu & Galat',
+    ratings: {
+      technical: 5,
+      collaboration: 4,
+      scientificRigor: 5,
+      reliability: 5
+    },
+    overall_score: 4.75,
+    strengths: 'Formulasi matematis untuk dekomposisi musiman dan deteksi anomali cuaca sangat akurat dan terbukti membantu interpretasi data lapangan.',
+    improvements: 'Penyampaian formula matematika ke anggota non-matematika dapat dilengkapi diagram alir yang lebih intuitif.',
+    badges: ['Ketelitian Ilmiah', 'Keahlian Teoretis'],
+    created_at: '2026-10-15 16:15:00'
+  },
+  {
+    id: 3,
+    project_id: 1,
+    reviewer_id: 15,
+    reviewer_name: 'Hendra Kusuma',
+    reviewer_study: 'Matematika',
+    reviewer_role: 'Pemodelan Deret Waktu & Galat',
+    reviewee_id: 16,
+    reviewee_name: 'Laila Munawaroh',
+    reviewee_study: 'Pendidikan Matematika',
+    reviewee_role: 'Visualisasi Dashboard & Dokumentasi',
+    ratings: {
+      technical: 4,
+      collaboration: 5,
+      scientificRigor: 4,
+      reliability: 5
+    },
+    overall_score: 4.5,
+    strengths: 'Visualisasi dashboard Grafana yang dirancang sangat mudah dipahami oleh petani dan dosen penguji. Estetika grafis dan tata letak informasi sangat proporsional.',
+    improvements: 'Bisa menambahkan opsi filter rentang tanggal dinamis dan ekspor tabel ringkasan ke format CSV langsung dari widget.',
+    badges: ['Visualisasi Unggul', 'Komunikasi Efektif', 'Inovatif'],
+    created_at: '2026-10-16 10:20:00'
+  },
+  {
+    id: 4,
+    project_id: 2,
+    reviewer_id: 2,
+    reviewer_name: 'Siti Nurhaliza',
+    reviewer_study: 'Artificial Intelligence',
+    reviewer_role: 'Ketua Tim & Computer Vision Engineer',
+    reviewee_id: 13,
+    reviewee_name: 'Bayu Wicaksono',
+    reviewee_study: 'Fisika',
+    reviewee_role: 'Optika Kamera & High-Speed Lighting',
+    ratings: {
+      technical: 5,
+      collaboration: 5,
+      scientificRigor: 5,
+      reliability: 4
+    },
+    overall_score: 4.75,
+    strengths: 'Penyetelan sudut pencahayaan strobo kecepatan tinggi sukses mengeliminasi motion blur citra botol pada konveyor bergerak 0.4 m/s.',
+    improvements: 'Perlu sinkronisasi jadwal uji coba lab dengan tim pengolah citra agar tidak menunggu waktu idle.',
+    badges: ['Problem Solver', 'Pekerja Keras'],
+    created_at: '2026-10-13 11:00:00'
+  },
+  {
+    id: 5,
+    project_id: 4,
+    reviewer_id: 4,
+    reviewer_name: 'Zahra Amalia',
+    reviewer_study: 'Bioteknologi',
+    reviewer_role: 'Ketua Tim & Lead Biotechnologist',
+    reviewee_id: 9,
+    reviewee_name: 'Fitri Handayani',
+    reviewee_study: 'Biologi',
+    reviewee_role: 'Uji Fitoremediasi & Fisiologi Tanaman',
+    ratings: {
+      technical: 5,
+      collaboration: 5,
+      scientificRigor: 5,
+      reliability: 5
+    },
+    overall_score: 5.0,
+    strengths: 'Dedikasi luar biasa dalam merawat kultur eceng gondok di bak reaktor mini. Pencatatan logbook biomasa sangat rapi dan konsisten setiap pagi.',
+    improvements: 'Pertahankan etos kerja teliti ini untuk penulisan manuskrip jurnal internasional bereputasi.',
+    badges: ['Riset Laboratorium Teladan', 'Kolaborator Hebat', 'Tanggung Jawab Penuh'],
+    created_at: '2026-10-16 15:00:00'
+  }
+];
+

@@ -3,13 +3,20 @@ import { useApp } from '../../context/AppContext';
 import { Award, CheckCircle, Download, ExternalLink, ShieldCheck, User } from 'lucide-react';
 
 export const StudentPortfolio: React.FC = () => {
-  const { currentUser, projects, openModal } = useApp();
+  const { currentUser, projects, openModal, peerFeedbacks } = useApp();
 
   const userProjects = projects.filter(
     p => p.creator_id === currentUser?.id || p.creator_username === currentUser?.username
   );
 
   const completedProjects = projects.filter(p => p.status === 'Selesai' || p.progress === 100);
+
+  const userPeerFeedbacks = peerFeedbacks.filter(f => f.reviewee_name === currentUser?.name);
+  const allEarnedBadges = Array.from(new Set(userPeerFeedbacks.flatMap(f => f.badges || [])));
+  const avgPeerRating =
+    userPeerFeedbacks.length > 0
+      ? (userPeerFeedbacks.reduce((a, b) => a + b.overall_score, 0) / userPeerFeedbacks.length).toFixed(1)
+      : null;
 
   return (
     <section className="page active">
@@ -131,6 +138,110 @@ export const StudentPortfolio: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Peer-to-Peer Feedback & Badges Showcase */}
+      <div className="card" style={{ marginBottom: '24px', padding: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+          <div>
+            <div className="eyebrow" style={{ color: 'var(--accent-teal)' }}>
+              Evaluasi Formatif 360° Rekan Tim
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--navy)', margin: '2px 0 4px 0' }}>
+              Ulasan Sejawat & Lencana Pengakuan Riset (Peer Badges)
+            </h3>
+            <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: 0 }}>
+              Penilaian independen dari rekan peneliti lintas disiplin atas kontribusi teknis, ketelitian, dan kepemimpinan tim Anda.
+            </p>
+          </div>
+
+          {avgPeerRating && (
+            <div
+              style={{
+                background: '#fef3c7',
+                border: '1px solid #fde68a',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                color: '#92400e',
+                fontWeight: 800,
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>★ {avgPeerRating} / 5.0 Rata-rata Sejawat ({userPeerFeedbacks.length} ulasan)</span>
+            </div>
+          )}
+        </div>
+
+        {/* Badges Earned */}
+        {allEarnedBadges.length > 0 && (
+          <div style={{ marginBottom: '18px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '8px' }}>
+              Lencana Etos Kerja yang Diberikan Rekan:
+            </span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {allEarnedBadges.map((badge, idx) => (
+                <span
+                  key={idx}
+                  className="badge badge-teal"
+                  style={{ fontSize: '11px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                >
+                  🏆 {badge}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews List */}
+        {userPeerFeedbacks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {userPeerFeedbacks.map(fb => (
+              <div
+                key={fb.id}
+                style={{
+                  background: 'var(--surface-alt)',
+                  border: '1px solid var(--line)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  borderLeft: '4px solid var(--accent-teal)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>{fb.reviewer_name}</strong>
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>({fb.reviewer_study || 'STEAM'})</span>
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>· {new Date(fb.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  </div>
+                  <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '2px 8px', borderRadius: '10px' }}>
+                    ★ {fb.overall_score.toFixed(1)} / 5.0
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: '10px', fontSize: '11px', color: 'var(--muted)' }}>
+                  <span>Teknis: <strong>{fb.ratings.technical}/5</strong></span>
+                  <span>Kolaborasi: <strong>{fb.ratings.collaboration}/5</strong></span>
+                  <span>Ketelitian: <strong>{fb.ratings.scientificRigor}/5</strong></span>
+                  <span>Keandalan: <strong>{fb.ratings.reliability}/5</strong></span>
+                </div>
+
+                <div style={{ background: '#f0fdf4', padding: '10px 12px', borderRadius: '8px', fontSize: '12px', color: '#166534', marginBottom: '6px' }}>
+                  <strong>💡 Kekuatan:</strong> "{fb.strengths}"
+                </div>
+
+                <div style={{ background: 'white', padding: '10px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--ink-secondary)', border: '1px solid var(--line)' }}>
+                  <strong>🌱 Rekomendasi:</strong> "{fb.improvements}"
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '24px', background: 'var(--surface-alt)', borderRadius: '10px', color: 'var(--muted)', fontSize: '12.5px' }}>
+            Belum ada ulasan yang diterima untuk akun ini. Masuk ke ruang kerja proyek dan berkolaborasi dengan rekan tim untuk saling bertukar peer review.
+          </div>
+        )}
       </div>
 
       {/* Completed & Verified Research Showcase */}
