@@ -2332,22 +2332,13 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
   return (
     <div style={{ padding: '8px 4px' }}>
       {/* Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="badge badge-blue" style={{ fontSize: '11px', fontWeight: 800 }}>
-            Langkah {slide} dari {totalSlides}
-          </span>
-          <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
-            {current.tag}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={handleFinish}
-          style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
-        >
-          Lewati Tur &times;
-        </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', paddingRight: '48px' }}>
+        <span className="badge badge-blue" style={{ fontSize: '11px', fontWeight: 800 }}>
+          Langkah {slide} dari {totalSlides}
+        </span>
+        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
+          {current.tag}
+        </span>
       </div>
 
       {/* Step Pills Navigation */}
@@ -2393,15 +2384,25 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
 
       {/* Slide Navigation Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          disabled={slide === 1}
-          onClick={() => setSlide(prev => Math.max(1, prev - 1))}
-          style={{ opacity: slide === 1 ? 0.4 : 1 }}
-        >
-          &larr; Sebelumnya
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={handleFinish}
+            style={{ color: 'var(--muted)', fontSize: '12px' }}
+          >
+            Lewati Tur
+          </button>
+          {slide > 1 && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setSlide(prev => Math.max(1, prev - 1))}
+            >
+              &larr; Sebelumnya
+            </button>
+          )}
+        </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
           {slide < totalSlides ? (
