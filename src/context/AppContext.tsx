@@ -143,7 +143,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Load initial from localStorage or defaults
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.USERS);
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
+    const parsed: User[] = saved ? JSON.parse(saved) : INITIAL_USERS;
+    return parsed.map(u => (u.role === 'admin' ? { ...u, email: 'cs@steamcraft.online' } : u));
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {

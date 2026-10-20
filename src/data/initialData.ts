@@ -190,7 +190,7 @@ export const INITIAL_USERS: User[] = [
     academic_links: 'GitHub: github.com/steamcraft-admin · Docs: steamcraft.online/docs',
     avatar_color: '#0f172a',
     password: 'admin2026!',
-    email: 'admin@steamcraft.ac.id',
+    email: 'cs@steamcraft.online',
     email_verified: 1
   },
   {

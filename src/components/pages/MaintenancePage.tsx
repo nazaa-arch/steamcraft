@@ -673,8 +673,8 @@ export const MaintenancePage: React.FC = () => {
         >
           <div>
             Butuh bantuan mendesak? Hubungi{' '}
-            <a href="mailto:support@steamcraft.online" style={{ color: '#38bdf8', textDecoration: 'none' }}>
-              support@steamcraft.online
+            <a href="mailto:cs@steamcraft.online" style={{ color: '#38bdf8', textDecoration: 'none' }}>
+              cs@steamcraft.online
             </a>
           </div>
 
