@@ -354,10 +354,11 @@ export const AdminDevPortal: React.FC = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (adminPasscode === 'admin123' || adminPasscode === 'steamcraft2026') {
+              const code = adminPasscode.trim().toLowerCase();
+              if (code === 'admin123' || code === 'admin' || code === 'steamcraft2026') {
                 handleFastLoginAdmin();
               } else {
-                setAuthError('Kunci otorisasi tidak valid.');
+                setAuthError('Kunci otorisasi tidak valid. Gunakan kode: admin123');
               }
             }}
           >
@@ -367,7 +368,7 @@ export const AdminDevPortal: React.FC = () => {
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
                 type="password"
-                placeholder="Masukkan kode otorisasi..."
+                placeholder="Kode otorisasi (admin123)..."
                 value={adminPasscode}
                 onChange={(e) => {
                   setAdminPasscode(e.target.value);
@@ -400,6 +401,9 @@ export const AdminDevPortal: React.FC = () => {
                 Validasi
               </button>
             </div>
+            <p style={{ color: '#94a3b8', fontSize: '11.5px', margin: '6px 0 0 0' }}>
+              💡 Petunjuk Kode Validasi: <code style={{ color: '#38bdf8' }}>admin123</code> (atau klik langsung tombol biru di atas)
+            </p>
             {authError && (
               <p style={{ color: '#ef4444', fontSize: '12px', margin: '8px 0 0 0' }}>{authError}</p>
             )}
