@@ -19,8 +19,28 @@ import {
   Activity,
   Zap,
   Mail,
-  ChevronRight
+  ChevronRight,
+  Award,
+  IdCard,
+  QrCode,
+  GraduationCap,
+  Settings,
+  Palette,
+  Binary
 } from 'lucide-react';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  division: string;
+  steamId: string;
+  joinDate: string;
+  quote: string;
+  focus: string[];
+  avatarInitial: string;
+  gradient: string;
+}
 
 interface ProjectCard {
   id: string;
@@ -38,25 +58,67 @@ interface ProjectCard {
 }
 
 export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunchApp }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeMemberTab, setActiveMemberTab] = useState<string>('all');
 
+  // Official 3 Team Members
+  const teamMembers: TeamMember[] = [
+    {
+      id: 'naza',
+      name: 'Muhammad Naza Firmansyah',
+      role: 'Project Lead & Lead System Architect',
+      division: 'Software Development & Architecture',
+      steamId: 'STEAM-001',
+      joinDate: '21 Oct 2026',
+      quote: 'Together We Build the Future',
+      focus: ['Cloud Architecture', 'Full-Stack React/Node Engine', 'FAIR Data Pipeline', 'Security & DevOps'],
+      avatarInitial: 'NF',
+      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
+    },
+    {
+      id: 'bima',
+      name: 'Bima Sena',
+      role: 'Co-Lead Engineer & Hardware Specialist',
+      division: 'Engineering & IoT Telemetry',
+      steamId: 'STEAM-002',
+      joinDate: '21 Oct 2026',
+      quote: 'Build Skills, Create Solutions, Make an Impact',
+      focus: ['ESP32 Microcontroller', 'LoRaWAN Modulations', 'Sensor Array & MPPT Solar', 'Hardware Telemetry'],
+      avatarInitial: 'BS',
+      gradient: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)'
+    },
+    {
+      id: 'sandi',
+      name: 'Sandi Ardi Prayitno',
+      role: 'Research Analyst & Creative Specialist',
+      division: 'Research, Design & Data Analytics',
+      steamId: 'STEAM-003',
+      joinDate: '21 Oct 2026',
+      quote: 'Learn, Create, and Deliver Real Impact',
+      focus: ['Scientific Methodology', 'UI/UX Visual Identity', 'Data Stochastic Modeling', 'Bio-materials Science'],
+      avatarInitial: 'SP',
+      gradient: 'linear-gradient(135deg, #10b981 0%, #0891b2 100%)'
+    }
+  ];
+
+  // Official Projects Portfolio
   const projects: ProjectCard[] = [
     {
       id: 'steamcraft-platform',
       title: 'STEAM-Craft — Platform Riset & Kolaborasi Multidisiplin',
       category: 'software',
-      categoryBadge: 'Platform Perangkat Lunak Terintegrasi',
-      badgeColor: '#0284c7',
+      categoryBadge: 'Platform Perangkat Lunak Terpadu (Flagship)',
+      badgeColor: '#3b82f6',
       isFlagship: true,
       description:
-        'Platform resmi inkubasi dan orkestrasi riset kolaboratif mahasiswa dan dosen pembimbing berbasis metodologi STEAM. Dilengkapi manajemen checkpoint terstruktur, logbook digital, open recruitment pencarian talenta lintas prodi, repositori berstandar FAIR, serta sistem audit rubrik ilmiah nasional.',
+        'Platform resmi inkubasi dan manajemen riset berbasis metodologi STEAM untuk civitas akademika. Dilengkapi repositori data berstandar FAIR, logbook digital, pelacak checkpoint proyek, modul open recruitment kolaborator lintas prodi, serta sistem audit rubrik penilaian ilmiah terverifikasi.',
       status: 'live',
       statusText: 'Production Live (Aktif)',
-      tags: ['React 19', 'TypeScript', 'FAIR Data', 'Rubrik Ilmiah', 'Vite', 'Multi-tenant'],
+      tags: ['React 19', 'TypeScript', 'FAIR Data Standard', 'Rubrik Ilmiah', 'Vite', 'Cloud Sync'],
       metrics: [
         { label: 'Domain Akses', value: 'app.steamcraft.online' },
-        { label: 'Model Evaluasi', value: '4 Dimensi Rubrik' },
-        { label: 'Status Server', value: 'AnymHost Cloud Node' }
+        { label: 'Dimensi Evaluasi', value: '4 Pilar Rubrik' },
+        { label: 'Hosting Node', value: 'AnymHost Cloud (163.223.227.38)' }
       ],
       targetUrl: 'https://app.steamcraft.online'
     },
@@ -65,16 +127,16 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
       title: 'IoT Marine Buoy — Telemetri Otonom Pemantau Terumbu Karang',
       category: 'hardware',
       categoryBadge: 'Hardware IoT & Konservasi Bahari',
-      badgeColor: '#059669',
+      badgeColor: '#10b981',
       description:
-        'Sistem pelampung telemetri cerdas bertenaga surya mikro berbasis mikrokontroler ESP32 dan modulasi LoRaWAN. Memantau parameter oseanografi secara berkala (pH air laut, salinitas, kekeruhan turbidity, dan fluktuasi suhu permukaan) untuk mitigasi pemutihan karang (coral bleaching) di perairan tropis.',
+        'Pelampung telemetri cerdas otonom bertenaga surya mikro berbasis ESP32 dan LoRaWAN. Memantau parameter oseanografi (suhu air, pH, salinitas, dan kekeruhan) untuk mitigasi pemutihan karang di pesisir tropis tanpa tergantung jaringan seluler.',
       status: 'lab',
-      statusText: 'Inkubasi Prototipe Hardware',
-      tags: ['ESP32', 'LoRaWAN 915MHz', 'BME280', 'Analog Turbidity Sensor', 'Solar MPPT'],
+      statusText: 'Inkubasi Prototipe Hardware Lab',
+      tags: ['ESP32', 'LoRaWAN 915MHz', 'BME280', 'Turbidity Sensor', 'Micro-Solar MPPT'],
       metrics: [
-        { label: 'Jangkauan Radio', value: 'Hingga 8.5 km' },
-        { label: 'Sampling Interval', value: '15 Menit Sekali' },
-        { label: 'Otonomi Baterai', value: 'Tanpa Henti (Solar)' }
+        { label: 'Jarak Transmisi', value: 'Hingga 8.5 km' },
+        { label: 'Interval Sampling', value: '15 Menit' },
+        { label: 'Daya Mandiri', value: 'Solar Cell 100%' }
       ],
       targetUrl: 'https://app.steamcraft.online'
     },
@@ -83,16 +145,16 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
       title: 'EcoBiosynthesis Mycobattery — Baterai Organik Biodegradabel',
       category: 'bio',
       categoryBadge: 'Bioteknologi Material Hijau & Energi Bersih',
-      badgeColor: '#d97706',
+      badgeColor: '#8b5cf6',
       description:
-        'Inovasi sel penyimpanan daya sekunder ramah lingkungan yang memanfaatkan jaringan miselium jamur tiram (Pleurotus ostreatus) dan membran biopolimer kitosan sebagai elektrolit padat non-toksik. Mengeliminasi penggunaan logam berat berbahaya pada perangkat sensor portabel.',
+        'Inovasi sel baterai ramah lingkungan yang mengintegrasikan miselium jamur tiram (Pleurotus ostreatus) dan elektrolit padat biopolimer kitosan alami. Mengurangi limbah kimia beracun dan dapat terurai secara biologis dalam tanah.',
       status: 'lab',
-      statusText: 'Uji Validasi Siklus Siklik Lab',
-      tags: ['Miselium Jamur', 'Kitosan Alami', 'Cyclic Voltammetry', 'Zero Toxic Waste'],
+      statusText: 'Uji Validasi Siklus Elektrokimia',
+      tags: ['Miselium Jamur', 'Kitosan Alami', 'Cyclic Voltammetry', 'Non-Toxic Battery'],
       metrics: [
-        { label: 'Densitas Daya', value: '1.24 V / Sel' },
-        { label: 'Biodegradabilitas', value: '100% Organik (90 Hari)' },
-        { label: 'Siklus Pengisian', value: '> 350 Cycles' }
+        { label: 'Tegangan Sel', value: '1.24 V / Sel' },
+        { label: 'Biodegradabilitas', value: '100% Organik' },
+        { label: 'Siklus Lab', value: '> 350 Siklus' }
       ],
       targetUrl: 'https://app.steamcraft.online'
     },
@@ -101,53 +163,51 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
       title: 'AI Scientific Reproducibility & Data Integrity Engine',
       category: 'pipeline',
       categoryBadge: 'Kecerdasan Buatan & Pipa Riset Masa Depan',
-      badgeColor: '#7c3aed',
+      badgeColor: '#6366f1',
       description:
-        'Modul kecerdasan buatan untuk verifikasi replikasi kode dan audit integritas data eksperimen secara otomatis. Melakukan pengecekan konsistensi statistik, deteksi anomali kurva kalibrasi sensor, dan pengujian robustness berbasis simulasi stokastik Monte Carlo.',
+        'Mesin audit data eksperimen dan replikasi kode otomatis berbasis AI untuk mendeteksi anomali kurva kalibrasi sensor, pengujian replikabilitas algoritma, dan simulasi ketahanan stokastik Monte Carlo.',
       status: 'pipeline',
-      statusText: 'Pipa Riset Tim Selanjutnya (Roadmap)',
-      tags: ['Python AI Engine', 'Monte Carlo Simulation', 'Reproducibility Check', 'Jupyter Pipeline'],
+      statusText: 'Pipa Sambungan Riset Lanjutan',
+      tags: ['Python AI Engine', 'Monte Carlo Simulation', 'Reproducibility', 'Jupyter Pipeline'],
       metrics: [
-        { label: 'Fase Inkubasi', value: 'Perancangan Algoritma' },
-        { label: 'Target Rilis', value: 'Q4 2026' },
-        { label: 'Integrasi', value: 'STEAM-Craft Core API' }
+        { label: 'Tahap Inkubasi', value: 'Perancangan Algoritma' },
+        { label: 'Integrasi', value: 'STEAM-Craft API' },
+        { label: 'Target Rilis', value: 'Q4 2026' }
       ],
       targetUrl: 'https://app.steamcraft.online'
     },
     {
       id: 'precision-agrodrone',
-      title: 'Precision Agro-Drone — Pemantau Mikroklimat Terasering',
+      title: 'Precision Agro-Drone — Pemantau Mikroklimat Pertanian Terasering',
       category: 'pipeline',
-      categoryBadge: 'Robotika & Pertanian Presisi',
+      categoryBadge: 'Robotika & Pertanian Presisi Tropis',
       badgeColor: '#0891b2',
       description:
-        'Platform wahana udara tanpa awak (UAV) ringan berbasis arsitektur quadcopter dengan sensor multispektral. Didesain untuk memetakan indeks vegetasi tanaman (NDVI) dan kelembapan tanah di area kontur terasering pertanian berkelanjutan.',
+        'Wahana drone quadcopter otonom ringan yang dilengkapi kamera multispektral untuk memetakan indeks vegetasi tanaman (NDVI) dan kelembapan tanah di lereng kontur terasering.',
       status: 'pipeline',
-      statusText: 'Pipa Riset Tim Lanjutan (Roadmap)',
-      tags: ['PX4 Autopilot', 'Multispectral Camera', 'NDVI Indexing', 'Precision Farming'],
+      statusText: 'Pipa Sambungan Riset Lanjutan',
+      tags: ['PX4 Autopilot', 'Multispectral Camera', 'NDVI Indexing', 'Agro-Robotics'],
       metrics: [
-        { label: 'Radius Jelajah', value: '3.2 km' },
+        { label: 'Radius Terbang', value: '3.2 km' },
         { label: 'Fase', value: 'Studi Kelayakan Avionik' },
-        { label: 'Afiliasi', value: 'Lab Robotika & Pertanian' }
+        { label: 'Laboratorium', value: 'Lab Robotika Terpadu' }
       ],
       targetUrl: 'https://app.steamcraft.online'
     }
   ];
 
-  const filteredProjects = selectedCategory === 'all'
+  const filteredProjects = activeCategory === 'all'
     ? projects
-    : projects.filter(p => p.category === selectedCategory);
+    : projects.filter(p => p.category === activeCategory);
 
   const handleOpenApp = (url?: string) => {
     if (onLaunchApp) {
       onLaunchApp();
       return;
     }
-    // If running on production, direct to app.steamcraft.online
-    if (window.location.hostname.includes('steamcraft.online')) {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('steamcraft.online')) {
       window.location.href = url || 'https://app.steamcraft.online';
     } else {
-      // Localhost / dev fallback
       const search = new URLSearchParams(window.location.search);
       search.set('view', 'app');
       window.location.search = search.toString();
@@ -158,72 +218,135 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
     <div
       style={{
         minHeight: '100vh',
-        background: '#070b14',
-        color: '#f8fafc',
-        fontFamily: "'Inter', sans-serif",
+        background: '#f8fafc',
+        color: '#0f172a',
+        fontFamily: "'Montserrat', 'Inter', sans-serif",
         lineHeight: 1.6
       }}
     >
+      {/* Top Banner Tagline */}
+      <div
+        style={{
+          background: 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%)',
+          color: '#fff',
+          padding: '8px 16px',
+          fontSize: '12px',
+          fontWeight: 600,
+          textAlign: 'center',
+          letterSpacing: '1px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px'
+        }}
+      >
+        <span>LEARN</span>
+        <span>•</span>
+        <span>CREATE</span>
+        <span>•</span>
+        <span>IMPACT</span>
+        <span style={{ opacity: 0.8, fontSize: '11px', display: 'none' }} className="hide-mobile">
+          | Together We Build the Future
+        </span>
+      </div>
+
       {/* Navigation Bar */}
       <nav
         style={{
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          background: 'rgba(7, 11, 20, 0.92)',
-          borderBottom: '1px solid rgba(56, 189, 248, 0.15)',
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
           backdropFilter: 'blur(16px)',
           padding: '14px 28px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '16px'
+          gap: '16px',
+          boxShadow: '0 4px 20px rgba(30, 58, 138, 0.05)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Brand Logo & Name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <img
             src="/logo.jpg"
-            alt="STEAM-Craft Logo"
-            style={{ width: '38px', height: '38px', borderRadius: '10px', objectFit: 'cover', border: '1px solid #38bdf8' }}
+            alt="STEAM Logo"
+            style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '12px',
+              objectFit: 'contain',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.15)'
+            }}
           />
           <div>
-            <span style={{ fontSize: '17px', fontWeight: 900, letterSpacing: '-0.3px', color: '#fff' }}>
-              STEAM-Craft <span style={{ color: '#38bdf8' }}>Team Innovation Hub</span>
-            </span>
-            <span style={{ display: 'block', fontSize: '11px', color: '#94a3b8', letterSpacing: '0.2px' }}>
-              Pusat Portofolio Riset Tim &amp; Gateway Multidisiplin
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 900,
+                  color: '#1e3a8a',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                STEAM
+              </span>
+              <span
+                style={{
+                  fontSize: '11px',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  color: '#2563eb',
+                  fontWeight: 800,
+                  letterSpacing: '0.5px'
+                }}
+              >
+                OFFICIAL HUB
+              </span>
+            </div>
+            <span style={{ display: 'block', fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
+              Pusat Inovasi Tim Riset Multidisiplin
             </span>
           </div>
         </div>
 
-        {/* Center / Right Links & CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+        {/* Center Nav Links */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <a
             href="#projects"
-            style={{ color: '#cbd5e1', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
+            style={{ color: '#475569', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
           >
             Projek Tim
           </a>
           <a
-            href="#roadmap"
-            style={{ color: '#cbd5e1', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
+            href="#team"
+            style={{ color: '#475569', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
           >
-            Peta Jalan (Roadmap)
+            Anggota Tim
           </a>
           <a
-            href="#team"
-            style={{ color: '#cbd5e1', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
+            href="#philosophy"
+            style={{ color: '#475569', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
           >
-            Tentang Tim
+            Filosofi STEAM
+          </a>
+          <a
+            href="#roadmap"
+            style={{ color: '#475569', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
+          >
+            Peta Sambungan Riset
           </a>
 
+          {/* Launch Application Button */}
           <button
             onClick={() => handleOpenApp()}
             style={{
-              padding: '9px 18px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+              padding: '10px 20px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
               border: 'none',
               color: '#fff',
               fontSize: '13px',
@@ -232,7 +355,8 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              boxShadow: '0 4px 16px rgba(37, 99, 235, 0.4)'
+              boxShadow: '0 6px 20px rgba(59, 130, 246, 0.35)',
+              transition: 'transform 0.15s ease'
             }}
           >
             <Rocket size={15} />
@@ -246,86 +370,103 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
         style={{
           position: 'relative',
           padding: '80px 24px 60px 24px',
-          textAlign: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
+          background: 'linear-gradient(180deg, #eff6ff 0%, #ffffff 100%)',
+          borderBottom: '1px solid #e2e8f0',
           overflow: 'hidden'
         }}
       >
-        {/* Glow ambient circle */}
+        {/* Soft Background Wave Glow */}
         <div
           style={{
             position: 'absolute',
-            top: '10%',
+            top: '-10%',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '600px',
-            height: '350px',
-            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(37, 99, 235, 0.05) 60%, transparent 100%)',
-            filter: 'blur(60px)',
+            width: '800px',
+            height: '400px',
+            background: 'radial-gradient(ellipse at center, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.06) 60%, transparent 100%)',
+            filter: 'blur(50px)',
             pointerEvents: 'none',
             zIndex: 0
           }}
         />
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          {/* Logo Showcase Hero Badge */}
+          <div style={{ marginBottom: '24px' }}>
+            <img
+              src="/logo.jpg"
+              alt="Logo STEAM Resmi"
+              style={{
+                width: '120px',
+                height: '120px',
+                objectFit: 'contain',
+                borderRadius: '24px',
+                padding: '8px',
+                background: '#ffffff',
+                boxShadow: '0 12px 36px rgba(30, 58, 138, 0.12)',
+                border: '1px solid #e2e8f0',
+                margin: '0 auto'
+              }}
+            />
+          </div>
+
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '6px 16px',
+              padding: '6px 18px',
               borderRadius: '999px',
-              background: 'rgba(56, 189, 248, 0.1)',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
-              color: '#38bdf8',
+              background: 'linear-gradient(90deg, rgba(30, 58, 138, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%)',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              color: '#1e3a8a',
               fontSize: '12.5px',
               fontWeight: 700,
-              letterSpacing: '0.4px',
-              marginBottom: '20px'
+              letterSpacing: '0.8px',
+              marginBottom: '16px'
             }}
           >
-            <Sparkles size={14} />
-            <span>PORTAL RESMI INOVASI &amp; EKOSISTEM RISET KOLABORATIF TIM</span>
+            <Sparkles size={14} color="#3b82f6" />
+            <span>PANDUAN IDENTITAS VISUAL &amp; PORTAL RESMI RISET TIM</span>
           </div>
 
           <h1
             style={{
-              fontSize: 'clamp(32px, 5vw, 54px)',
+              fontSize: 'clamp(32px, 5vw, 52px)',
               fontWeight: 900,
-              lineHeight: 1.15,
-              margin: '0 0 20px 0',
-              letterSpacing: '-1px',
-              background: 'linear-gradient(180deg, #ffffff 30%, #cbd5e1 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              lineHeight: 1.18,
+              margin: '0 0 16px 0',
+              color: '#1e3a8a',
+              letterSpacing: '-0.8px'
             }}
           >
-            Mewujudkan Inovasi Multidisiplin Berkelanjutan Berbasis STEAM
+            Build Skills, Create Solutions, Make an Impact.
           </h1>
 
           <p
             style={{
               fontSize: 'clamp(15px, 2vw, 18px)',
-              color: '#94a3b8',
+              color: '#475569',
               maxWidth: '820px',
               margin: '0 auto 36px auto',
-              lineHeight: 1.6
+              lineHeight: 1.6,
+              fontWeight: 500
             }}
           >
-            Portal terpadu konsorsium riset tim mahasiswa dan dosen pembimbing. Menghubungkan platform kerja ilmiah 
-            <strong> STEAM-Craft</strong> dengan portofolio inisiatif riset perangkat keras IoT, bioteknologi terbarukan, 
-            serta instrumen rekayasa komputasi masa depan.
+            STEAM adalah ruang tumbuh bagi ide, kreativitas, dan kolaborasi tim kami untuk menciptakan dampak nyata melalui 
+            <strong> sains, teknologi, rekayasa, seni, dan matematika</strong>. Menghubungkan platform digital utama dengan 
+            seluruh inisiatif riset kolaboratif masa depan.
           </p>
 
-          {/* Call to Actions */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '48px' }}>
+          {/* Action CTAs */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '44px' }}>
             <button
               onClick={() => handleOpenApp()}
               style={{
                 padding: '14px 28px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
                 border: 'none',
                 color: '#fff',
                 fontSize: '15px',
@@ -334,256 +475,464 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                boxShadow: '0 8px 28px rgba(37, 99, 235, 0.45)'
+                boxShadow: '0 8px 24px rgba(30, 58, 138, 0.25)'
               }}
             >
               <Rocket size={18} />
-              <span>Masuk ke Platform Aplikasi (app.steamcraft.online)</span>
+              <span>Masuk ke Platform STEAM-Craft (app.steamcraft.online)</span>
               <ArrowRight size={16} />
             </button>
 
             <a
-              href="#projects"
+              href="#team"
               style={{
                 padding: '14px 24px',
                 borderRadius: '12px',
-                background: 'rgba(30, 41, 59, 0.7)',
-                border: '1px solid rgba(148, 163, 184, 0.3)',
-                color: '#e2e8f0',
+                background: '#ffffff',
+                border: '1.5px solid #cbd5e1',
+                color: '#1e3a8a',
                 fontSize: '15px',
                 fontWeight: 700,
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
               }}
             >
-              <Compass size={18} color="#38bdf8" />
-              <span>Eksplorasi Projek Tim &darr;</span>
+              <Users size={18} color="#3b82f6" />
+              <span>Profil Anggota Tim &darr;</span>
             </a>
           </div>
 
-          {/* Quick Metrics Bar */}
+          {/* 3 Core Philosophical Pillars from Brand Guidelines */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
               gap: '16px',
-              background: 'rgba(15, 23, 42, 0.7)',
-              border: '1px solid rgba(148, 163, 184, 0.2)',
-              borderRadius: '16px',
-              padding: '20px 24px',
               maxWidth: '960px',
               margin: '0 auto',
-              backdropFilter: 'blur(10px)'
+              textAlign: 'left'
             }}
           >
-            <div>
-              <div style={{ fontSize: '28px', fontWeight: 900, color: '#38bdf8' }}>5+</div>
-              <div style={{ fontSize: '12.5px', color: '#94a3b8' }}>Proyek Kolaborasi Berjalan</div>
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '20px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
+                borderLeft: '4px solid #8b5cf6'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <Users size={18} color="#8b5cf6" />
+                <strong style={{ fontSize: '15px', color: '#1e3a8a' }}>Kolaborasi</strong>
+              </div>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Tiga figur saling terhubung, melambangkan keberagaman disiplin ilmu yang berjalan bersama menuju tujuan yang sama.
+              </p>
             </div>
-            <div>
-              <div style={{ fontSize: '28px', fontWeight: 900, color: '#22c55e' }}>5 Pilar</div>
-              <div style={{ fontSize: '12.5px', color: '#94a3b8' }}>Integrasi Lengkap S-T-E-A-M</div>
+
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '20px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
+                borderLeft: '4px solid #3b82f6'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <Sparkles size={18} color="#3b82f6" />
+                <strong style={{ fontSize: '15px', color: '#1e3a8a' }}>Inovasi</strong>
+              </div>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Bintang di tengah sebagai simbol ide-ide baru yang lahir dari perpaduan sains murni, rekayasa teknologi, dan estetika.
+              </p>
             </div>
-            <div>
-              <div style={{ fontSize: '28px', fontWeight: 900, color: '#fbbf24' }}>FAIR Ready</div>
-              <div style={{ fontSize: '12.5px', color: '#94a3b8' }}>Standar Reproduktibilitas Ilmiah</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '28px', fontWeight: 900, color: '#c084fc' }}>1 Konsorsium</div>
-              <div style={{ fontSize: '12.5px', color: '#94a3b8' }}>Kolaborasi Multidisiplin Kampus</div>
+
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '20px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
+                borderLeft: '4px solid #10b981'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <Globe size={18} color="#10b981" />
+                <strong style={{ fontSize: '15px', color: '#1e3a8a' }}>Dampak Nyata</strong>
+              </div>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Orbit yang mengelilingi melambangkan penyebaran manfaat riset ke lingkungan civitas akademika dan masyarakat.
+              </p>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Section: Collaborative Projects Showcase */}
-      <section id="projects" style={{ padding: '60px 24px', maxWidth: '1280px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
-            PORTFOLIO &amp; SHOWCASE INOVASI
+      {/* Section: Official Team Members (3 ID Cards) */}
+      <section id="team" style={{ padding: '70px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+            SUSUNAN INOVATOR RESMI
           </span>
-          <h2 style={{ fontSize: '32px', fontWeight: 900, margin: '6px 0 12px 0', color: '#fff' }}>
-            Projek Tim Bersama &amp; Peta Sambungan Inovasi
+          <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#1e3a8a', margin: '6px 0 10px 0' }}>
+            Anggota Tim Peneliti STEAM
           </h2>
-          <p style={{ fontSize: '14.5px', color: '#94a3b8', maxWidth: '720px', margin: '0 auto' }}>
-            Seluruh proyek riset tim terhubung secara simbiosis dengan platform manajemen kerja STEAM-Craft 
-            sebagai poros tata kelola data dan kolaborasi.
+          <p style={{ fontSize: '14.5px', color: '#64748b', maxWidth: '640px', margin: '0 auto' }}>
+            Tiga inovator multidisiplin yang memimpin perancangan platform perangkat lunak, instrumen IoT, dan metodologi ilmiah.
           </p>
-
-          {/* Category Filter Tabs */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '24px' }}>
-            {[
-              { id: 'all', label: 'Semua Inisiatif' },
-              { id: 'software', label: '💻 Platform Perangkat Lunak' },
-              { id: 'hardware', label: '📡 IoT & Hardware' },
-              { id: 'bio', label: '🌱 Bioteknologi & Energi' },
-              { id: 'pipeline', label: '⚡ Riset Lanjutan (Pipeline)' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedCategory(tab.id)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '999px',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  border: selectedCategory === tab.id ? '1px solid #38bdf8' : '1px solid rgba(148, 163, 184, 0.25)',
-                  background: selectedCategory === tab.id ? 'rgba(56, 189, 248, 0.15)' : 'rgba(15, 23, 42, 0.6)',
-                  color: selectedCategory === tab.id ? '#38bdf8' : '#94a3b8',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Project Cards Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
-          {filteredProjects.map((proj) => (
+        {/* 3 ID Cards Grid (Styled exactly as the uploaded ID Card design) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
+          {teamMembers.map((member) => (
             <div
-              key={proj.id}
+              key={member.id}
               style={{
-                background: proj.isFlagship
-                  ? 'linear-gradient(180deg, rgba(30, 58, 138, 0.35) 0%, rgba(15, 23, 42, 0.95) 100%)'
-                  : 'linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%)',
-                border: proj.isFlagship ? '2px solid #38bdf8' : '1px solid rgba(148, 163, 184, 0.2)',
-                borderRadius: '20px',
-                padding: '28px',
+                background: '#ffffff',
+                borderRadius: '24px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 16px 40px rgba(30, 58, 138, 0.08)',
+                overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                boxShadow: proj.isFlagship ? '0 16px 40px rgba(56, 189, 248, 0.15)' : '0 8px 24px rgba(0,0,0,0.3)',
-                position: 'relative'
+                position: 'relative',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
               }}
             >
-              {proj.isFlagship && (
+              {/* ID Card Top Wave Header */}
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%)',
+                  padding: '24px 20px',
+                  color: '#fff',
+                  position: 'relative'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <img
+                      src="/logo.jpg"
+                      alt="STEAM Logo"
+                      style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff', padding: '3px' }}
+                    />
+                    <span style={{ fontWeight: 900, fontSize: '15px', letterSpacing: '1px' }}>STEAM</span>
+                  </div>
+
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px', opacity: 0.85, display: 'block' }}>
+                      LEARN • CREATE • IMPACT
+                    </span>
+                    <Sparkles size={12} style={{ marginTop: '2px', opacity: 0.9 }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* ID Card Body */}
+              <div style={{ padding: '24px 24px 20px 24px', textAlign: 'center' }}>
+                {/* Avatar Circle */}
                 <div
                   style={{
-                    position: 'absolute',
-                    top: '-12px',
-                    right: '24px',
-                    background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                    width: '84px',
+                    height: '84px',
+                    borderRadius: '50%',
+                    background: member.gradient,
                     color: '#fff',
-                    padding: '4px 12px',
-                    borderRadius: '999px',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    letterSpacing: '0.5px',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)'
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontSize: '28px',
+                    fontWeight: 900,
+                    margin: '-48px auto 14px auto',
+                    boxShadow: '0 8px 24px rgba(30, 58, 138, 0.2)',
+                    border: '4px solid #ffffff'
                   }}
                 >
-                  ★ PROYEK UTAMA (FLAGSHIP)
-                </div>
-              )}
-
-              <div>
-                {/* Category & Status Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      padding: '3px 10px',
-                      borderRadius: '6px',
-                      background: `${proj.badgeColor}22`,
-                      color: proj.badgeColor,
-                      border: `1px solid ${proj.badgeColor}55`
-                    }}
-                  >
-                    {proj.categoryBadge}
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: proj.status === 'live' ? '#22c55e' : proj.status === 'lab' ? '#fbbf24' : '#c084fc',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: '7px',
-                        height: '7px',
-                        borderRadius: '50%',
-                        background: proj.status === 'live' ? '#22c55e' : proj.status === 'lab' ? '#fbbf24' : '#c084fc',
-                        display: 'inline-block'
-                      }}
-                    />
-                    {proj.statusText}
-                  </span>
+                  {member.avatarInitial}
                 </div>
 
-                <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 12px 0', lineHeight: 1.3 }}>
-                  {proj.title}
+                <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#1e3a8a', margin: '0 0 4px 0' }}>
+                  {member.name}
                 </h3>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    letterSpacing: '0.8px',
+                    color: '#2563eb',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '16px'
+                  }}
+                >
+                  TEAM MEMBER • {member.role}
+                </span>
 
-                <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: '0 0 20px 0' }}>
-                  {proj.description}
-                </p>
-
-                {/* Metrics Highlight */}
-                {proj.metrics && (
-                  <div
-                    style={{
-                      background: 'rgba(15, 23, 42, 0.6)',
-                      border: '1px solid rgba(148, 163, 184, 0.15)',
-                      borderRadius: '12px',
-                      padding: '12px 16px',
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-                      gap: '12px',
-                      marginBottom: '20px'
-                    }}
-                  >
-                    {proj.metrics.map((m, idx) => (
-                      <div key={idx}>
-                        <div style={{ fontSize: '10.5px', color: '#64748b' }}>{m.label}</div>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0' }}>{m.value}</div>
-                      </div>
-                    ))}
+                {/* ID Card Metadata Table */}
+                <div
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '14px',
+                    padding: '14px 16px',
+                    fontSize: '12px',
+                    textAlign: 'left',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748b' }}>ID ANGGOTA:</span>
+                    <strong style={{ color: '#1e3a8a' }}>{member.steamId}</strong>
                   </div>
-                )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748b' }}>DIVISI:</span>
+                    <strong style={{ color: '#1e3a8a' }}>{member.division}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748b' }}>TANGGAL BERGABUNG:</span>
+                    <strong style={{ color: '#1e3a8a' }}>{member.joinDate}</strong>
+                  </div>
+                </div>
 
-                {/* Tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '24px' }}>
-                  {proj.tags.map((tag, tIdx) => (
+                {/* Focus Badges */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', justifyContent: 'center', marginBottom: '14px' }}>
+                  {member.focus.map((f, idx) => (
                     <span
-                      key={tIdx}
+                      key={idx}
                       style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
+                        fontSize: '10.5px',
+                        fontWeight: 600,
+                        padding: '3px 8px',
                         borderRadius: '6px',
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        color: '#cbd5e1'
+                        background: '#eff6ff',
+                        color: '#1e40af',
+                        border: '1px solid #bfdbfe'
                       }}
                     >
-                      #{tag}
+                      {f}
                     </span>
                   ))}
                 </div>
               </div>
 
-              {/* Action Button */}
-              <div>
+              {/* ID Card Footer Ribbon */}
+              <div
+                style={{
+                  background: 'linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 100%)',
+                  padding: '12px 20px',
+                  borderTop: '1px solid #e2e8f0',
+                  textAlign: 'center',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#475569',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Sparkles size={12} color="#3b82f6" />
+                <span>{member.quote}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Section: Collaborative Projects Showcase */}
+      <section id="projects" style={{ padding: '70px 24px', background: '#ffffff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+              PORTOFOLIO RISET TIM BERSAMA
+            </span>
+            <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#1e3a8a', margin: '6px 0 12px 0' }}>
+              Projek Tim &amp; Gateway Sambungan Inovasi
+            </h2>
+            <p style={{ fontSize: '14.5px', color: '#64748b', maxWidth: '720px', margin: '0 auto' }}>
+              Halaman ini berfungsi sebagai portal penghubung utama ke platform aplikasi STEAM-Craft dan beberapa inisiatif proyek tim selanjutnya.
+            </p>
+
+            {/* Category Filter */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '24px' }}>
+              {[
+                { id: 'all', label: 'Semua Projek' },
+                { id: 'software', label: '💻 Platform Perangkat Lunak' },
+                { id: 'hardware', label: '📡 IoT & Hardware Laut' },
+                { id: 'bio', label: '🌱 Bioteknologi & Baterai' },
+                { id: 'pipeline', label: '⚡ Riset Lanjutan (Pipeline)' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveCategory(tab.id)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '999px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: activeCategory === tab.id ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                    background: activeCategory === tab.id ? '#eff6ff' : '#ffffff',
+                    color: activeCategory === tab.id ? '#1e40af' : '#64748b'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+            {filteredProjects.map((proj) => (
+              <div
+                key={proj.id}
+                style={{
+                  background: proj.isFlagship
+                    ? 'linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%)'
+                    : '#ffffff',
+                  border: proj.isFlagship ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+                  borderRadius: '20px',
+                  padding: '28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: proj.isFlagship ? '0 12px 36px rgba(59, 130, 246, 0.12)' : '0 4px 16px rgba(0,0,0,0.03)',
+                  position: 'relative'
+                }}
+              >
+                {proj.isFlagship && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-12px',
+                      right: '24px',
+                      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                      color: '#fff',
+                      padding: '4px 12px',
+                      borderRadius: '999px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      letterSpacing: '0.5px',
+                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+                    }}
+                  >
+                    ★ PROYEK UTAMA TIM
+                  </div>
+                )}
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        background: `${proj.badgeColor}15`,
+                        color: proj.badgeColor,
+                        border: `1px solid ${proj.badgeColor}44`
+                      }}
+                    >
+                      {proj.categoryBadge}
+                    </span>
+
+                    <span
+                      style={{
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        color: proj.status === 'live' ? '#16a34a' : proj.status === 'lab' ? '#d97706' : '#7c3aed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '7px',
+                          height: '7px',
+                          borderRadius: '50%',
+                          background: proj.status === 'live' ? '#16a34a' : proj.status === 'lab' ? '#d97706' : '#7c3aed',
+                          display: 'inline-block'
+                        }}
+                      />
+                      {proj.statusText}
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 10px 0', lineHeight: 1.3 }}>
+                    {proj.title}
+                  </h3>
+
+                  <p style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.6, margin: '0 0 18px 0' }}>
+                    {proj.description}
+                  </p>
+
+                  {/* Metrics Box */}
+                  {proj.metrics && (
+                    <div
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '12px 16px',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                        gap: '10px',
+                        marginBottom: '18px'
+                      }}
+                    >
+                      {proj.metrics.map((m, mIdx) => (
+                        <div key={mIdx}>
+                          <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>{m.label}</div>
+                          <div style={{ fontSize: '12px', fontWeight: 700, color: '#1e3a8a' }}>{m.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '22px' }}>
+                    {proj.tags.map((tag, tIdx) => (
+                      <span
+                        key={tIdx}
+                        style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          background: '#f1f5f9',
+                          color: '#475569',
+                          fontWeight: 500
+                        }}
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Launch Action */}
                 <button
                   onClick={() => handleOpenApp(proj.targetUrl)}
                   style={{
                     width: '100%',
-                    padding: '11px',
+                    padding: '12px',
                     borderRadius: '10px',
                     background: proj.isFlagship
-                      ? 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)'
-                      : 'rgba(56, 189, 248, 0.12)',
-                    border: proj.isFlagship ? 'none' : '1px solid rgba(56, 189, 248, 0.3)',
-                    color: proj.isFlagship ? '#fff' : '#38bdf8',
+                      ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
+                      : 'rgba(59, 130, 246, 0.08)',
+                    border: proj.isFlagship ? 'none' : '1px solid #bfdbfe',
+                    color: proj.isFlagship ? '#fff' : '#1e40af',
                     fontSize: '13px',
                     fontWeight: 800,
                     cursor: 'pointer',
@@ -591,121 +940,59 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxShadow: proj.isFlagship ? '0 4px 16px rgba(37, 99, 235, 0.3)' : 'none'
+                    boxShadow: proj.isFlagship ? '0 4px 14px rgba(30, 58, 138, 0.2)' : 'none'
                   }}
                 >
-                  <span>{proj.isFlagship ? 'Buka Platform STEAM-Craft (app.steamcraft.online)' : 'Lihat Data & Logbook di STEAM-Craft'}</span>
+                  <span>{proj.isFlagship ? 'Buka Aplikasi STEAM-Craft (app.steamcraft.online)' : 'Akses di Platform STEAM-Craft'}</span>
                   <ExternalLink size={14} />
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Section: Innovation Roadmap & Connectivity */}
-      <section
-        id="roadmap"
-        style={{
-          padding: '60px 24px',
-          background: 'rgba(15, 23, 42, 0.6)',
-          borderTop: '1px solid rgba(148, 163, 184, 0.15)',
-          borderBottom: '1px solid rgba(148, 163, 184, 0.15)'
-        }}
-      >
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
-              PETA JALAN INTEGRASI MASA DEPAN
-            </span>
-            <h2 style={{ fontSize: '30px', fontWeight: 900, margin: '6px 0 10px 0', color: '#fff' }}>
-              Bagaimana Seluruh Projek Tim Saling Terhubung?
-            </h2>
-            <p style={{ fontSize: '14px', color: '#94a3b8', maxWidth: '680px', margin: '0 auto' }}>
-              Arsitektur terdistribusi yang menyatukan platform aplikasi perangkat lunak dengan implementasi fisik di laboratorium.
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-            <div style={{ background: 'rgba(30, 41, 59, 0.7)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(148, 163, 184, 0.2)' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', display: 'grid', placeItems: 'center', marginBottom: '14px' }}>
-                <Layers size={20} />
-              </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '0 0 8px 0' }}>
-                1. Fondasi Platform Digital (STEAM-Craft)
-              </h4>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
-                Berfungsi sebagai inkubator, repositori protokol eksperimen, buku log ilmiah terenkripsi, dan verifikasi kelayakan rubrik sebelum proyek diimplementasikan.
-              </p>
-            </div>
-
-            <div style={{ background: 'rgba(30, 41, 59, 0.7)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(148, 163, 184, 0.2)' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', display: 'grid', placeItems: 'center', marginBottom: '14px' }}>
-                <Cpu size={20} />
-              </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '0 0 8px 0' }}>
-                2. Realisasi Hardware &amp; Lab Organik
-              </h4>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
-                Data lapangan dari pelampung IoT laut dan baterai jamur diunggah langsung ke platform STEAM-Craft via sensor telemetry endpoint untuk analisis komparatif.
-              </p>
-            </div>
-
-            <div style={{ background: 'rgba(30, 41, 59, 0.7)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(148, 163, 184, 0.2)' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(192, 132, 252, 0.2)', color: '#c084fc', display: 'grid', placeItems: 'center', marginBottom: '14px' }}>
-                <Activity size={20} />
-              </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '0 0 8px 0' }}>
-                3. Integrasi Pipeline Lanjutan
-              </h4>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
-                Proyek tim berikutnya (mesin AI reproduktibilitas dan drone presisi) langsung mewarisi protokol autentikasi civitas dan basis data riset yang telah terbentuk.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Section: About Team & Multidisciplinary Pillars */}
-      <section id="team" style={{ padding: '60px 24px', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
-            KONSORSIUM RISET MULTIDISIPLIN
+      {/* Section: STEAM Philosophy & Meaning (From Brand Guidelines) */}
+      <section id="philosophy" style={{ padding: '70px 24px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+            PANDUAN IDENTITAS &amp; NILAI RESMI
           </span>
-          <h2 style={{ fontSize: '30px', fontWeight: 900, margin: '6px 0 12px 0', color: '#fff' }}>
-            5 Pilar Pendekatan STEAM
+          <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#1e3a8a', margin: '6px 0 10px 0' }}>
+            Makna Filosofi STEAM
           </h2>
-          <p style={{ fontSize: '14px', color: '#94a3b8', maxWidth: '680px', margin: '0 auto' }}>
-            Menyatukan perspektif dari berbagai disiplin ilmu untuk menciptakan solusi rekayasa yang teruji secara ilmiah dan berdampak luas.
+          <p style={{ fontSize: '14.5px', color: '#64748b', maxWidth: '700px', margin: '0 auto' }}>
+            STEAM merupakan singkatan dari 5 pilar keilmuan yang bersatu untuk menciptakan solusi aplikatif berdaya guna.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { letter: 'S', title: 'Science', desc: 'Metodologi saintifik, kontrol variabel & validasi lab biokimia.' },
-            { letter: 'T', title: 'Technology', desc: 'Komputasi awan, modulasi LoRaWAN & arsitektur web modern.' },
-            { letter: 'E', title: 'Engineering', desc: 'Rancang bangun prototipe instrumentasi fisik & efisiensi daya.' },
-            { letter: 'A', title: 'Art & Design', desc: 'Ergonomi antarmuka, infografis data & estetika purwarupa.' },
-            { letter: 'M', title: 'Mathematics', desc: 'Analitik stokastik, kalibrasi regresi sensor & model risiko.' }
+            { letter: 'S', title: 'Science', desc: 'Ilmu pengetahuan, rasa ingin tahu, dan pencarian kebenaran empiris.', color: '#1e3a8a' },
+            { letter: 'T', title: 'Technology', desc: 'Teknologi, inovasi digital, dan solusi mutakhir untuk masa depan.', color: '#3b82f6' },
+            { letter: 'E', title: 'Engineering', desc: 'Rekayasa teknis, proses manufaktur, dan implementasi ide fisik.', color: '#8b5cf6' },
+            { letter: 'A', title: 'Arts', desc: 'Seni, estetika desain, kreativitas, ekspresi, dan nilai kemanusiaan.', color: '#10b981' },
+            { letter: 'M', title: 'Mathematics', desc: 'Logika, analisis kuantitatif, dan dasar dari segala pemodelan ilmu.', color: '#0891b2' }
           ].map((item, idx) => (
             <div
               key={idx}
               style={{
-                background: 'rgba(30, 41, 59, 0.5)',
-                border: '1px solid rgba(148, 163, 184, 0.2)',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
                 borderRadius: '16px',
                 padding: '20px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
                 textAlign: 'center'
               }}
             >
               <div
                 style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '46px',
+                  height: '46px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                  background: item.color,
                   color: '#fff',
-                  fontSize: '20px',
+                  fontSize: '22px',
                   fontWeight: 900,
                   display: 'grid',
                   placeItems: 'center',
@@ -714,26 +1001,98 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
               >
                 {item.letter}
               </div>
-              <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', margin: '0 0 6px 0' }}>{item.title}</h4>
-              <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
+              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>{item.title}</h4>
+              <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
             </div>
           ))}
+        </div>
+
+        {/* Official Quote Box */}
+        <div
+          style={{
+            background: 'linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%)',
+            border: '1px solid #bfdbfe',
+            borderRadius: '16px',
+            padding: '20px 28px',
+            textAlign: 'center',
+            fontSize: '13.5px',
+            color: '#1e40af',
+            fontStyle: 'italic',
+            fontWeight: 600
+          }}
+        >
+          "STEAM adalah tentang bagaimana ilmu, teknologi, rekayasa, seni, dan matematika bersatu untuk menciptakan dampak positif bagi masa depan."
+        </div>
+      </section>
+
+      {/* Section: Future Pipeline Roadmap */}
+      <section id="roadmap" style={{ padding: '60px 24px', background: '#f1f5f9', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+              PETA SAMBUNGAN RISET TIM
+            </span>
+            <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#1e3a8a', margin: '6px 0 10px 0' }}>
+              Bagaimana Seluruh Proyek Saling Terhubung?
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b', maxWidth: '640px', margin: '0 auto' }}>
+              Domain utama ini mengikat seluruh inkubasi tim menjadi satu ekosistem riset yang berkelanjutan.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
+            <div style={{ background: '#ffffff', borderRadius: '16px', padding: '22px', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', display: 'grid', placeItems: 'center', marginBottom: '12px' }}>
+                <Layers size={18} />
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>
+                1. Portal Kerja STEAM-Craft
+              </h4>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Sebagai repositori pusat, buku log ilmiah terverifikasi, dan manajemen pengajuan bimbingan dosen pakar.
+              </p>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '16px', padding: '22px', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', display: 'grid', placeItems: 'center', marginBottom: '12px' }}>
+                <Cpu size={18} />
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>
+                2. Implementasi Lab Fisik &amp; IoT
+              </h4>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Data telemetri sensor pelampung laut dan siklus baterai jamur langsung diintegrasikan ke basis data riset kampus.
+              </p>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '16px', padding: '22px', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.1)', color: '#7c3aed', display: 'grid', placeItems: 'center', marginBottom: '12px' }}>
+                <Activity size={18} />
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>
+                3. Pipa Inovasi Lanjutan
+              </h4>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Inkubasi mesin AI verifikasi reproduktibilitas kode dan drone pertanian presisi siap ditambahkan secara modular.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer
         style={{
-          borderTop: '1px solid rgba(148, 163, 184, 0.15)',
+          background: '#0f172a',
+          color: '#94a3b8',
           padding: '40px 24px 30px 24px',
-          background: '#04070d',
           fontSize: '12.5px',
-          color: '#94a3b8'
+          borderTop: '1px solid #1e293b'
         }}
       >
         <div
           style={{
-            maxWidth: '1200px',
+            maxWidth: '1100px',
             margin: '0 auto',
             display: 'flex',
             justifyContent: 'space-between',
@@ -743,22 +1102,29 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
           }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 800, fontSize: '15px', marginBottom: '6px' }}>
-              <span>STEAM-Craft Collaborative Hub</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <img
+                src="/logo.jpg"
+                alt="STEAM Logo"
+                style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff', padding: '2px' }}
+              />
+              <span style={{ fontSize: '16px', fontWeight: 900, color: '#fff', letterSpacing: '0.5px' }}>
+                TIM INOVASI STEAM
+              </span>
             </div>
             <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
-              &copy; 2026 Tim Riset Inovasi STEAM-Craft. Hak Cipta Dilindungi Undang-Undang.
+              &copy; 2026 Tim Peneliti: Muhammad Naza Firmansyah • Bima Sena • Sandi Ardi Prayitno.
             </p>
           </div>
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1' }}>
               <Mail size={14} color="#38bdf8" /> Kontak: <a href="mailto:cs@steamcraft.online" style={{ color: '#38bdf8', textDecoration: 'none' }}>cs@steamcraft.online</a>
             </span>
             <span>•</span>
             <button
               onClick={() => handleOpenApp()}
-              style={{ background: 'none', border: 'none', color: '#38bdf8', fontWeight: 700, cursor: 'pointer', fontSize: '12.5px', padding: 0 }}
+              style={{ background: 'none', border: 'none', color: '#60a5fa', fontWeight: 700, cursor: 'pointer', fontSize: '12.5px', padding: 0 }}
             >
               Aplikasi (app.steamcraft.online) &rarr;
             </button>
