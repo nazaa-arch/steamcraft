@@ -99,7 +99,7 @@ interface AppContextType {
 
   // Announcements
   markAnnouncementRead: (id: number) => void;
-  markAllAnnouncementsRead: () => void;
+  markAllAnnouncementsRead: (silent?: boolean) => void;
   toggleSaveAnnouncement: (id: number) => void;
   addAnnouncement: (data: Omit<Announcement, 'id' | 'created_at'>) => void;
 
@@ -770,9 +770,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAnnouncements(prev => prev.map(a => (a.id === id ? { ...a, is_read: true } : a)));
   };
 
-  const markAllAnnouncementsRead = () => {
+  const markAllAnnouncementsRead = (silent = false) => {
     setAnnouncements(prev => prev.map(a => ({ ...a, is_read: true })));
-    showToast('Semua pemberitahuan telah ditandai dibaca.');
+    if (!silent) {
+      showToast('Semua pemberitahuan telah ditandai dibaca.');
+    }
   };
 
   const toggleSaveAnnouncement = (id: number) => {

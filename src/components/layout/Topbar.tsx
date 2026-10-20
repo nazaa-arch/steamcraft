@@ -279,7 +279,17 @@ export const Topbar: React.FC = () => {
         <div className="notif-bell-wrapper" ref={notifWrapperRef}>
           <button
             className="notif-bell-btn"
-            onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+            onClick={() => {
+              if (!notifDropdownOpen) {
+                // Otomatis hilangkan notifikasi begitu menu dibuka / diklik
+                if (unreadCount > 0) {
+                  markAllAnnouncementsRead(true);
+                }
+                setNotifDropdownOpen(true);
+              } else {
+                setNotifDropdownOpen(false);
+              }
+            }}
             title="Pemberitahuan & Pengumuman Kampus"
             aria-label="Notifikasi"
           >

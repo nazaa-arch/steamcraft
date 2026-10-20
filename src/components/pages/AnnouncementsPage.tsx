@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Bell, Bookmark, BookmarkCheck, Search, Plus, Check } from 'lucide-react';
 
@@ -13,6 +13,11 @@ export const AnnouncementsPage: React.FC = () => {
   } = useApp();
 
   const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
+
+  // Otomatis bersihkan notifikasi saat halaman pengumuman dibuka
+  useEffect(() => {
+    markAllAnnouncementsRead(true);
+  }, []);
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -43,7 +48,7 @@ export const AnnouncementsPage: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-ghost" onClick={markAllAnnouncementsRead}>
+          <button className="btn btn-ghost" onClick={() => markAllAnnouncementsRead()}>
             <Check size={14} />
             <span>Tandai Semua Dibaca</span>
           </button>
