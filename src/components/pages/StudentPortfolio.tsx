@@ -60,6 +60,117 @@ export const StudentPortfolio: React.FC = () => {
     [currentUser?.title_prefix, currentUser?.name, currentUser?.title_suffix].filter(Boolean).join(' ') ||
     'Budi Santoso';
 
+  // STEAM 5-Pillar Scores Calculation
+  const userProjectsWithScores = (userProjects.length > 0 ? userProjects : projects).filter(p => p.steam_scores);
+  const steamScores = userProjectsWithScores.length > 0
+    ? {
+        S: Math.round(userProjectsWithScores.reduce((acc, p) => acc + (p.steam_scores?.S || 94), 0) / userProjectsWithScores.length),
+        T: Math.round(userProjectsWithScores.reduce((acc, p) => acc + (p.steam_scores?.T || 89), 0) / userProjectsWithScores.length),
+        E: Math.round(userProjectsWithScores.reduce((acc, p) => acc + (p.steam_scores?.E || 86), 0) / userProjectsWithScores.length),
+        A: Math.round(userProjectsWithScores.reduce((acc, p) => acc + (p.steam_scores?.A || 82), 0) / userProjectsWithScores.length),
+        M: Math.round(userProjectsWithScores.reduce((acc, p) => acc + (p.steam_scores?.M || 92), 0) / userProjectsWithScores.length),
+      }
+    : { S: 94, T: 89, E: 86, A: 82, M: 92 };
+
+  const avgSteamScore = (
+    (steamScores.S + steamScores.T + steamScores.E + steamScores.A + steamScores.M) / 5
+  ).toFixed(1);
+
+  // STEAM Pentagon Geometry (Segi Lima STEAM)
+  const pentagonPillars = [
+    {
+      key: 'S',
+      title: 'SCIENCE',
+      sub: 'Sains & Observasi Empiris',
+      score: steamScores.S,
+      color: '#2563eb',
+      lightBg: '#eff6ff',
+      borderColor: '#bfdbfe',
+      desc: 'Formulasi hipotesis terukur, telaah jurnal bereputasi, dan kepatuhan replikasi data kontrol.'
+    },
+    {
+      key: 'T',
+      title: 'TECHNOLOGY',
+      sub: 'Teknologi & Algoritma',
+      score: steamScores.T,
+      color: '#0d9488',
+      lightBg: '#f0fdfa',
+      borderColor: '#99f6e4',
+      desc: 'Implementasi machine learning, arsitektur telemetri nirkabel LoRa, dan komputasi awan.'
+    },
+    {
+      key: 'E',
+      title: 'ENGINEERING',
+      sub: 'Rekayasa & Purwarupa',
+      score: steamScores.E,
+      color: '#ea580c',
+      lightBg: '#fff7ed',
+      borderColor: '#fed7aa',
+      desc: 'Perancangan fisik tahan cuaca ekstrem, kalibrasi instrumentasi sensor, dan keandalan sistem.'
+    },
+    {
+      key: 'A',
+      title: 'ART',
+      sub: 'Estetika & Desain Visual',
+      score: steamScores.A,
+      color: '#e11d48',
+      lightBg: '#fff1f2',
+      borderColor: '#fecdd3',
+      desc: 'Desain visualisasi data telemetri intuitif bagi operator lapangan dan diseminasi publik.'
+    },
+    {
+      key: 'M',
+      title: 'MATHEMATICS',
+      sub: 'Matematika & Ketelitian Statistik',
+      score: steamScores.M,
+      color: '#7c3aed',
+      lightBg: '#f5f3ff',
+      borderColor: '#ddd6fe',
+      desc: 'Analisis ketidakpastian (uncertainty), evaluasi galat metrik RMSE, dan validasi kurva waktu.'
+    }
+  ];
+
+  // SVG Radar Constants
+  const cx = 270;
+  const cy = 225;
+  const maxR = 145;
+  const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
+
+  const getPentagonVertex = (r: number, index: number) => {
+    const angleDeg = -90 + index * 72; // Start from top (-90 deg), 72 deg step
+    const angleRad = (angleDeg * Math.PI) / 180;
+    return {
+      x: cx + r * Math.cos(angleRad),
+      y: cy + r * Math.sin(angleRad)
+    };
+  };
+
+  // Background Concentric Regular Pentagons
+  const concentricPolygons = levels.map(level => {
+    return [0, 1, 2, 3, 4]
+      .map(i => {
+        const pt = getPentagonVertex(maxR * level, i);
+        return `${pt.x},${pt.y}`;
+      })
+      .join(' ');
+  });
+
+  // User's Data Polygon
+  const userScorePolygon = pentagonPillars
+    .map((p, i) => {
+      const r = (p.score / 100) * maxR;
+      const pt = getPentagonVertex(r, i);
+      return `${pt.x},${pt.y}`;
+    })
+    .join(' ');
+
+  // Data nodes at vertices
+  const dataNodes = pentagonPillars.map((p, i) => {
+    const r = (p.score / 100) * maxR;
+    const pt = getPentagonVertex(r, i);
+    return { ...p, ...pt };
+  });
+
   // Real JSON Package Downloader
   const handleDownloadPackage = (project: Project) => {
     const data = {
@@ -387,16 +498,16 @@ export const StudentPortfolio: React.FC = () => {
       {/* ==================== TAB 1: STEAM RADAR & COMPETENCIES ==================== */}
       {activeTab === 'radar' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* 5 Pillars Progress Grid */}
+          {/* ==================== STEAM PENTAGON RADAR (SEGI LIMA) ==================== */}
           <div className="card" style={{ padding: '28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <div className="eyebrow">Pengukuran Kompetensi Terstandarisasi</div>
                 <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--navy)', margin: '2px 0 4px 0' }}>
-                  Pemetaan Keahlian 5 Pilar STEAM
+                  Pemetaan Segi Lima Kompetensi STEAM
                 </h3>
                 <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: 0 }}>
-                  Dihitung secara algoritmik dari 5 checkpoint riset terverifikasi, logbook empiris laboratorium, dan evaluasi rubrik pembimbing.
+                  Diagram radar poligon segi lima terstandarisasi yang memetakan kedalaman capaian 5 pilar interdisipliner (Science, Technology, Engineering, Art, Mathematics).
                 </p>
               </div>
 
@@ -405,86 +516,232 @@ export const StudentPortfolio: React.FC = () => {
                   background: '#f0fdf4',
                   border: '1px solid #bbf7d0',
                   color: '#166534',
-                  padding: '4px 12px',
+                  padding: '5px 14px',
                   borderRadius: '20px',
-                  fontSize: '12px',
+                  fontSize: '12.5px',
                   fontWeight: 800
                 }}
               >
-                ✓ Nilai Akumulasi Rata-rata: 88.2% (Unggul)
+                ✓ Rata-rata Skor STEAM: {avgSteamScore}% (Unggul)
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Science */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800, marginBottom: '6px' }}>
-                  <span style={{ color: '#2563eb' }}>🔬 Science (Sains Murni & Observasi Empiris)</span>
-                  <span style={{ color: 'var(--navy)' }}>94 / 100</span>
-                </div>
-                <div className="progress-track" style={{ height: '9px' }}>
-                  <div className="progress-fill" style={{ width: '94%', background: '#2563eb' }} />
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>
-                  Formulasi hipotesis terukur, telaah pustaka jurnal bereputasi, dan kepatuhan replikasi data kontrol.
-                </div>
-              </div>
+            {/* Pentagon SVG Radar Chart Container */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '16px 0 20px 0',
+                background: 'radial-gradient(circle at center, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.5) 100%)',
+                borderRadius: '16px',
+                border: '1px solid var(--line-light, #e2e8f0)',
+                position: 'relative'
+              }}
+            >
+              <svg
+                viewBox="0 0 540 450"
+                style={{
+                  width: '100%',
+                  maxWidth: '520px',
+                  height: 'auto',
+                  overflow: 'visible'
+                }}
+              >
+                <defs>
+                  {/* Glowing Radar Gradient */}
+                  <linearGradient id="steamPentagonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity="0.45" />
+                    <stop offset="35%" stopColor="#0d9488" stopOpacity="0.4" />
+                    <stop offset="70%" stopColor="#ea580c" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.45" />
+                  </linearGradient>
 
-              {/* Technology */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800, marginBottom: '6px' }}>
-                  <span style={{ color: '#0d9488' }}>💻 Technology (Teknologi & Algoritma Komputasi)</span>
-                  <span style={{ color: 'var(--navy)' }}>89 / 100</span>
-                </div>
-                <div className="progress-track" style={{ height: '9px' }}>
-                  <div className="progress-fill" style={{ width: '89%', background: '#0d9488' }} />
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>
-                  Implementasi model machine learning, arsitektur telemetri nirkabel LoRa, dan komputasi awan.
-                </div>
-              </div>
+                  {/* Drop Shadow Filter */}
+                  <filter id="radarShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#2563eb" floodOpacity="0.25" />
+                  </filter>
+                </defs>
 
-              {/* Engineering */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800, marginBottom: '6px' }}>
-                  <span style={{ color: '#ea580c' }}>⚙️ Engineering (Rekayasa Alat & Purwarupa)</span>
-                  <span style={{ color: 'var(--navy)' }}>86 / 100</span>
-                </div>
-                <div className="progress-track" style={{ height: '9px' }}>
-                  <div className="progress-fill" style={{ width: '86%', background: '#ea580c' }} />
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>
-                  Perancangan casing tahan cuaca ekstrem outdoor, kalibrasi instrumentasi sensor, dan keandalan sistem.
-                </div>
-              </div>
+                {/* 1. Background Concentric Regular Pentagons */}
+                {concentricPolygons.map((pts, idx) => {
+                  const level = levels[idx];
+                  return (
+                    <g key={idx}>
+                      <polygon
+                        points={pts}
+                        fill={level === 1.0 ? 'rgba(255, 255, 255, 0.7)' : 'none'}
+                        stroke={level === 1.0 ? '#94a3b8' : '#cbd5e1'}
+                        strokeWidth={level === 1.0 ? '1.8' : '1.2'}
+                        strokeDasharray={level === 1.0 ? 'none' : '4,4'}
+                      />
+                      {/* Percent tick on vertical axis */}
+                      <text
+                        x={cx + 6}
+                        y={cy - maxR * level + 4}
+                        fontSize="9.5"
+                        fontWeight="700"
+                        fill="#94a3b8"
+                      >
+                        {Math.round(level * 100)}%
+                      </text>
+                    </g>
+                  );
+                })}
 
-              {/* Art */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800, marginBottom: '6px' }}>
-                  <span style={{ color: '#e11d48' }}>🎨 Art (Estetika, Ergonomi & Desain Visual)</span>
-                  <span style={{ color: 'var(--navy)' }}>82 / 100</span>
-                </div>
-                <div className="progress-track" style={{ height: '9px' }}>
-                  <div className="progress-fill" style={{ width: '82%', background: '#e11d48' }} />
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>
-                  Desain visualisasi data telemetri yang intuitif bagi pengguna lapangan dan kemudahan diseminasi publik.
-                </div>
-              </div>
+                {/* 2. Spoke Lines from Center to Outer Vertices */}
+                {[0, 1, 2, 3, 4].map(i => {
+                  const outerPt = getPentagonVertex(maxR, i);
+                  return (
+                    <line
+                      key={i}
+                      x1={cx}
+                      y1={cy}
+                      x2={outerPt.x}
+                      y2={outerPt.y}
+                      stroke="#94a3b8"
+                      strokeWidth="1.4"
+                      strokeDasharray="2,2"
+                    />
+                  );
+                })}
 
-              {/* Mathematics */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800, marginBottom: '6px' }}>
-                  <span style={{ color: '#7c3aed' }}>📐 Mathematics (Analisis Matematika & Ketelitian Statistik)</span>
-                  <span style={{ color: 'var(--navy)' }}>92 / 100</span>
+                {/* 3. Center Anchor Dot */}
+                <circle cx={cx} cy={cy} r="4" fill="#64748b" />
+
+                {/* 4. Active STEAM Data Pentagon */}
+                <polygon
+                  points={userScorePolygon}
+                  fill="url(#steamPentagonGrad)"
+                  stroke="#2563eb"
+                  strokeWidth="2.8"
+                  strokeLinejoin="round"
+                  filter="url(#radarShadow)"
+                />
+
+                {/* 5. Vertex Data Nodes with Glow Rings */}
+                {dataNodes.map((node, i) => (
+                  <g key={i}>
+                    {/* Outer glow ring */}
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r="8"
+                      fill={node.color}
+                      fillOpacity="0.25"
+                    />
+                    {/* Outer border circle */}
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r="5.5"
+                      fill={node.color}
+                      stroke="white"
+                      strokeWidth="2"
+                    />
+                    {/* Inner core */}
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r="2"
+                      fill="white"
+                    />
+                  </g>
+                ))}
+
+                {/* 6. Five Corner Vertex Badges: S, T, E, A, M */}
+                {/* Vertex 0: S (SCIENCE) - TOP */}
+                <g>
+                  <circle cx="270" cy="22" r="15" fill="#2563eb" />
+                  <text x="270" y="27" textAnchor="middle" fill="white" fontWeight="900" fontSize="13">S</text>
+                  <text x="270" y="47" textAnchor="middle" fill="var(--navy)" fontWeight="800" fontSize="12">SCIENCE</text>
+                  <text x="270" y="61" textAnchor="middle" fill="#2563eb" fontWeight="800" fontSize="11.5">{steamScores.S}/100</text>
+                </g>
+
+                {/* Vertex 1: T (TECHNOLOGY) - TOP RIGHT */}
+                <g>
+                  <circle cx="452" cy="145" r="15" fill="#0d9488" />
+                  <text x="452" y="150" textAnchor="middle" fill="white" fontWeight="900" fontSize="13">T</text>
+                  <text x="452" y="170" textAnchor="middle" fill="var(--navy)" fontWeight="800" fontSize="12">TECHNOLOGY</text>
+                  <text x="452" y="184" textAnchor="middle" fill="#0d9488" fontWeight="800" fontSize="11.5">{steamScores.T}/100</text>
+                </g>
+
+                {/* Vertex 2: E (ENGINEERING) - BOTTOM RIGHT */}
+                <g>
+                  <circle cx="382" cy="365" r="15" fill="#ea580c" />
+                  <text x="382" y="370" textAnchor="middle" fill="white" fontWeight="900" fontSize="13">E</text>
+                  <text x="382" y="390" textAnchor="middle" fill="var(--navy)" fontWeight="800" fontSize="12">ENGINEERING</text>
+                  <text x="382" y="404" textAnchor="middle" fill="#ea580c" fontWeight="800" fontSize="11.5">{steamScores.E}/100</text>
+                </g>
+
+                {/* Vertex 3: A (ART) - BOTTOM LEFT */}
+                <g>
+                  <circle cx="158" cy="365" r="15" fill="#e11d48" />
+                  <text x="158" y="370" textAnchor="middle" fill="white" fontWeight="900" fontSize="13">A</text>
+                  <text x="158" y="390" textAnchor="middle" fill="var(--navy)" fontWeight="800" fontSize="12">ART</text>
+                  <text x="158" y="404" textAnchor="middle" fill="#e11d48" fontWeight="800" fontSize="11.5">{steamScores.A}/100</text>
+                </g>
+
+                {/* Vertex 4: M (MATHEMATICS) - TOP LEFT */}
+                <g>
+                  <circle cx="88" cy="145" r="15" fill="#7c3aed" />
+                  <text x="88" y="150" textAnchor="middle" fill="white" fontWeight="900" fontSize="13">M</text>
+                  <text x="88" y="170" textAnchor="middle" fill="var(--navy)" fontWeight="800" fontSize="12">MATHEMATICS</text>
+                  <text x="88" y="184" textAnchor="middle" fill="#7c3aed" fontWeight="800" fontSize="11.5">{steamScores.M}/100</text>
+                </g>
+              </svg>
+            </div>
+
+            {/* 5-Pillar STEAM Detailed Competency Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '20px' }}>
+              {pentagonPillars.map(p => (
+                <div
+                  key={p.key}
+                  style={{
+                    background: p.lightBg,
+                    border: `1px solid ${p.borderColor}`,
+                    borderRadius: '12px',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    position: 'relative'
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: p.color,
+                          color: 'white',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 900
+                        }}
+                      >
+                        {p.key}
+                      </span>
+                      <strong style={{ fontSize: '15px', color: p.color, fontWeight: 900 }}>
+                        {p.score}/100
+                      </strong>
+                    </div>
+                    <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--navy)' }}>
+                      {p.title}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--ink-secondary)', fontWeight: 600, marginBottom: '6px' }}>
+                      {p.sub}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
+                    {p.desc}
+                  </p>
                 </div>
-                <div className="progress-track" style={{ height: '9px' }}>
-                  <div className="progress-fill" style={{ width: '92%', background: '#7c3aed' }} />
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>
-                  Analisis ketidakpastian (uncertainty analysis), galat statistik RMSE, dan validasi kurva deret waktu.
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
