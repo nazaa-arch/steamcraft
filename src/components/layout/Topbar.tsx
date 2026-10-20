@@ -278,7 +278,7 @@ export const Topbar: React.FC = () => {
         {/* Quick Tour / Panduan Button */}
         <button
           type="button"
-          className="btn btn-ghost btn-sm"
+          className="btn btn-ghost btn-sm topbar-tour-btn"
           onClick={() => openModal('quickTour')}
           style={{
             padding: '5px 10px',
@@ -295,7 +295,7 @@ export const Topbar: React.FC = () => {
           title="Buka Panduan & Tur Alur Riset STEAM-Craft"
         >
           <Sparkles size={13} style={{ color: 'var(--primary)' }} />
-          <span>Panduan</span>
+          <span className="tour-text">Panduan</span>
         </button>
 
         {/* Notification Bell Dropdown */}
@@ -455,12 +455,12 @@ export const Topbar: React.FC = () => {
 
         {/* Logout Button */}
         <button
-          className="btn btn-ghost btn-sm"
+          className="btn btn-ghost btn-sm topbar-logout-btn"
           onClick={logout}
           title="Keluar"
         >
           <LogOut size={13} />
-          <span>Keluar</span>
+          <span className="logout-text">Keluar</span>
         </button>
       </div>
     </header>

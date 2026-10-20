@@ -1098,3 +1098,174 @@ textarea:focus,
     margin-bottom: 18px !important;
   }
 }
+
+/* ==================== STREAMLINED MOBILE HEADER (TOPBAR) ==================== */
+@media (max-width: 640px) {
+  .topbar {
+    height: auto !important;
+    padding: 8px 12px 6px 12px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px 8px !important;
+  }
+
+  .brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-decoration: none !important;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-logo-img {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+
+  .brand-text h2 {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    margin: 0 !important;
+  }
+
+  .brand-text span {
+    display: none !important;
+  }
+
+  .user-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  #devModeIndicator {
+    padding: 3px 8px !important;
+    font-size: 10px !important;
+    border-radius: 12px !important;
+  }
+
+  #devModeIndicator span:last-child {
+    font-size: 10px !important;
+  }
+
+  /* Panduan / Quick Tour icon button */
+  .topbar-tour-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  .topbar-tour-btn .tour-text {
+    display: none !important;
+  }
+
+  /* Notifikasi Bell icon button */
+  .notif-bell-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* User Profile Avatar Pill */
+  .user-badge {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .user-badge:hover,
+  .user-badge:focus-visible,
+  .user-badge:active {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: scale(0.96) !important;
+  }
+
+  .user-badge .user-info {
+    display: none !important;
+  }
+
+  .user-badge .user-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    font-size: 13.5px !important;
+    border-radius: 50% !important;
+    border: 2px solid #38bdf8 !important;
+    box-shadow: 0 2px 6px rgba(56, 189, 248, 0.25) !important;
+  }
+
+  /* Keluar / Logout icon button */
+  .topbar-logout-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #fff1f2 !important;
+    border: 1px solid #fecdd3 !important;
+    color: #e11d48 !important;
+  }
+
+  .topbar-logout-btn .logout-text {
+    display: none !important;
+  }
+
+  /* Sub-Navigation Row */
+  .nav {
+    order: 3 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 2px !important;
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    padding: 2px 2px 4px 2px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .nav button {
+    flex-shrink: 0 !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 20px !important;
+  }
+
+  .notif-dropdown {
+    top: 58px !important;
+  }
+}
+
