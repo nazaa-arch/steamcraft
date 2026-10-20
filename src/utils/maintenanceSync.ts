@@ -34,7 +34,7 @@ export function getInitialMaintenanceState(): boolean {
   // 1. Check URL override
   const params = new URLSearchParams(window.location.search);
   if (params.get('maintenance') === 'true' || params.get('maintenance') === '1') return true;
-  if (params.get('maintenance') === 'false' || params.get('maintenance') === '0' || params.get('bypass') === 'admin') return false;
+  if (params.get('maintenance') === 'false' || params.get('maintenance') === '0') return false;
 
   // 2. Check cross-subdomain cookie
   const cookieVal = getMaintenanceCookie();

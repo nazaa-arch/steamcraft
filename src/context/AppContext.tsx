@@ -334,7 +334,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (inviteCode && currentUser) {
       openModal('joinProject', inviteCode);
     }
-    if (urlParams.get('maintenance') === 'off' || urlParams.get('maintenance') === '0' || urlParams.get('bypass') === 'admin') {
+    if (urlParams.get('maintenance') === 'off' || urlParams.get('maintenance') === '0') {
       setMaintenanceModeState(false);
       localStorage.setItem(STORAGE_KEYS.MAINTENANCE_MODE, 'false');
     } else if (urlParams.get('maintenance') === 'true' || urlParams.get('maintenance') === '1') {

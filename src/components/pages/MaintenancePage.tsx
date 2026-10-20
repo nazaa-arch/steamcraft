@@ -38,9 +38,9 @@ export const MaintenancePage: React.FC = () => {
   const [checkResult, setCheckResult] = useState<string | null>(null);
   const [showAdminBypass, setShowAdminBypass] = useState<boolean>(false);
 
-  // Admin login form state
-  const [adminUsername, setAdminUsername] = useState('admin');
-  const [adminPassword, setAdminPassword] = useState('admin123');
+  // Admin login form state (kosongkan secara default agar tidak terisi otomatis)
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
 
   // Countdown effect
@@ -78,15 +78,6 @@ export const MaintenancePage: React.FC = () => {
       setCurrentPage('dashboard');
     } else {
       setAdminError('Kredensial Administrator tidak valid.');
-    }
-  };
-
-  const handleQuickDemoAdmin = () => {
-    const success = login('admin', 'admin123');
-    if (success) {
-      showToast('Masuk sebagai Administrator melalui Akses Darurat.');
-      setShowAdminBypass(false);
-      setCurrentPage('dashboard');
     }
   };
 
@@ -652,24 +643,14 @@ export const MaintenancePage: React.FC = () => {
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+              <div style={{ marginTop: '8px' }}>
                 <button
                   type="submit"
                   className="btn btn-primary btn-sm"
-                  style={{ flex: 1, background: '#f59e0b', borderColor: '#d97706', color: '#000', fontWeight: 800 }}
+                  style={{ width: '100%', background: '#f59e0b', borderColor: '#d97706', color: '#000', fontWeight: 800, padding: '10px' }}
                 >
                   <Lock size={14} />
-                  <span>Buka Akses Admin</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                  onClick={handleQuickDemoAdmin}
-                >
-                  <Sparkles size={14} />
-                  <span>Masuk Demo Admin</span>
+                  <span>Masuk Sebagai Administrator</span>
                 </button>
               </div>
             </form>
