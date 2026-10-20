@@ -136,7 +136,7 @@ export const MissionControlPage: React.FC = () => {
           <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '10px' }}>
             Daftar Proyek Riset ({filteredProjects.length})
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="mission-project-list">
             {filteredProjects.map(proj => (
               <div
                 key={proj.id}
@@ -186,7 +186,7 @@ export const MissionControlPage: React.FC = () => {
                 </div>
 
                 <button
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-secondary btn-sm inspector-ws-btn"
                   onClick={() => {
                     setSelectedProjectId(activeProject.id);
                     setCurrentPage('workspace');
@@ -229,21 +229,23 @@ export const MissionControlPage: React.FC = () => {
 
             {/* Rubric Evaluation Form */}
             <form onSubmit={handleSaveRubric}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div className="rubric-form-header">
                 <div>
-                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
                     Form Penilaian Rubrik STEAM (Standar Nasional)
                   </h4>
-                  <p style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '2px 0 0 0' }}>
                     Setiap pilar dinilai dengan rentang 0.0 - 25.0 (Total akumulasi 100).
                   </p>
                 </div>
                 <div
                   className={`rubric-valid-pill ${totalScore >= 70 ? 'valid' : 'invalid'}`}
-                  style={{ fontSize: '14px' }}
                 >
-                  <span>Total: {totalScore}</span>
-                  <span>({totalScore >= 90 ? 'Grade A' : totalScore >= 80 ? 'Grade A-' : totalScore >= 70 ? 'Grade B+' : 'Grade B'})</span>
+                  <span className="rubric-pill-total">Total: {totalScore}</span>
+                  <span className="rubric-pill-divider">•</span>
+                  <span className="rubric-pill-grade">
+                    {totalScore >= 90 ? 'Grade A' : totalScore >= 80 ? 'Grade A-' : totalScore >= 70 ? 'Grade B+' : 'Grade B'}
+                  </span>
                 </div>
               </div>
 
@@ -251,7 +253,7 @@ export const MissionControlPage: React.FC = () => {
                 <div className="rubric-row">
                   <div>
                     <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>1. Kelengkapan Tahapan (Completeness)</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    <div className="rubric-subtext" style={{ fontSize: '11px', color: 'var(--muted)' }}>
                       Penyelesaian 5 tahapan riset ilmiah secara terstruktur (Bobot 25%)
                     </div>
                   </div>
@@ -269,7 +271,7 @@ export const MissionControlPage: React.FC = () => {
                 <div className="rubric-row">
                   <div>
                     <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>2. Bukti Empiris & Jurnal (Evidence)</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    <div className="rubric-subtext" style={{ fontSize: '11px', color: 'var(--muted)' }}>
                       Data laboratorium terkalibrasi, logbook riset, dan analisis galat (Bobot 25%)
                     </div>
                   </div>
@@ -287,7 +289,7 @@ export const MissionControlPage: React.FC = () => {
                 <div className="rubric-row">
                   <div>
                     <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>3. Kontribusi Multidisiplin (Contribution)</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    <div className="rubric-subtext" style={{ fontSize: '11px', color: 'var(--muted)' }}>
                       Keterpaduan peran kolaborator lintas prodi dan implementasi solusi (Bobot 25%)
                     </div>
                   </div>
@@ -305,7 +307,7 @@ export const MissionControlPage: React.FC = () => {
                 <div className="rubric-row">
                   <div>
                     <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>4. Reproducibility & Artefak (Reproducibility)</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    <div className="rubric-subtext" style={{ fontSize: '11px', color: 'var(--muted)' }}>
                       Ketersediaan kode, dataset publik, dan kepatuhan replikasi pihak ketiga (Bobot 25%)
                     </div>
                   </div>
@@ -332,8 +334,8 @@ export const MissionControlPage: React.FC = () => {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
-                <button type="submit" className="btn btn-primary">
+              <div className="rubric-submit-wrapper" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                <button type="submit" className="btn btn-primary rubric-submit-btn">
                   <Save size={15} />
                   <span>Simpan & Terbitkan Hasil Evaluasi Rubrik</span>
                 </button>
