@@ -14,6 +14,7 @@ import { AnalyticsPage } from './components/pages/AnalyticsPage';
 import { AnnouncementsPage } from './components/pages/AnnouncementsPage';
 import { AdminConsolePage } from './components/pages/AdminConsolePage';
 import { AdminDashboard } from './components/pages/AdminDashboard';
+import { AdminDevPortal } from './components/pages/AdminDevPortal';
 import { MaintenancePage } from './components/pages/MaintenancePage';
 import { NotFoundPage } from './components/pages/NotFoundPage';
 import { Modals } from './components/modals/Modals';
@@ -21,6 +22,24 @@ import { Toast } from './components/common/Toast';
 
 export const App: React.FC = () => {
   const { currentUser, currentPage, maintenanceMode, setMaintenanceMode, setCurrentPage } = useApp();
+
+  // Detect adm.steamcraft.online subdomain or ?portal=adm query param
+  const isAdmSubdomain = typeof window !== 'undefined' && (
+    window.location.hostname.startsWith('adm.') ||
+    window.location.hostname === 'adm.steamcraft.online' ||
+    new URLSearchParams(window.location.search).get('portal') === 'adm'
+  );
+
+  // Dedicated Master Admin & DevOps Portal route
+  if (isAdmSubdomain || currentPage === 'adminDev') {
+    return (
+      <>
+        <AdminDevPortal />
+        <Modals />
+        <Toast />
+      </>
+    );
+  }
 
   // If Maintenance Mode is globally active and user is not an Admin, show MaintenancePage directly
   if (maintenanceMode && currentUser?.role !== 'admin') {
@@ -116,11 +135,12 @@ export const App: React.FC = () => {
         {currentPage === 'analytics' && <AnalyticsPage />}
         {currentPage === 'announcements' && <AnnouncementsPage />}
         {currentPage === 'admin' && <AdminConsolePage />}
+        {currentPage === 'adminDev' && <AdminDevPortal />}
         {currentPage === 'maintenance' && <MaintenancePage />}
         {![
           'dashboard', 'projects', 'workspace', 'recruitment', 'studentConsultations',
           'studentResources', 'studentPortfolio', 'mission', 'consultations', 'resources',
-          'analytics', 'announcements', 'admin', 'maintenance'
+          'analytics', 'announcements', 'admin', 'adminDev', 'maintenance'
         ].includes(currentPage) && <NotFoundPage />}
       </main>
 

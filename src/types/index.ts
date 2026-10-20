@@ -15,7 +15,8 @@ export type PageName =
   | 'analytics'
   | 'admin'
   | 'announcements'
-  | 'maintenance';
+  | 'maintenance'
+  | 'adminDev';
 
 export interface User {
   id: number;

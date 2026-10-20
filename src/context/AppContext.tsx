@@ -30,6 +30,12 @@ import {
   INITIAL_PEER_FEEDBACKS,
   DEFAULT_TEMPLATES
 } from '../data/initialData';
+import {
+  getInitialMaintenanceState,
+  syncMaintenanceState,
+  startServerMaintenancePolling
+} from '../utils/maintenanceSync';
+import { trackPageView, trackEvent } from '../utils/analytics';
 
 interface AppContextType {
   currentUser: User | null;
@@ -162,15 +168,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [maintenanceMode, setMaintenanceModeState] = useState<boolean>(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('maintenance') === 'true' || urlParams.get('maintenance') === '1') {
-      return true;
-    }
-    const saved = localStorage.getItem(STORAGE_KEYS.MAINTENANCE_MODE);
-    return saved === 'true';
+    return getInitialMaintenanceState();
   });
 
-  const [currentPage, setCurrentPage] = useState<PageName>('dashboard');
+  const [currentPage, setCurrentPageState] = useState<PageName>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('portal') === 'adm' || window.location.hostname.startsWith('adm.')) {
+        return 'adminDev';
+      }
+    }
+    return 'dashboard';
+  });
+
+  const setCurrentPage = (page: PageName) => {
+    setCurrentPageState(page);
+    trackPageView(page);
+  };
   const [selectedProjectId, setSelectedProjectId] = useState<number>(1);
 
   const [projects, setProjects] = useState<Project[]>(() => {
@@ -332,9 +346,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser]);
 
+  // Polling server maintenance mode periodically & listen to cross-subdomain sync
+  useEffect(() => {
+    const cleanup = startServerMaintenancePolling((serverActive) => {
+      setMaintenanceModeState((prev) => (prev !== serverActive ? serverActive : prev));
+    });
+    return cleanup;
+  }, []);
+
   const setMaintenanceMode = (active: boolean) => {
     setMaintenanceModeState(active);
-    localStorage.setItem(STORAGE_KEYS.MAINTENANCE_MODE, active ? 'true' : 'false');
+    syncMaintenanceState(active);
     showToast(
       active
         ? '⚠️ Mode Pemeliharaan Sistem DIAKTIFKAN. Akses dibatasi untuk Administrator.'

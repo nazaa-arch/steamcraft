@@ -119,17 +119,38 @@ Klinik riset berjalan efektif. Seluruh tahapan metodologi berada dalam koridor e
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             className="btn btn-primary"
+            style={{
+              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+              borderColor: '#0284c7',
+              color: '#fff',
+              fontWeight: 800,
+              boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)'
+            }}
+            onClick={() => {
+              if (window.location.hostname.includes('steamcraft.online')) {
+                window.location.href = 'https://adm.steamcraft.online';
+              } else {
+                setCurrentPage('adminDev');
+              }
+            }}
+          >
+            <Server size={16} />
+            <span>⚡ Master Portal (adm.steamcraft.online)</span>
+          </button>
+
+          <button
+            className="btn btn-secondary"
             onClick={() => {
               setShowSummaryGenerator(!showSummaryGenerator);
               if (!generatedSummary) handleGenerateSummary();
             }}
           >
             <FileText size={16} />
-            <span>{showSummaryGenerator ? 'Tutup Ringkasan' : '📊 Buat Ringkasan Eksekutif (Opsional)'}</span>
+            <span>{showSummaryGenerator ? 'Tutup Ringkasan' : '📊 Ringkasan Eksekutif'}</span>
           </button>
 
           <button
-            className="btn btn-secondary"
+            className="btn btn-ghost"
             onClick={() => setCurrentPage('admin')}
           >
             <Shield size={16} />
@@ -344,6 +365,15 @@ Klinik riset berjalan efektif. Seluruh tahapan metodologi berada dalam koridor e
         </div>
 
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => setCurrentPage('adminDev')}
+            style={{ fontSize: '12px', border: '1px solid #38bdf8', color: '#0284c7' }}
+          >
+            <Server size={14} />
+            <span>DevOps Command Center &rarr;</span>
+          </button>
+
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => setCurrentPage('maintenance')}
