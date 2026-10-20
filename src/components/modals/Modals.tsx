@@ -60,6 +60,18 @@ export const Modals: React.FC = () => {
     members
   } = useApp();
 
+  // Global Escape key listener to close modals
+  useEffect(() => {
+    if (!activeModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModal, closeModal]);
+
   if (!activeModal) return null;
 
   return (
@@ -78,6 +90,7 @@ export const Modals: React.FC = () => {
         {activeModal === 'announcementDetail' && <AnnouncementDetailContent ann={modalData} onClose={closeModal} />}
         {activeModal === 'newAnnouncement' && <NewAnnouncementContent onClose={closeModal} />}
         {activeModal === 'register' && <RegisterModalContent onClose={closeModal} />}
+        {activeModal === 'forgotPassword' && <ForgotPasswordModalContent onClose={closeModal} />}
         {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
       </div>
     </div>
@@ -90,14 +103,14 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
   const [study, setStudy] = useState(currentUser?.study_program || 'Sains Data');
-  const [steam, setSteam] = useState('Science + Tech');
+  const [steam, setSteam] = useState('');
   const [template, setTemplate] = useState<'data' | 'experiment' | 'actuary' | 'free'>('data');
   const [goal, setGoal] = useState('');
-  const [tools, setTools] = useState('Python, Git, Lab Instruments');
+  const [tools, setTools] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
-  const [lecturer, setLecturer] = useState('Dr. Rahmat Wijaya, M.Sc.');
+  const [lecturer, setLecturer] = useState('');
   const [openRec, setOpenRec] = useState(1);
-  const [recRoles, setRecRoles] = useState('Data Analyst, Hardware IoT, UI/UX');
+  const [recRoles, setRecRoles] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,12 +118,12 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
       name,
       desc,
       study,
-      steam,
+      steam: steam || 'Sains Terpadu',
       template,
       goal,
-      tools,
-      repo_url: repoUrl || 'https://github.com/steamcraft/research-project',
-      lecturer,
+      tools: tools || 'Perangkat Standar Riset',
+      repo_url: repoUrl || '',
+      lecturer: lecturer || 'Dr. Rahmat Wijaya, M.Sc.',
       open_recruitment: openRec,
       recruitment_roles: recRoles
     });
@@ -191,7 +204,8 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
 
         <div className="auth-field" style={{ margin: 0 }}>
           <label>Dosen Pembimbing</label>
-          <select value={lecturer} onChange={e => setLecturer(e.target.value)}>
+          <select value={lecturer} onChange={e => setLecturer(e.target.value)} required>
+            <option value="" disabled>-- Pilih Dosen Pembimbing --</option>
             <option value="Dr. Rahmat Wijaya, M.Sc.">Dr. Rahmat Wijaya, M.Sc.</option>
             <option value="Prof. Dr. Ir. Dewi Kartika">Prof. Dr. Ir. Dewi Kartika</option>
             <option value="Prof. Dr. Hartono, M.Si.">Prof. Dr. Hartono, M.Si.</option>
@@ -2443,4 +2457,186 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
     </div>
   );
 };
+
+/* ==================== 11. FORGOT PASSWORD MODAL ==================== */
+const ForgotPasswordModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { users, resetPassword, showToast } = useApp();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [identifier, setIdentifier] = useState('');
+  const [matchedUser, setMatchedUser] = useState<any>(null);
+  const [otpInput, setOtpInput] = useState('');
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleLookup = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    const q = identifier.trim().toLowerCase();
+    const found = users.find(
+      u =>
+        u.username.toLowerCase() === q ||
+        u.identifier.toLowerCase() === q ||
+        (u.email && u.email.toLowerCase() === q)
+    );
+
+    if (!found) {
+      setErrorMsg('Akun tidak ditemukan. Periksa kembali NIM, NIDN, username, atau email Anda.');
+      return;
+    }
+
+    const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setMatchedUser(found);
+    setGeneratedOtp(mockOtp);
+    setOtpInput(mockOtp); // auto-fill simulated OTP for easy UX
+    setStep(2);
+    showToast(`Kode OTP verifikasi [${mockOtp}] dikirim ke email terdaftar ${found.name}`);
+  };
+
+  const handleResetSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (otpInput.trim() !== generatedOtp) {
+      setErrorMsg('Kode OTP tidak sesuai. Silakan masukkan 6 digit kode yang tertera.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setErrorMsg('Kata sandi baru minimal harus terdiri dari 6 karakter.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setErrorMsg('Konfirmasi kata sandi baru tidak cocok.');
+      return;
+    }
+
+    const success = resetPassword(matchedUser.identifier || matchedUser.username, newPassword);
+    if (success) {
+      onClose();
+    }
+  };
+
+  return (
+    <div>
+      <div className="eyebrow" style={{ color: '#0284c7' }}>Pemulihan Akun Civitas</div>
+      <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginBottom: '8px' }}>
+        Lupa Kata Sandi?
+      </h2>
+      <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '20px' }}>
+        Pulihkan akses ke akun STEAM-Craft Anda melalui verifikasi identitas resmi kampus.
+      </p>
+
+      {step === 1 ? (
+        <form onSubmit={handleLookup}>
+          <div className="auth-field">
+            <label>NIM / NIDN / Username / Email Terdaftar</label>
+            <input
+              type="text"
+              placeholder="Contoh: 202610101 (NIM) atau 198504122010121002 (NIP)"
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
+              required
+              autoFocus
+            />
+            <small style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px', display: 'block' }}>
+              Tip demo: Masukkan NIM Mahasiswa (<code>202610101</code>) atau NIP Dosen (<code>198504122010121002</code>).
+            </small>
+          </div>
+
+          {errorMsg && <div className="auth-error" style={{ marginBottom: '14px' }}>{errorMsg}</div>}
+
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '18px' }}>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
+              Batal
+            </button>
+            <button type="submit" className="btn btn-primary">
+              <span>Lanjut & Minta Kode OTP</span>
+              <ArrowRight size={15} />
+            </button>
+          </div>
+        </form>
+      ) : (
+        <form onSubmit={handleResetSubmit}>
+          <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
+              ✓ Identitas Ditemukan
+            </div>
+            <strong style={{ fontSize: '14px', color: 'var(--navy)', display: 'block', marginTop: '2px' }}>
+              {matchedUser.name} ({matchedUser.role === 'student' ? 'Mahasiswa Peneliti' : matchedUser.role === 'lecturer' ? 'Dosen Pembimbing' : 'Administrator'})
+            </strong>
+            <div style={{ fontSize: '11.5px', color: '#0284c7' }}>
+              NIM/NIDN: {matchedUser.identifier} • {matchedUser.study_program}
+            </div>
+          </div>
+
+          <div className="auth-field">
+            <label>Kode OTP 6-Digit (Simulasi Email Kampus)</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={otpInput}
+                onChange={e => setOtpInput(e.target.value)}
+                placeholder="6 digit kode"
+                maxLength={6}
+                required
+                style={{ fontFamily: 'monospace', fontSize: '18px', letterSpacing: '4px', textAlign: 'center', fontWeight: 800 }}
+              />
+              <span className="badge badge-teal" style={{ whiteSpace: 'nowrap', padding: '8px 10px' }}>
+                Kode: {generatedOtp}
+              </span>
+            </div>
+          </div>
+
+          <div className="auth-field">
+            <label>Kata Sandi Baru</label>
+            <div className="password-input-wrap">
+              <input
+                type={showPass ? 'text' : 'password'}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Minimal 6 karakter"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPass(!showPass)}
+              >
+                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="auth-field">
+            <label>Ulangi Kata Sandi Baru</label>
+            <input
+              type={showPass ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="Ketik ulang kata sandi baru"
+              required
+            />
+          </div>
+
+          {errorMsg && <div className="auth-error" style={{ marginBottom: '14px' }}>{errorMsg}</div>}
+
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '18px' }}>
+            <button type="button" className="btn btn-ghost" onClick={() => setStep(1)}>
+              Kembali
+            </button>
+            <button type="submit" className="btn btn-primary">
+              <Check size={15} />
+              <span>Simpan Kata Sandi Baru</span>
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+};
+
 

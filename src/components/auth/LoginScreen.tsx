@@ -40,10 +40,6 @@ export const LoginScreen: React.FC = () => {
           <span>Platform Kolaborasi Riset Ilmiah & Inovasi Mahasiswa</span>
         </div>
 
-        <div className="login-brand-image">
-          <img src="/logo.jpg" alt="SteamCraft Logo" />
-        </div>
-
         <div className="login-copy">
           <div className="eyebrow">Science · Technology · Engineering · Art · Mathematics</div>
           <h1>
@@ -51,7 +47,7 @@ export const LoginScreen: React.FC = () => {
           </h1>
           <p>
             Integrasikan eksplorasi sains, implementasi teknologi, rancang bangun rekayasa, ekspresi estetika seni,
-            dan ketelitian matematika dalam satu alur kerja berbasis reproducible research.
+            dan ketelitian matematika dalam satu alur kerja riset terstandarisasi.
           </p>
 
           <div className="login-discipline">
@@ -70,6 +66,38 @@ export const LoginScreen: React.FC = () => {
             <span className="disc-pill">
               <span className="dot dot-purple"></span> Mathematics
             </span>
+          </div>
+        </div>
+
+        <div className="login-brand-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
+            <img
+              src="/logo.jpg"
+              alt="SteamCraft Logo"
+              style={{ width: '46px', height: '46px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--line)', boxShadow: '0 4px 12px rgba(40,120,215,0.15)' }}
+            />
+            <div>
+              <strong style={{ fontSize: '15px', color: 'var(--navy)', display: 'block' }}>
+                STEAM-Craft Research Ecosystem
+              </strong>
+              <small style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
+                Open Science &bull; AI &amp; IoT &bull; Rubrik Standar Nasional
+              </small>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingTop: '10px', borderTop: '1px solid var(--line-light)' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--primary)' }}>13</div>
+              <div style={{ fontSize: '10px', color: 'var(--muted)' }}>Proyek Riset</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '15px', fontWeight: 900, color: '#0d9488' }}>36</div>
+              <div style={{ fontSize: '10px', color: 'var(--muted)' }}>Kolaborator</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '15px', fontWeight: 900, color: '#16a34a' }}>99.8%</div>
+              <div style={{ fontSize: '10px', color: 'var(--muted)' }}>Verifikasi Mutu</div>
+            </div>
           </div>
         </div>
 
@@ -137,7 +165,24 @@ export const LoginScreen: React.FC = () => {
             </div>
 
             <div className="auth-field">
-              <label>Kata Sandi</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ margin: 0 }}>Kata Sandi</label>
+                <button
+                  type="button"
+                  onClick={() => openModal('forgotPassword')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--primary)',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
+                >
+                  Lupa kata sandi?
+                </button>
+              </div>
               <div className="password-input-wrap">
                 <input
                   type={showPassword ? 'text' : 'password'}

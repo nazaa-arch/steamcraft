@@ -62,6 +62,7 @@ interface AppContextType {
 
   // Auth
   login: (identifierOrUsername: string, password?: string) => boolean;
+  resetPassword: (identifierOrUsernameOrEmail: string, newPassword: string) => boolean;
   switchDemoUser: (roleOrUsername: string) => void;
   logout: () => void;
   registerUser: (data: Partial<User>) => boolean;
@@ -329,6 +330,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast('Identitas pengguna tidak ditemukan!');
     return false;
+  };
+
+  const resetPassword = (identifierOrUsernameOrEmail: string, newPassword: string): boolean => {
+    const q = identifierOrUsernameOrEmail.trim().toLowerCase();
+    const userIndex = users.findIndex(
+      u =>
+        u.username.toLowerCase() === q ||
+        u.identifier.toLowerCase() === q ||
+        (u.email && u.email.toLowerCase() === q)
+    );
+
+    if (userIndex === -1) {
+      showToast('Akun dengan identitas tersebut tidak ditemukan!');
+      return false;
+    }
+
+    const updatedUsers = [...users];
+    updatedUsers[userIndex] = {
+      ...updatedUsers[userIndex],
+      password: newPassword
+    };
+
+    setUsers(updatedUsers);
+    localStorage.setItem('sc_users', JSON.stringify(updatedUsers));
+    showToast(`Kata sandi untuk ${updatedUsers[userIndex].name} berhasil diperbarui! Silakan masuk.`);
+    return true;
   };
 
   const switchDemoUser = (roleOrUsername: string) => {
@@ -893,6 +920,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAppMode,
 
         login,
+        resetPassword,
         switchDemoUser,
         logout,
         registerUser,

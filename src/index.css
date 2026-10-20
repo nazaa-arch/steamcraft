@@ -1554,5 +1554,91 @@ html, body {
   }
 }
 
+/* ==================== LAPTOP & RESPONSIVE TOPBAR NAVIGATION ==================== */
+.nav-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.nav button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.nav-scroll-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  flex-shrink: 0;
+  color: var(--navy);
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-scroll-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: scale(1.08);
+}
+
+.nav-scroll-left {
+  margin-right: 4px;
+}
+
+.nav-scroll-right {
+  margin-left: 4px;
+}
+
+/* ==================== LOGIN HERO SHOWCASE RESTRUCTURE ==================== */
+.login-showcase {
+  justify-content: center !important;
+  gap: 20px !important;
+}
+
+.login-copy h1 {
+  margin-top: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.login-brand-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(40, 120, 215, 0.2);
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  max-width: 520px;
+  margin: 6px 0 12px 0;
+}
+
+
 
 

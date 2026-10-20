@@ -13,6 +13,8 @@ import { MissionControlPage } from './components/pages/MissionControlPage';
 import { AnalyticsPage } from './components/pages/AnalyticsPage';
 import { AnnouncementsPage } from './components/pages/AnnouncementsPage';
 import { AdminConsolePage } from './components/pages/AdminConsolePage';
+import { AdminDashboard } from './components/pages/AdminDashboard';
+import { NotFoundPage } from './components/pages/NotFoundPage';
 import { Modals } from './components/modals/Modals';
 import { Toast } from './components/common/Toast';
 
@@ -34,7 +36,9 @@ export const App: React.FC = () => {
       <Topbar />
 
       <main className="wrap">
-        {currentPage === 'dashboard' && <StudentDashboard />}
+        {currentPage === 'dashboard' && (
+          currentUser.role === 'admin' ? <AdminDashboard /> : <StudentDashboard />
+        )}
         {currentPage === 'projects' && <ProjectCatalog />}
         {currentPage === 'workspace' && <ProjectWorkspace />}
         {currentPage === 'recruitment' && <OpenRecruitmentHub />}
@@ -47,6 +51,11 @@ export const App: React.FC = () => {
         {currentPage === 'analytics' && <AnalyticsPage />}
         {currentPage === 'announcements' && <AnnouncementsPage />}
         {currentPage === 'admin' && <AdminConsolePage />}
+        {![
+          'dashboard', 'projects', 'workspace', 'recruitment', 'studentConsultations',
+          'studentResources', 'studentPortfolio', 'mission', 'consultations', 'resources',
+          'analytics', 'announcements', 'admin'
+        ].includes(currentPage) && <NotFoundPage />}
       </main>
 
       <Modals />

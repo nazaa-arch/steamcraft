@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles } from 'lucide-react';
+import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -19,6 +19,40 @@ export const Topbar: React.FC = () => {
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const notifWrapperRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkNavScroll = () => {
+    if (navRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = navRef.current;
+      setCanScrollLeft(scrollLeft > 6);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
+    }
+  };
+
+  useEffect(() => {
+    checkNavScroll();
+    window.addEventListener('resize', checkNavScroll);
+    return () => window.removeEventListener('resize', checkNavScroll);
+  }, [currentPage, currentUser]);
+
+  const scrollNav = (direction: 'left' | 'right') => {
+    if (navRef.current) {
+      navRef.current.scrollBy({
+        left: direction === 'left' ? -220 : 220,
+        behavior: 'smooth'
+      });
+      setTimeout(checkNavScroll, 300);
+    }
+  };
+
+  const handleNavWheel = (e: React.WheelEvent) => {
+    if (navRef.current && e.deltaY !== 0) {
+      navRef.current.scrollLeft += e.deltaY;
+      checkNavScroll();
+    }
+  };
 
   // Close notification dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -86,8 +120,27 @@ export const Topbar: React.FC = () => {
         </div>
       </a>
 
-      {/* Role-Separated Navigation */}
-      <nav className="nav" id="mainNav">
+      {/* Role-Separated Navigation with Laptop Horizontal Scroll Support */}
+      <div className="nav-container">
+        {canScrollLeft && (
+          <button
+            type="button"
+            className="nav-scroll-btn nav-scroll-left"
+            onClick={() => scrollNav('left')}
+            title="Geser menu ke kiri"
+            aria-label="Geser navigasi ke kiri"
+          >
+            <ChevronLeft size={15} />
+          </button>
+        )}
+
+        <nav
+          className="nav"
+          id="mainNav"
+          ref={navRef}
+          onScroll={checkNavScroll}
+          onWheel={handleNavWheel}
+        >
         {/* Student Navigation */}
         {role === 'student' && (
           <>
@@ -234,7 +287,20 @@ export const Topbar: React.FC = () => {
             </button>
           </>
         )}
-      </nav>
+        </nav>
+
+        {canScrollRight && (
+          <button
+            type="button"
+            className="nav-scroll-btn nav-scroll-right"
+            onClick={() => scrollNav('right')}
+            title="Geser menu ke kanan"
+            aria-label="Geser navigasi ke kanan"
+          >
+            <ChevronRight size={15} />
+          </button>
+        )}
+      </div>
 
       {/* User Controls */}
       <div className="user-controls">
