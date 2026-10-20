@@ -20,7 +20,12 @@ import {
   Paperclip,
   Star,
   ThumbsUp,
-  MessageSquare
+  MessageSquare,
+  ChevronDown,
+  Layers,
+  UserCheck,
+  BookOpen,
+  Sparkles
 } from 'lucide-react';
 
 export const ProjectWorkspace: React.FC = () => {
@@ -43,7 +48,8 @@ export const ProjectWorkspace: React.FC = () => {
     peerFeedbacks,
     addPeerFeedback,
     currentUser,
-    openModal
+    openModal,
+    showToast
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'checkpoints' | 'journals' | 'versions' | 'team' | 'peerFeedback' | 'evaluation'>('checkpoints');
@@ -163,90 +169,99 @@ export const ProjectWorkspace: React.FC = () => {
   return (
     <section className="page active">
       {/* Workspace Header Card */}
-      <div className="workspace-header">
-        <div className="ws-top">
-          <div style={{ flex: 1 }}>
-            {/* Project Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-              <span className="eyebrow" style={{ margin: 0 }}>
-                Ruang Kerja Riset:
-              </span>
+      <div className="workspace-header workspace-header-enhanced">
+        <div className="ws-top-row">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span className="ws-category-badge">
+              <span className="ws-live-pulse"></span>
+              Ruang Kerja Riset
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>
+              Proyek #{currentProject.id} dari {projects.length}
+            </span>
+          </div>
+
+          {/* Styled Project Switcher Dropdown */}
+          <div className="ws-switcher-container">
+            <div className="ws-switcher-wrapper">
+              <Layers size={14} className="ws-switcher-icon-left" />
               <select
                 value={selectedProjectId}
                 onChange={e => setSelectedProjectId(Number(e.target.value))}
-                style={{
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  padding: '4px 10px',
-                  borderRadius: '8px',
-                  width: 'auto'
-                }}
+                className="ws-switcher-select"
+                aria-label="Pilih Proyek Riset"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>
-                    #{p.id} - {p.name} ({p.study})
+                    #{p.id} • {p.name} ({p.study})
                   </option>
                 ))}
               </select>
-            </div>
-
-            <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--navy)', marginBottom: '8px', lineHeight: 1.2 }}>
-              {currentProject.name}
-            </h2>
-
-            <p style={{ fontSize: '13.5px', color: 'var(--ink-secondary)', maxWidth: '750px', marginBottom: '14px' }}>
-              {currentProject.desc}
-            </p>
-
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span className="badge badge-blue">{currentProject.study}</span>
-              <span className="badge badge-purple">{currentProject.steam}</span>
-              <span className={`badge ${currentProject.blocker ? 'badge-rose' : 'badge-teal'}`}>
-                {currentProject.blocker ? '⚠️ Memerlukan Bimbingan (Blocker)' : currentProject.status}
-              </span>
-              <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '6px' }}>
-                👨‍🏫 Pembimbing: <strong>{currentProject.lecturer}</strong>
-              </span>
+              <ChevronDown size={14} className="ws-switcher-chevron-right" />
             </div>
           </div>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="ws-actions">
-            {currentProject.repo_url && (
-              <a
-                href={currentProject.repo_url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-ghost btn-sm"
-                title="Buka Repositori Kode Ilmiah"
-              >
-                <GitBranch size={13} />
-                <span>Repositori</span>
-                <ExternalLink size={11} />
-              </a>
-            )}
+        {/* Project Title & Description */}
+        <div className="ws-title-row">
+          <h2 className="ws-project-title">
+            {currentProject.name}
+          </h2>
+          <p className="ws-project-desc">
+            {currentProject.desc}
+          </p>
+        </div>
 
-            <button
-              className={`btn ${currentProject.blocker ? 'btn-success' : 'btn-ghost'} btn-sm`}
-              onClick={() => {
-                if (currentProject.blocker) {
-                  toggleBlocker(currentProject.id, '');
-                } else {
-                  setBlockerModalOpen(true);
-                }
-              }}
+        {/* Metadata & Supervisor Row */}
+        <div className="ws-meta-bar">
+          <span className="badge badge-blue">{currentProject.study}</span>
+          <span className="badge badge-purple">{currentProject.steam}</span>
+          <span className={`badge ${currentProject.blocker ? 'badge-rose' : 'badge-teal'}`}>
+            {currentProject.blocker ? '⚠️ Memerlukan Bimbingan' : currentProject.status}
+          </span>
+          <div className="ws-supervisor-chip">
+            <UserCheck size={12} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+            <span>Pembimbing: <strong>{currentProject.lecturer}</strong></span>
+          </div>
+        </div>
+
+        {/* Action Buttons Row */}
+        <div className="ws-actions-row">
+          {currentProject.repo_url && (
+            <a
+              href={currentProject.repo_url}
+              target="_blank"
+              rel="noreferrer"
+              className="ws-btn-repo"
+              title="Buka Repositori Kode Ilmiah"
             >
-              <AlertTriangle size={13} />
-              <span>{currentProject.blocker ? 'Selesaikan Kendala' : 'Laporkan Kendala'}</span>
-            </button>
-          </div>
+              <GitBranch size={13} />
+              <span>Repositori Riset</span>
+              <ExternalLink size={11} />
+            </a>
+          )}
+
+          <button
+            type="button"
+            className={currentProject.blocker ? 'ws-btn-blocker-active' : 'ws-btn-blocker'}
+            onClick={() => {
+              if (currentProject.blocker) {
+                toggleBlocker(currentProject.id, '');
+              } else {
+                setBlockerModalOpen(true);
+              }
+            }}
+          >
+            <AlertTriangle size={13} />
+            <span>{currentProject.blocker ? 'Selesaikan Kendala' : 'Laporkan Kendala'}</span>
+          </button>
         </div>
 
         {/* Blocker alert banner if present */}
         {currentProject.blocker === 1 && (
           <div
             style={{
-              marginTop: '16px',
+              marginBottom: '16px',
               padding: '12px 16px',
               borderRadius: '12px',
               background: '#fff1f2',
@@ -278,56 +293,64 @@ export const ProjectWorkspace: React.FC = () => {
         )}
 
         {/* Progress Bar */}
-        <div style={{ marginTop: '18px' }}>
-          <div className="progress-label-row">
+        <div className="ws-progress-box">
+          <div className="ws-progress-label">
             <span>
               Kemajuan Riset Ilmiah ({completedCount} dari {projectCheckpoints.length} checkpoint)
             </span>
-            <span style={{ color: 'var(--primary)', fontWeight: 800 }}>{currentProject.progress}% Selesai</span>
+            <span style={{ color: 'var(--primary)', fontWeight: 800 }}>
+              {currentProject.progress}% Selesai
+            </span>
           </div>
-          <div className="progress-track" style={{ height: '10px' }}>
-            <div className="progress-fill" style={{ width: `${currentProject.progress}%` }}></div>
+          <div className="ws-progress-track">
+            <div className="ws-progress-fill" style={{ width: `${currentProject.progress}%` }}></div>
           </div>
         </div>
       </div>
 
-      {/* Workspace Tabs */}
-      <div className="inspector-subtabs" style={{ marginBottom: '20px' }}>
+      {/* Workspace Subtabs Navigation */}
+      <div className="ws-subtabs-nav">
         <button
-          className={`inspector-subtab-btn ${activeTab === 'checkpoints' ? 'active' : ''}`}
+          className={`ws-subtab-pill ${activeTab === 'checkpoints' ? 'active' : ''}`}
           onClick={() => setActiveTab('checkpoints')}
         >
-          Tahapan & Checkpoint ({completedCount}/{projectCheckpoints.length})
+          <CheckCircle2 size={13} />
+          <span>Tahapan ({completedCount}/{projectCheckpoints.length})</span>
         </button>
         <button
-          className={`inspector-subtab-btn ${activeTab === 'journals' ? 'active' : ''}`}
+          className={`ws-subtab-pill ${activeTab === 'journals' ? 'active' : ''}`}
           onClick={() => setActiveTab('journals')}
         >
-          Jurnal & Logbook ({projectJournals.length})
+          <BookOpen size={13} />
+          <span>Logbook ({projectJournals.length})</span>
         </button>
         <button
-          className={`inspector-subtab-btn ${activeTab === 'versions' ? 'active' : ''}`}
+          className={`ws-subtab-pill ${activeTab === 'versions' ? 'active' : ''}`}
           onClick={() => setActiveTab('versions')}
         >
-          Versi & Artefak ({projectVersions.length})
+          <Layers size={13} />
+          <span>Artefak ({projectVersions.length})</span>
         </button>
         <button
-          className={`inspector-subtab-btn ${activeTab === 'team' ? 'active' : ''}`}
+          className={`ws-subtab-pill ${activeTab === 'team' ? 'active' : ''}`}
           onClick={() => setActiveTab('team')}
         >
-          Kolaborator Tim ({projectMembers.length})
+          <Users size={13} />
+          <span>Tim ({projectMembers.length})</span>
         </button>
         <button
-          className={`inspector-subtab-btn ${activeTab === 'peerFeedback' ? 'active' : ''}`}
+          className={`ws-subtab-pill ${activeTab === 'peerFeedback' ? 'active' : ''}`}
           onClick={() => setActiveTab('peerFeedback')}
         >
-          Peer Feedback ({projectPeerFeedbacks.length})
+          <Star size={13} />
+          <span>Peer 360 ({projectPeerFeedbacks.length})</span>
         </button>
         <button
-          className={`inspector-subtab-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
+          className={`ws-subtab-pill ${activeTab === 'evaluation' ? 'active' : ''}`}
           onClick={() => setActiveTab('evaluation')}
         >
-          Evaluasi STEAM & AI Asisten
+          <Sparkles size={13} />
+          <span>Evaluasi & AI</span>
         </button>
       </div>
 
@@ -461,7 +484,7 @@ export const ProjectWorkspace: React.FC = () => {
                   marginBottom: '20px'
                 }}
               >
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div className="ws-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div className="auth-field" style={{ margin: 0 }}>
                     <label>Kategori Catatan</label>
                     <select value={journalTag} onChange={e => setJournalTag(e.target.value)}>
@@ -536,7 +559,7 @@ export const ProjectWorkspace: React.FC = () => {
                             onClick={e => {
                               // If running in browser simulation, show preview
                               e.preventDefault();
-                              alert(`Mengunduh artefak data riset: ${j.file_name}`);
+                              showToast(`Mengunduh artefak data riset: ${j.file_name}`);
                             }}
                           >
                             <Paperclip size={12} />
@@ -594,7 +617,7 @@ export const ProjectWorkspace: React.FC = () => {
                       required
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div className="ws-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                     <div className="auth-field" style={{ margin: 0 }}>
                       <label>URL Artefak / Commit Repositori</label>
                       <input
@@ -672,7 +695,7 @@ export const ProjectWorkspace: React.FC = () => {
                       ) : (
                         <button
                           className="btn btn-ghost btn-sm"
-                          onClick={() => alert(`Artefak v${v.version_number}.0 telah tersimpan dalam repositori internal.`)}
+                          onClick={() => showToast(`Artefak v${v.version_number}.0 telah tersimpan dalam repositori internal.`)}
                         >
                           <Check size={12} />
                           <span>Terverifikasi</span>
@@ -1820,7 +1843,7 @@ export const ProjectWorkspace: React.FC = () => {
                 </p>
 
                 {currentProject.steam_scores ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', textAlign: 'center' }}>
+                  <div className="steam-score-grid">
                     <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
                       <div style={{ fontSize: '11px', fontWeight: 800, color: '#1d4ed8' }}>SCIENCE</div>
                       <div style={{ fontSize: '24px', fontWeight: 900, color: '#1e40af' }}>{currentProject.steam_scores.S}</div>
@@ -1869,7 +1892,7 @@ export const ProjectWorkspace: React.FC = () => {
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '12px' }}>
+                  <div className="rubric-score-grid">
                     <div style={{ background: 'white', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
                       <div style={{ fontSize: '10px', color: 'var(--muted)' }}>Tahapan (25%)</div>
                       <div style={{ fontSize: '16px', fontWeight: 800, color: '#16a34a' }}>
