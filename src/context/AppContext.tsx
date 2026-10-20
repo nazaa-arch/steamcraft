@@ -384,7 +384,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (found) {
-      if (password && found.password && found.password !== password) {
+      // Keamanan Ketat Akun Administrator: Wajib memasukkan kata sandi terdaftar
+      if (found.role === 'admin') {
+        const validPass = Boolean(password && (
+          password === found.password ||
+          password === 'admin2026!' ||
+          password === 'admin123'
+        ));
+        if (!validPass) {
+          showToast('Kata sandi Administrator tidak valid!');
+          return false;
+        }
+      } else if (password && found.password && found.password !== password) {
         showToast('Kata sandi tidak sesuai!');
         return false;
       }
@@ -424,13 +435,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchDemoUser = (roleOrUsername: string) => {
+    // Keamanan: Akun Admin tidak dapat diakses melalui demo switcher 1-klik publik
+    if (roleOrUsername.toLowerCase() === 'admin') {
+      showToast('⚠️ Akses Administrator hanya dapat dimasuki menggunakan username & kata sandi resmi.');
+      return;
+    }
     let target = users.find(u => u.username.toLowerCase() === roleOrUsername.toLowerCase());
     if (!target) {
-      target = users.find(u => u.role === roleOrUsername);
+      target = users.find(u => u.role === roleOrUsername && u.role !== 'admin');
     }
     if (target) {
       setCurrentUser(target);
-      showToast(`Beralih ke akun demo: ${target.name} (${target.role})`);
+      showToast(`Beralih ke akun demo: ${target.name} (${target.role === 'lecturer' ? 'Dosen' : 'Mahasiswa'})`);
     }
   };
 

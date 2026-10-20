@@ -201,15 +201,6 @@ export const LoginScreen: React.FC = () => {
                   <span>👨‍🏫 Dr. Rahmat Wijaya, M.Sc. (Dosen Pembimbing)</span>
                   <span style={{ fontSize: '10px', opacity: 0.8 }}>Dosen STEAM &rarr;</span>
                 </button>
-                <button
-                  type="button"
-                  className="demo-btn"
-                  onClick={() => switchDemoUser('admin')}
-                  style={{ background: '#0f172a', color: '#38bdf8', borderColor: '#38bdf8' }}
-                >
-                  <span>🛠️ Administrator Sistem (Lead Dev)</span>
-                  <span style={{ fontSize: '10px', opacity: 0.8 }}>Full Console &rarr;</span>
-                </button>
               </div>
             </div>
 
