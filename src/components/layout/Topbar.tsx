@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check } from 'lucide-react';
+import { Bell, Edit3, Shield, LogOut, Check, X } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -18,6 +18,34 @@ export const Topbar: React.FC = () => {
   } = useApp();
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const notifWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Close notification dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!notifDropdownOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (notifWrapperRef.current && !notifWrapperRef.current.contains(event.target as Node)) {
+        setNotifDropdownOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setNotifDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [notifDropdownOpen]);
 
   if (!currentUser) return null;
 
@@ -248,7 +276,7 @@ export const Topbar: React.FC = () => {
         )}
 
         {/* Notification Bell Dropdown */}
-        <div className="notif-bell-wrapper">
+        <div className="notif-bell-wrapper" ref={notifWrapperRef}>
           <button
             className="notif-bell-btn"
             onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
@@ -258,6 +286,16 @@ export const Topbar: React.FC = () => {
             <Bell size={18} />
             {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
           </button>
+
+          {/* Fullscreen Backdrop for Mobile & Desktop (Click/Tap outside to close) */}
+          {notifDropdownOpen && (
+            <div
+              className="notif-backdrop"
+              onClick={() => setNotifDropdownOpen(false)}
+              onTouchStart={() => setNotifDropdownOpen(false)}
+              aria-hidden="true"
+            />
+          )}
 
           {/* Dropdown Popover */}
           {notifDropdownOpen && (
@@ -273,11 +311,22 @@ export const Topbar: React.FC = () => {
                     Pemberitahuan & Pengumuman
                   </strong>
                 </div>
-                {unreadCount > 0 && (
-                  <span className="badge badge-rose" style={{ fontSize: '10px' }}>
-                    {unreadCount} baru
-                  </span>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {unreadCount > 0 && (
+                    <span className="badge badge-rose" style={{ fontSize: '10px' }}>
+                      {unreadCount} baru
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="notif-close-btn"
+                    onClick={() => setNotifDropdownOpen(false)}
+                    title="Tutup Notifikasi"
+                    aria-label="Tutup"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="notif-dropdown-list">
