@@ -15,6 +15,7 @@ import { AnnouncementsPage } from './components/pages/AnnouncementsPage';
 import { AdminConsolePage } from './components/pages/AdminConsolePage';
 import { AdminDashboard } from './components/pages/AdminDashboard';
 import { AdminDevPortal } from './components/pages/AdminDevPortal';
+import { TeamProjectHub } from './components/pages/TeamProjectHub';
 import { MaintenancePage } from './components/pages/MaintenancePage';
 import { NotFoundPage } from './components/pages/NotFoundPage';
 import { Modals } from './components/modals/Modals';
@@ -23,15 +24,17 @@ import { Toast } from './components/common/Toast';
 export const App: React.FC = () => {
   const { currentUser, currentPage, maintenanceMode, setMaintenanceMode, setCurrentPage } = useApp();
 
-  // Detect adm.steamcraft.online subdomain or ?portal=adm query param
-  const isAdmSubdomain = typeof window !== 'undefined' && (
-    window.location.hostname.startsWith('adm.') ||
-    window.location.hostname === 'adm.steamcraft.online' ||
-    new URLSearchParams(window.location.search).get('portal') === 'adm'
-  );
+  const hostname = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
 
-  // Dedicated Master Admin & DevOps Portal route
-  if (isAdmSubdomain || currentPage === 'adminDev') {
+  // 1. Dedicated Master Admin & DevOps Portal route: adm.steamcraft.online or ?portal=adm or currentPage === 'adminDev'
+  const isAdmSubdomain =
+    hostname.startsWith('adm.') ||
+    hostname === 'adm.steamcraft.online' ||
+    searchParams.get('portal') === 'adm' ||
+    currentPage === 'adminDev';
+
+  if (isAdmSubdomain) {
     return (
       <>
         <AdminDevPortal />
@@ -41,6 +44,44 @@ export const App: React.FC = () => {
     );
   }
 
+  // 2. Main Team Project Hub Domain: steamcraft.online / www.steamcraft.online (Showcase Projek Tim Bersama)
+  // When visitor opens steamcraft.online, show the Team Collaborative Projects Showcase & Multi-Project Gateway!
+  // When visitor opens app.steamcraft.online or ?view=app, show the full STEAM-Craft Application!
+  const isAppSubdomain =
+    hostname.startsWith('app.') ||
+    hostname === 'app.steamcraft.online' ||
+    searchParams.get('view') === 'app' ||
+    searchParams.get('app') === 'true';
+
+  const isMainHub =
+    !isAppSubdomain &&
+    (hostname === 'steamcraft.online' ||
+      hostname === 'www.steamcraft.online' ||
+      searchParams.get('view') === 'hub' ||
+      currentPage === 'hub');
+
+  if (isMainHub) {
+    return (
+      <>
+        <TeamProjectHub
+          onLaunchApp={() => {
+            if (hostname.includes('steamcraft.online')) {
+              window.location.href = 'https://app.steamcraft.online';
+            } else {
+              setCurrentPage('dashboard');
+              const sp = new URLSearchParams(window.location.search);
+              sp.set('view', 'app');
+              window.location.search = sp.toString();
+            }
+          }}
+        />
+        <Modals />
+        <Toast />
+      </>
+    );
+  }
+
+  // 3. Application Area (app.steamcraft.online or ?view=app):
   // If Maintenance Mode is globally active and user is not an Admin, show MaintenancePage directly
   if (maintenanceMode && currentUser?.role !== 'admin') {
     return (
@@ -136,11 +177,12 @@ export const App: React.FC = () => {
         {currentPage === 'announcements' && <AnnouncementsPage />}
         {currentPage === 'admin' && <AdminConsolePage />}
         {currentPage === 'adminDev' && <AdminDevPortal />}
+        {currentPage === 'hub' && <TeamProjectHub />}
         {currentPage === 'maintenance' && <MaintenancePage />}
         {![
           'dashboard', 'projects', 'workspace', 'recruitment', 'studentConsultations',
           'studentResources', 'studentPortfolio', 'mission', 'consultations', 'resources',
-          'analytics', 'announcements', 'admin', 'adminDev', 'maintenance'
+          'analytics', 'announcements', 'admin', 'adminDev', 'hub', 'maintenance'
         ].includes(currentPage) && <NotFoundPage />}
       </main>
 

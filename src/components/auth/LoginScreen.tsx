@@ -217,6 +217,23 @@ export const LoginScreen: React.FC = () => {
                 <ArrowRight size={14} />
               </button>
             </div>
+
+            {/* Back Link to Team Project Hub */}
+            <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px solid rgba(148, 163, 184, 0.15)', paddingTop: '14px' }}>
+              <a
+                href="https://steamcraft.online"
+                style={{
+                  color: '#94a3b8',
+                  fontSize: '12.5px',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>🌐 Kunjungi Hub Portofolio Projek Tim (steamcraft.online) &rarr;</span>
+              </a>
+            </div>
           </form>
         </div>
       </section>

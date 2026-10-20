@@ -287,6 +287,25 @@ export const Topbar: React.FC = () => {
             </button>
           </>
         )}
+          <a
+            href="https://steamcraft.online"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              color: '#94a3b8',
+              textDecoration: 'none',
+              fontSize: '12px',
+              fontWeight: 600,
+              background: 'rgba(255,255,255,0.05)',
+              marginLeft: '4px'
+            }}
+            title="Kunjungi Website Utama & Hub Projek Tim"
+          >
+            <span>🌐 Hub Projek Tim &nearr;</span>
+          </a>
         </nav>
 
         {canScrollRight && (
