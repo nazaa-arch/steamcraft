@@ -83,6 +83,7 @@ export interface Project {
   package_compiled?: number;
   package_filename?: string | null;
   is_demo?: number;
+  invite_code?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -76,6 +76,8 @@ interface AppContextType {
   toggleBlocker: (projectId: number, reason: string) => void;
   addJournal: (projectId: number, tag: string, content: string, fileName?: string) => void;
   addVersion: (projectId: number, note: string, artifactUrl?: string, fileName?: string) => void;
+  joinProjectByCode: (codeOrUrl: string, memberRole?: string) => { success: boolean; project?: Project; message: string };
+  inviteUserToProject: (projectId: number, userId: number, role: string) => boolean;
 
   // Collaborations
   applyRecruitment: (projectId: number, applicantRole: string, applicantStudy: string, message: string) => void;
@@ -299,6 +301,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setModalData(null);
   };
 
+  // Check URL query parameters for invitation links (?invite=CODE or ?code=CODE)
+  useEffect(() => {
+    if (!currentUser) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteCode = urlParams.get('invite') || urlParams.get('join') || urlParams.get('code');
+    if (inviteCode) {
+      openModal('joinProject', inviteCode);
+    }
+  }, [currentUser]);
+
   const setAppMode = (mode: AppMode) => {
     setAppModeState(mode);
     showToast(
@@ -480,6 +492,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       blocker_reason: '',
       steam_scores: { S: 85, T: 80, E: 75, A: 70, M: 80 },
       is_demo: appMode === 'demo' ? 1 : 0,
+      invite_code: `STEAM-${newId.toString().padStart(2, '0')}${((data.study || 'SC').replace(/[^a-zA-Z]/g, '')).slice(0, 2).toUpperCase()}`,
       created_at: new Date().toISOString()
     };
 
@@ -649,6 +662,117 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setVersions(prev => [newVersion, ...prev]);
     setProjects(prev => prev.map(p => (p.id === projectId ? { ...p, versions_count: nextVer } : p)));
     showToast(`Build v${nextVer}.0 berhasil didaftarkan ke reproducibility log.`);
+  };
+
+  const joinProjectByCode = (codeOrUrl: string, memberRole?: string): { success: boolean; project?: Project; message: string } => {
+    if (!currentUser) {
+      showToast('Silakan masuk terlebih dahulu untuk bergabung ke proyek!');
+      return { success: false, message: 'Pengguna belum login.' };
+    }
+
+    // Clean up code from potential URL paste: ?invite=CODE or /join?code=CODE
+    let code = codeOrUrl.trim();
+    if (code.includes('invite=')) {
+      code = code.split('invite=')[1].split('&')[0];
+    } else if (code.includes('code=')) {
+      code = code.split('code=')[1].split('&')[0];
+    }
+    code = code.toUpperCase();
+
+    // Match project by invite_code or fallback pattern STEAM-XX
+    const found = projects.find(p => {
+      const defaultCode = (p.invite_code || `STEAM-${p.id.toString().padStart(2, '0')}${((p.study || 'SC').replace(/[^a-zA-Z]/g, '')).slice(0, 2).toUpperCase()}`).toUpperCase();
+      const simpleIdCode = `STEAM-${p.id.toString().padStart(2, '0')}`;
+      return defaultCode === code || simpleIdCode === code || p.invite_code?.toUpperCase() === code;
+    });
+
+    if (!found) {
+      showToast('Kode atau tautan undangan proyek tidak ditemukan!');
+      return { success: false, message: 'Kode undangan tidak cocok dengan proyek riset manapun.' };
+    }
+
+    // Check if user is already a member
+    const isAlreadyMember = members.some(m => m.project_id === found.id && (m.user_id === currentUser.id || m.identifier === currentUser.identifier));
+    if (isAlreadyMember) {
+      setSelectedProjectId(found.id);
+      setCurrentPage('workspace');
+      showToast(`Anda sudah terdaftar sebagai anggota tim "${found.name}". Membuka ruang kerja.`);
+      return { success: true, project: found, message: 'Anda sudah menjadi anggota proyek ini.' };
+    }
+
+    // Add new member
+    const newMember: ProjectMember = {
+      id: Date.now(),
+      project_id: found.id,
+      user_id: currentUser.id,
+      name: currentUser.name,
+      identifier: currentUser.identifier,
+      study_program: currentUser.study_program,
+      role: memberRole || 'Co-Researcher (Kolaborator)',
+      is_lead: 0,
+      avatar_color: currentUser.avatar_color || '#2563eb',
+      joined_at: new Date().toISOString()
+    };
+
+    setMembers(prev => [...prev, newMember]);
+    setProjects(prev =>
+      prev.map(p => (p.id === found.id ? { ...p, members_count: p.members_count + 1 } : p))
+    );
+
+    // Add welcome logbook journal entry
+    addJournal(
+      found.id,
+      'Kolaborator',
+      `${currentUser.name} (${currentUser.study_program}) resmi bergabung ke tim riset via kode undangan [${code}].`
+    );
+
+    setSelectedProjectId(found.id);
+    setCurrentPage('workspace');
+    showToast(`🎉 Selamat bergabung di tim riset "${found.name}"!`);
+    return { success: true, project: found, message: 'Berhasil bergabung ke tim riset.' };
+  };
+
+  const inviteUserToProject = (projectId: number, userId: number, role: string): boolean => {
+    const targetProject = projects.find(p => p.id === projectId);
+    const targetUser = users.find(u => u.id === userId);
+
+    if (!targetProject || !targetUser) {
+      showToast('Data proyek atau pengguna tidak valid!');
+      return false;
+    }
+
+    const isAlreadyMember = members.some(m => m.project_id === projectId && m.user_id === userId);
+    if (isAlreadyMember) {
+      showToast(`${targetUser.name} sudah menjadi anggota proyek ini.`);
+      return false;
+    }
+
+    const newMember: ProjectMember = {
+      id: Date.now(),
+      project_id: projectId,
+      user_id: targetUser.id,
+      name: targetUser.name,
+      identifier: targetUser.identifier,
+      study_program: targetUser.study_program,
+      role: role || 'Co-Researcher (Kolaborator)',
+      is_lead: 0,
+      avatar_color: targetUser.avatar_color || '#0d9488',
+      joined_at: new Date().toISOString()
+    };
+
+    setMembers(prev => [...prev, newMember]);
+    setProjects(prev =>
+      prev.map(p => (p.id === projectId ? { ...p, members_count: p.members_count + 1 } : p))
+    );
+
+    addJournal(
+      projectId,
+      'Kolaborator',
+      `${targetUser.name} (${targetUser.study_program}) ditambahkan ke tim riset sebagai ${newMember.role}.`
+    );
+
+    showToast(`Undangan terkirim! ${targetUser.name} telah bergabung ke tim "${targetProject.name}".`);
+    return true;
   };
 
   // Applications
@@ -933,6 +1057,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleBlocker,
         addJournal,
         addVersion,
+        joinProjectByCode,
+        inviteUserToProject,
 
         applyRecruitment,
         updateApplicationStatus,

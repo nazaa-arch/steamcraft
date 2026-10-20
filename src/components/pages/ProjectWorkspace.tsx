@@ -25,7 +25,9 @@ import {
   Layers,
   UserCheck,
   BookOpen,
-  Sparkles
+  Sparkles,
+  UserPlus,
+  Link as LinkIcon
 } from 'lucide-react';
 
 export const ProjectWorkspace: React.FC = () => {
@@ -227,6 +229,17 @@ export const ProjectWorkspace: React.FC = () => {
 
         {/* Action Buttons Row */}
         <div className="ws-actions-row">
+          <button
+            type="button"
+            className="ws-btn-repo"
+            onClick={() => openModal('inviteProject', currentProject)}
+            title="Undang kolaborator baru lewat tautan atau kode unik"
+            style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#16a34a' }}
+          >
+            <UserPlus size={13} />
+            <span>Undang Kolaborator</span>
+          </button>
+
           {currentProject.repo_url && (
             <a
               href={currentProject.repo_url}

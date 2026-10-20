@@ -37,7 +37,9 @@ import {
   Compass,
   FolderGit2,
   Bot,
-  ArrowRight
+  ArrowRight,
+  UserPlus,
+  Copy
 } from 'lucide-react';
 import { User, Project, UserRole } from '../../types';
 
@@ -91,6 +93,8 @@ export const Modals: React.FC = () => {
         {activeModal === 'newAnnouncement' && <NewAnnouncementContent onClose={closeModal} />}
         {activeModal === 'register' && <RegisterModalContent onClose={closeModal} />}
         {activeModal === 'forgotPassword' && <ForgotPasswordModalContent onClose={closeModal} />}
+        {activeModal === 'inviteProject' && <InviteProjectModalContent project={modalData} onClose={closeModal} />}
+        {activeModal === 'joinProject' && <JoinProjectModalContent initialCode={typeof modalData === 'string' ? modalData : ''} onClose={closeModal} />}
         {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
       </div>
     </div>
@@ -630,10 +634,6 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
 
       {/* ==================== 1. LIVE RESEARCHER PASSPORT PREVIEW ==================== */}
       <div className="researcher-passport-card">
-        <div className="passport-watermark">
-          STEAM-CRAFT ID: SC-2026-{identifier || 'DEV01'}
-        </div>
-
         <div className="passport-header">
           <div className="passport-brand">
             <Layers size={14} />
@@ -719,6 +719,19 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
                   </span>
                 ))}
             </div>
+          </div>
+        </div>
+
+        {/* Passport Footer with Clear Prominent STEAM-CRAFT ID */}
+        <div className="passport-footer">
+          <div className="passport-security-stamp">
+            <span className="passport-security-dot" />
+            <span>Digital Identity Verified &bull; DIKTI STEAM Framework</span>
+          </div>
+
+          <div className="passport-id-badge" title="ID Peneliti STEAM-Craft Resmi">
+            <span className="passport-id-label">STEAM-CRAFT ID:</span>
+            <span className="passport-id-value">SC-2026-{identifier || 'DEV01'}</span>
           </div>
         </div>
       </div>
@@ -2638,5 +2651,276 @@ const ForgotPasswordModalContent: React.FC<{ onClose: () => void }> = ({ onClose
     </div>
   );
 };
+
+/* ==================== 12. INVITE PROJECT COLLABORATOR MODAL ==================== */
+const InviteProjectModalContent: React.FC<{ project: any; onClose: () => void }> = ({ project, onClose }) => {
+  const { users, members, inviteUserToProject, showToast } = useApp();
+  const [selectedUserId, setSelectedUserId] = useState<number>(0);
+  const [invitedRole, setInvitedRole] = useState('Co-Researcher (Kolaborator Inti)');
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  if (!project) return null;
+
+  const inviteCode = (project.invite_code || `STEAM-${project.id.toString().padStart(2, '0')}${((project.study || 'SC').replace(/[^a-zA-Z]/g, '')).slice(0, 2).toUpperCase()}`).toUpperCase();
+  const inviteUrl = `${window.location.origin}?invite=${inviteCode}`;
+
+  const currentMemberUserIds = members.filter(m => m.project_id === project.id).map(m => m.user_id);
+  const candidateUsers = users.filter(u => !currentMemberUserIds.includes(u.id));
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(inviteUrl);
+    setCopiedLink(true);
+    showToast(`Tautan undangan proyek "${project.name}" berhasil disalin!`);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(inviteCode);
+    setCopiedCode(true);
+    showToast(`Kode undangan [${inviteCode}] berhasil disalin!`);
+    setTimeout(() => setCopiedCode(false), 2500);
+  };
+
+  const handleInviteDirect = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUserId) {
+      showToast('Pilih pengguna yang ingin diundang!');
+      return;
+    }
+    const success = inviteUserToProject(project.id, selectedUserId, invitedRole);
+    if (success) {
+      onClose();
+    }
+  };
+
+  return (
+    <div>
+      <div className="eyebrow" style={{ color: '#0284c7' }}>Kolaborasi Multidisiplin Tim</div>
+      <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+        Undang Kolaborator ke Proyek Riset
+      </h2>
+      <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '20px' }}>
+        Bagikan tautan atau kode unik untuk mengajak mahasiswa dan dosen lain bergabung ke ruang kerja tim riset ini.
+      </p>
+
+      {/* Target Project Mini Card */}
+      <div style={{ background: '#f8fbff', border: '1px solid #bfdbfe', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '4px' }}>
+          <span className="badge badge-blue">{project.study}</span>
+          <span className="badge badge-purple">{project.steam}</span>
+        </div>
+        <strong style={{ fontSize: '15px', color: 'var(--navy)', display: 'block', lineHeight: 1.3 }}>
+          {project.name}
+        </strong>
+      </div>
+
+      {/* 1. Share Invitation Code & Link */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '22px' }}>
+        {/* Unique Join Code Box */}
+        <div style={{ background: '#0f172a', color: 'white', padding: '16px', borderRadius: '14px', border: '1px solid #334155' }}>
+          <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+            🔑 Kode Undangan Proyek
+          </span>
+          <div style={{ fontSize: '22px', fontWeight: 900, fontFamily: 'monospace', color: '#38bdf8', letterSpacing: '2px', marginBottom: '12px' }}>
+            {inviteCode}
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={handleCopyCode}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            {copiedCode ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+            <span>{copiedCode ? 'Kode Tersalin!' : 'Salin Kode Undangan'}</span>
+          </button>
+        </div>
+
+        {/* Shareable Link Box */}
+        <div style={{ background: 'white', padding: '16px', borderRadius: '14px', border: '1px solid var(--line)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+              🔗 Tautan Undangan Langsung
+            </span>
+            <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', background: 'var(--surface-alt)', padding: '8px 10px', borderRadius: '8px', wordBreak: 'break-all', fontFamily: 'monospace', marginBottom: '12px' }}>
+              {inviteUrl}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={handleCopyLink}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            {copiedLink ? <Check size={14} /> : <LinkIcon size={14} />}
+            <span>{copiedLink ? 'Tautan Tersalin!' : 'Salin Tautan Undangan'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Direct Invite to Registered Civitas */}
+      <form onSubmit={handleInviteDirect} style={{ borderTop: '1px solid var(--line)', paddingTop: '18px' }}>
+        <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
+          Atau Tambahkan Langsung Pengguna Civitas Terdaftar
+        </h4>
+        <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '14px' }}>
+          Pilih mahasiswa atau dosen lain untuk langsung dimasukkan ke dalam tim riset ini.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+          <div className="auth-field" style={{ margin: 0 }}>
+            <label>Pilih Peneliti Civitas</label>
+            <select
+              value={selectedUserId}
+              onChange={e => setSelectedUserId(Number(e.target.value))}
+              required
+            >
+              <option value="0" disabled>-- Pilih Pengguna Terdaftar --</option>
+              {candidateUsers.map(u => (
+                <option key={u.id} value={u.id}>
+                  {u.name} ({u.study_program} &bull; {u.role === 'student' ? 'Mhs' : u.role === 'lecturer' ? 'Dosen' : 'Admin'})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="auth-field" style={{ margin: 0 }}>
+            <label>Peran dalam Tim Riset</label>
+            <select
+              value={invitedRole}
+              onChange={e => setInvitedRole(e.target.value)}
+              required
+            >
+              <option value="Co-Researcher (Kolaborator Inti)">Co-Researcher (Kolaborator Inti)</option>
+              <option value="Data Analyst / AI Specialist">Data Analyst / AI Specialist</option>
+              <option value="Hardware &amp; IoT Engineer">Hardware &amp; IoT Engineer</option>
+              <option value="Biologist / Lab Specialist">Biologist / Lab Specialist</option>
+              <option value="Actuarial Risk Modeler">Actuarial Risk Modeler</option>
+              <option value="UI/UX &amp; Estetika Seni (Art)">UI/UX &amp; Estetika Seni (Art)</option>
+              <option value="Peer Reviewer &amp; Penguji Mutu">Peer Reviewer &amp; Penguji Mutu</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+          <button type="button" className="btn btn-ghost" onClick={onClose}>
+            Selesai
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={candidateUsers.length === 0}>
+            <UserPlus size={15} />
+            <span>Kirim Undangan / Tambahkan ke Tim</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+/* ==================== 13. JOIN PROJECT VIA CODE / LINK MODAL ==================== */
+const JoinProjectModalContent: React.FC<{ initialCode?: string; onClose: () => void }> = ({ initialCode = '', onClose }) => {
+  const { projects, joinProjectByCode } = useApp();
+  const [inputCode, setInputCode] = useState(initialCode || '');
+  const [role, setRole] = useState('Co-Researcher (Kolaborator)');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Extract cleaned code
+  let cleanCode = inputCode.trim();
+  if (cleanCode.includes('invite=')) {
+    cleanCode = cleanCode.split('invite=')[1].split('&')[0];
+  } else if (cleanCode.includes('code=')) {
+    cleanCode = cleanCode.split('code=')[1].split('&')[0];
+  }
+  cleanCode = cleanCode.toUpperCase();
+
+  // Match preview project
+  const previewProject = projects.find(p => {
+    const defaultCode = (p.invite_code || `STEAM-${p.id.toString().padStart(2, '0')}${((p.study || 'SC').replace(/[^a-zA-Z]/g, '')).slice(0, 2).toUpperCase()}`).toUpperCase();
+    const simpleIdCode = `STEAM-${p.id.toString().padStart(2, '0')}`;
+    return defaultCode === cleanCode || simpleIdCode === cleanCode || p.invite_code?.toUpperCase() === cleanCode;
+  });
+
+  const handleJoin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    const res = joinProjectByCode(inputCode, role);
+    if (!res.success) {
+      setErrorMsg(res.message);
+    } else {
+      onClose();
+    }
+  };
+
+  return (
+    <div>
+      <div className="eyebrow" style={{ color: '#0284c7' }}>Akses Tim Riset Terpadu</div>
+      <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+        Gabung ke Proyek Riset Tim
+      </h2>
+      <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '20px' }}>
+        Masukkan kode undangan atau tempel tautan yang diberikan oleh ketua tim riset.
+      </p>
+
+      <form onSubmit={handleJoin}>
+        <div className="auth-field">
+          <label>Kode Undangan atau Tautan Lengkap Proyek</label>
+          <input
+            type="text"
+            placeholder="Contoh: STEAM-01SD atau https://steamcraft.online/?invite=STEAM-01SD"
+            value={inputCode}
+            onChange={e => setInputCode(e.target.value)}
+            required
+            autoFocus
+            style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700 }}
+          />
+          <small style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px', display: 'block' }}>
+            Tip demo: Coba ketik <code>STEAM-01SD</code> (Prediksi Cuaca) atau <code>STEAM-02AI</code> (Robot AI).
+          </small>
+        </div>
+
+        {/* Live Detected Project Preview */}
+        {previewProject && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>
+              <CheckCircle2 size={13} />
+              <span>Proyek Riset Ditemukan</span>
+            </div>
+            <strong style={{ fontSize: '14px', color: 'var(--navy)', display: 'block', margin: '4px 0 2px 0' }}>
+              {previewProject.name}
+            </strong>
+            <div style={{ fontSize: '11.5px', color: '#15803d' }}>
+              Prodi: {previewProject.study} &bull; Dosen: {previewProject.lecturer} &bull; {previewProject.members_count} Anggota
+            </div>
+          </div>
+        )}
+
+        <div className="auth-field">
+          <label>Peran Anda dalam Proyek</label>
+          <select value={role} onChange={e => setRole(e.target.value)} required>
+            <option value="Co-Researcher (Kolaborator)">Co-Researcher (Kolaborator Riset)</option>
+            <option value="Data Analyst / AI Specialist">Data Analyst / AI Specialist</option>
+            <option value="Hardware &amp; IoT Engineer">Hardware &amp; IoT Engineer</option>
+            <option value="Biologist / Laboratorium">Biologist / Laboratorium</option>
+            <option value="Modeler Risiko Aktuaria">Modeler Risiko Aktuaria</option>
+            <option value="Visual Designer &amp; UI/UX">Visual Designer &amp; UI/UX</option>
+            <option value="Peer Reviewer &amp; QA">Peer Reviewer &amp; QA</option>
+          </select>
+        </div>
+
+        {errorMsg && <div className="auth-error" style={{ marginBottom: '14px' }}>{errorMsg}</div>}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '18px' }}>
+          <button type="button" className="btn btn-ghost" onClick={onClose}>
+            Batal
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={!previewProject && cleanCode.length < 3}>
+            <ArrowRight size={15} />
+            <span>Gabung ke Ruang Kerja Tim</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 
 

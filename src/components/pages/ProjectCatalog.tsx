@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Plus, Search, Filter, Users, ArrowRight, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Search, Filter, Users, ArrowRight, UserPlus, CheckCircle, AlertCircle, Link as LinkIcon, KeyRound } from 'lucide-react';
 
 export const ProjectCatalog: React.FC = () => {
   const { projects, setSelectedProjectId, setCurrentPage, openModal } = useApp();
@@ -43,10 +43,16 @@ export const ProjectCatalog: React.FC = () => {
             membuka rekrutmen atau jadikan referensi untuk inisiasi topik baru.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => openModal('newProject')}>
-          <Plus size={15} />
-          <span>Buat Proyek Baru</span>
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => openModal('joinProject')}>
+            <KeyRound size={15} />
+            <span>Gabung via Kode / Link</span>
+          </button>
+          <button className="btn btn-primary" onClick={() => openModal('newProject')}>
+            <Plus size={15} />
+            <span>Buat Proyek Baru</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
