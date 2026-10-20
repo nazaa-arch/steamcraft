@@ -12,7 +12,9 @@ export const Topbar: React.FC = () => {
     markAllAnnouncementsRead,
     openModal,
     logout,
-    consultations
+    consultations,
+    markConsultationsRead,
+    projects
   } = useApp();
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
@@ -25,14 +27,19 @@ export const Topbar: React.FC = () => {
   const unreadAnnouncements = announcements.filter(a => !a.is_read);
   const unreadCount = unreadAnnouncements.length;
 
-  // Consultation badges
+  // Consultation badges: only count if status is active and not yet marked as read/seen
   const pendingStudentConsults = consultations.filter(
-    c => c.student_name.toLowerCase().includes(currentUser.name.toLowerCase()) && c.status === 'Terjadwal'
+    c =>
+      c.student_name.toLowerCase().includes(currentUser.name.toLowerCase()) &&
+      c.status === 'Terjadwal' &&
+      c.is_read !== 1
   ).length;
 
   const pendingLecturerConsults = consultations.filter(
-    c => c.status === 'Menunggu respons'
+    c => c.status === 'Menunggu respons' && c.is_read !== 1
   ).length;
+
+  const blockerProjectsCount = projects.filter(p => p.blocker === 1).length;
 
   return (
     <header className="topbar">
@@ -82,7 +89,10 @@ export const Topbar: React.FC = () => {
             </button>
             <button
               className={currentPage === 'studentConsultations' ? 'active' : ''}
-              onClick={() => setCurrentPage('studentConsultations')}
+              onClick={() => {
+                setCurrentPage('studentConsultations');
+                markConsultationsRead();
+              }}
             >
               <span>Jadwal & Bimbingan</span>
               {pendingStudentConsults > 0 && (
@@ -112,7 +122,9 @@ export const Topbar: React.FC = () => {
               onClick={() => setCurrentPage('mission')}
             >
               <span>Mission Control</span>
-              <span className="nav-badge warning">3</span>
+              {blockerProjectsCount > 0 && (
+                <span className="nav-badge warning">{blockerProjectsCount}</span>
+              )}
             </button>
             <button
               className={currentPage === 'projects' ? 'active' : ''}
@@ -128,7 +140,10 @@ export const Topbar: React.FC = () => {
             </button>
             <button
               className={currentPage === 'consultations' ? 'active' : ''}
-              onClick={() => setCurrentPage('consultations')}
+              onClick={() => {
+                setCurrentPage('consultations');
+                markConsultationsRead();
+              }}
             >
               <span>Bimbingan</span>
               {pendingLecturerConsults > 0 && (

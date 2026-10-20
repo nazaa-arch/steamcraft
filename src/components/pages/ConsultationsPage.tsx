@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Calendar, Clock, MapPin, Plus, CheckCircle, MessageSquare } from 'lucide-react';
 
@@ -7,6 +7,7 @@ export const ConsultationsPage: React.FC = () => {
     currentUser,
     consultations,
     updateConsultation,
+    markConsultationsRead,
     openModal,
     projects
   } = useApp();
@@ -14,9 +15,14 @@ export const ConsultationsPage: React.FC = () => {
   const isLecturer = currentUser?.role === 'lecturer';
   const [feedbackNoteInput, setFeedbackNoteInput] = useState<{ [id: number]: string }>({});
 
+  // Automatically mark user's consultations as read upon viewing the page
+  useEffect(() => {
+    markConsultationsRead();
+  }, []);
+
   const handleCompleteConsultation = (id: number) => {
     const feedback = feedbackNoteInput[id] || 'Bimbingan telah selesai dilaksanakan dengan baik.';
-    updateConsultation(id, { status: 'Selesai', feedback });
+    updateConsultation(id, { status: 'Selesai', feedback, is_read: 1 });
   };
 
   return (
@@ -127,6 +133,21 @@ export const ConsultationsPage: React.FC = () => {
                       >
                         <CheckCircle size={13} />
                         <span>Tandai Selesai & Beri Catatan</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Actions for Student */}
+                  {!isLecturer && c.status !== 'Selesai' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end', justifyContent: 'center' }}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => updateConsultation(c.id, { status: 'Selesai', is_read: 1 })}
+                        style={{ fontSize: '11.5px', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        title="Tandai bahwa sesi bimbingan telah dihadiri dan selesai"
+                      >
+                        <CheckCircle size={13} style={{ color: '#16a34a' }} />
+                        <span>Tandai Selesai Dilaksanakan</span>
                       </button>
                     </div>
                   )}

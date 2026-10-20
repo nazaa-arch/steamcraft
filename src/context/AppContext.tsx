@@ -83,6 +83,7 @@ interface AppContextType {
   // Consultations & Lab
   bookConsultation: (data: Omit<Consultation, 'id' | 'created_at' | 'status'>) => void;
   updateConsultation: (id: number, data: Partial<Consultation>) => void;
+  markConsultationsRead: () => void;
   requestResource: (data: Omit<ResourceRequest, 'id' | 'created_at' | 'status'>) => void;
   updateResourceStatus: (id: number, status: 'Menunggu' | 'Disetujui' | 'Ditolak', feedback?: string) => void;
 
@@ -683,6 +684,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Jadwal / catatan bimbingan diperbarui!');
   };
 
+  const markConsultationsRead = () => {
+    if (!currentUser) return;
+    const nameLower = currentUser.name.toLowerCase();
+    setConsultations(prev =>
+      prev.map(c => {
+        const isBelongsToUser =
+          c.student_name.toLowerCase().includes(nameLower) ||
+          c.lecturer_name.toLowerCase().includes(nameLower);
+        return isBelongsToUser ? { ...c, is_read: 1 } : c;
+      })
+    );
+  };
+
   const requestResource = (data: Omit<ResourceRequest, 'id' | 'created_at' | 'status'>) => {
     const newReq: ResourceRequest = {
       ...data,
@@ -891,6 +905,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         bookConsultation,
         updateConsultation,
+        markConsultationsRead,
         requestResource,
         updateResourceStatus,
 

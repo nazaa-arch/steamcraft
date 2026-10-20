@@ -157,6 +157,7 @@ export interface Consultation {
   note?: string;
   feedback?: string | null;
   status: 'Menunggu respons' | 'Terjadwal' | 'Selesai' | 'Dibatalkan';
+  is_read?: number;
   created_at: string;
 }
 
