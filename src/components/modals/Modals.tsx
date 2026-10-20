@@ -985,10 +985,16 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
               <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{bio.length} karakter</span>
             </div>
             <textarea
-              rows={3}
+              rows={4}
               value={bio}
               onChange={e => setBio(e.target.value)}
               placeholder="Deskripsikan rekam jejak akademik, peran dalam penelitian multidisiplin, dan fokus kontribusi ilmiah Anda..."
+              style={{
+                width: '100%',
+                minHeight: '100px',
+                boxSizing: 'border-box',
+                resize: 'vertical'
+              }}
             />
           </div>
         </div>

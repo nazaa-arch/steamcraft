@@ -228,8 +228,9 @@ button {
   margin-bottom: 6px;
 }
 
-.auth-field input, .auth-field select, .field input, .field select, .field textarea {
+.auth-field input, .auth-field select, .auth-field textarea, .field input, .field select, .field textarea {
   width: 100%;
+  box-sizing: border-box;
   padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -237,9 +238,10 @@ button {
   color: var(--ink);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
 }
 
-.auth-field input:focus, .field input:focus, .field select:focus, .field textarea:focus {
+.auth-field input:focus, .auth-field select:focus, .auth-field textarea:focus, .field input:focus, .field select:focus, .field textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(40, 120, 215, 0.15);
   background: white;
