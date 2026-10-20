@@ -1,7 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Check, Bookmark, Calendar, Clock, MapPin, Send, Sparkles, Star, Award, ThumbsUp } from 'lucide-react';
-import { User, Project } from '../../types';
+import {
+  X,
+  Check,
+  Bookmark,
+  Calendar,
+  Clock,
+  MapPin,
+  Send,
+  Sparkles,
+  Star,
+  Award,
+  ThumbsUp,
+  User as UserIcon,
+  Shield,
+  GraduationCap,
+  Briefcase,
+  Link as LinkIcon,
+  Lock,
+  Eye,
+  EyeOff,
+  Palette,
+  FileText,
+  CheckCircle2,
+  RefreshCw,
+  ExternalLink,
+  Hash,
+  AtSign,
+  Globe,
+  Code,
+  BookOpen,
+  Layers,
+  Key,
+  Phone,
+  Mail
+} from 'lucide-react';
+import { User, Project, UserRole } from '../../types';
 
 export const Modals: React.FC = () => {
   const {
@@ -26,7 +60,7 @@ export const Modals: React.FC = () => {
 
   return (
     <div className="modal-overlay active" onClick={closeModal}>
-      <div className="modal-box" onClick={e => e.stopPropagation()}>
+      <div className={`modal-box ${activeModal === 'profile' ? 'modal-box-xl' : ''}`} onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={closeModal}>
           &times;
         </button>
@@ -243,124 +277,923 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
 
 /* ==================== 2. PROFILE MODAL ==================== */
 const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ user, onClose }) => {
-  const { updateProfile } = useApp();
+  const { updateProfile, currentUser } = useApp();
+
+  const isSelf = !user || user.id === currentUser?.id;
+  const isAdminEditor = currentUser?.role === 'admin';
+
+  // Tabs: 'identity' | 'steam' | 'links' | 'customization'
+  const [activeTab, setActiveTab] = useState<'identity' | 'steam' | 'links' | 'customization'>('identity');
+
+  // Form states
   const [name, setName] = useState(user.name || '');
+  const [titlePrefix, setTitlePrefix] = useState(user.title_prefix || '');
+  const [titleSuffix, setTitleSuffix] = useState(user.title_suffix || '');
   const [identifier, setIdentifier] = useState(user.identifier || '');
+  const [role, setRole] = useState<UserRole>(user.role || 'student');
   const [study, setStudy] = useState(user.study_program || '');
   const [faculty, setFaculty] = useState(user.faculty || 'Fakultas MIPA');
   const [university, setUniversity] = useState(user.university || 'Universitas Indonesia');
+  const [email, setEmail] = useState(user.email || '');
+  const [phone, setPhone] = useState(user.phone || '');
+  const [officeRoom, setOfficeRoom] = useState(user.office_room || '');
+
+  // STEAM & Research Focus
   const [researchInterests, setResearchInterests] = useState(user.research_interests || '');
   const [bio, setBio] = useState(user.bio || '');
-  const [academicLinks, setAcademicLinks] = useState(user.academic_links || '');
-  const [avatarColor, setAvatarColor] = useState(user.avatar_color || '#2878d7');
 
-  const avatarColors = ['#2878d7', '#0d9488', '#ea580c', '#7c3aed', '#e11d48', '#059669', '#0f172a'];
+  // 5 STEAM Pillars toggles
+  const defaultPillars = user.steam_focus && user.steam_focus.length > 0
+    ? user.steam_focus
+    : role === 'student'
+      ? ['Science', 'Technology']
+      : role === 'lecturer'
+        ? ['Science', 'Technology', 'Engineering', 'Mathematics']
+        : ['Science', 'Technology', 'Engineering', 'Art', 'Mathematics'];
+
+  const [steamFocus, setSteamFocus] = useState<string[]>(defaultPillars);
+
+  // Academic links
+  const [academicLinks, setAcademicLinks] = useState(user.academic_links || '');
+  const [scholarId, setScholarId] = useState(user.scholar_id || '');
+  const [orcidId, setOrcidId] = useState(user.orcid_id || '');
+  const [githubUrl, setGithubUrl] = useState(user.github_url || '');
+  const [linkedinUrl, setLinkedinUrl] = useState(user.linkedin_url || '');
+
+  // Avatar & Security
+  const [avatarColor, setAvatarColor] = useState(user.avatar_color || '#2878d7');
+  const [avatarIcon, setAvatarIcon] = useState(
+    user.avatar_icon || (role === 'student' ? '🔬' : role === 'lecturer' ? '👨‍🏫' : '🛠️')
+  );
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // 12 Curated Academic Colors
+  const avatarColors = [
+    '#2878d7', // Royal Blue
+    '#0d9488', // Deep Teal
+    '#059669', // Emerald
+    '#16a34a', // Bio Green
+    '#ea580c', // Engineering Orange
+    '#d97706', // Amber Gold
+    '#e11d48', // Rose Crimson
+    '#7c3aed', // Math Violet
+    '#4f46e5', // Tech Indigo
+    '#0891b2', // Cyber Cyan
+    '#0f172a', // Navy Slate
+    '#475569'  // Steel Slate
+  ];
+
+  // 10 STEAM Icons
+  const avatarIcons = ['🔬', '💻', '⚙️', '🎨', '📐', '🧬', '🚀', '💡', '🛡️', '👨‍🏫'];
+
+  // Fast Tag Suggestions
+  const suggestedTags = [
+    'Machine Learning',
+    'IoT Telemetri',
+    'Sensor Cerdas',
+    'Biochar Kitosan',
+    'Computer Vision',
+    'Deep Learning',
+    'Robotika Kursi Roda',
+    'Etnomatematika',
+    'Biomonitoring Air',
+    'Simulasi Monte Carlo',
+    'Teknik Biomedis',
+    'Edge AI'
+  ];
+
+  // STEAM Pillars definitions
+  const steamPillars = [
+    { key: 'Science', label: '🔬 Science (Sains)', code: 's' },
+    { key: 'Technology', label: '💻 Technology (Teknologi)', code: 't' },
+    { key: 'Engineering', label: '⚙️ Engineering (Rekayasa)', code: 'e' },
+    { key: 'Art', label: '🎨 Art (Desain & Humaniora)', code: 'a' },
+    { key: 'Mathematics', label: '📐 Mathematics (Matematika)', code: 'm' }
+  ];
+
+  const togglePillar = (pillarKey: string) => {
+    if (steamFocus.includes(pillarKey)) {
+      if (steamFocus.length > 1) {
+        setSteamFocus(steamFocus.filter(p => p !== pillarKey));
+      }
+    } else {
+      setSteamFocus([...steamFocus, pillarKey]);
+    }
+  };
+
+  const toggleTagChip = (tag: string) => {
+    const currentTags = researchInterests
+      ? researchInterests.split(',').map(t => t.trim()).filter(Boolean)
+      : [];
+
+    if (currentTags.some(t => t.toLowerCase() === tag.toLowerCase())) {
+      const filtered = currentTags.filter(t => t.toLowerCase() !== tag.toLowerCase());
+      setResearchInterests(filtered.join(', '));
+    } else {
+      const updated = [...currentTags, tag];
+      setResearchInterests(updated.join(', '));
+    }
+  };
+
+  // Profile completeness percentage
+  const calculateCompleteness = () => {
+    let score = 0;
+    if (name.trim()) score += 20;
+    if (identifier.trim()) score += 15;
+    if (study.trim()) score += 15;
+    if (faculty.trim()) score += 10;
+    if (researchInterests.trim()) score += 15;
+    if (bio.trim()) score += 10;
+    if (academicLinks.trim() || githubUrl.trim() || linkedinUrl.trim() || scholarId.trim()) score += 15;
+    return Math.min(100, score);
+  };
+
+  const completeness = calculateCompleteness();
+
+  // Preset quick-fill based on role
+  const loadPresetDemoData = () => {
+    if (role === 'student') {
+      setName('Budi Santoso');
+      setTitlePrefix('');
+      setTitleSuffix('S.Stat (Kandidat)');
+      setIdentifier('202610101');
+      setStudy('Sains Data');
+      setFaculty('Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)');
+      setUniversity('Universitas Indonesia');
+      setEmail('budi.santoso@ui.ac.id');
+      setPhone('0812-3456-7890');
+      setResearchInterests('Machine Learning, IoT Telemetri, Prediksi Cuaca Mikro, Deep Learning');
+      setBio('Lead data scientist tim proyek sensor cuaca pertanian presisi berbasis transmisi nirkabel LoRa.');
+      setSteamFocus(['Science', 'Technology', 'Mathematics']);
+      setGithubUrl('https://github.com/budisantoso');
+      setLinkedinUrl('https://linkedin.com/in/budisantoso-sd');
+      setAcademicLinks('GitHub: github.com/budisantoso · LinkedIn: /in/budisantoso-sd');
+      setAvatarColor('#2878d7');
+      setAvatarIcon('🔬');
+    } else if (role === 'lecturer') {
+      setName('Dr. Rahmat Wijaya, M.Sc.');
+      setTitlePrefix('Dr.');
+      setTitleSuffix('M.Sc.');
+      setIdentifier('198504122010121002');
+      setStudy('Fakultas Sains & Teknologi');
+      setFaculty('Departemen Fisika & Instrumentasi Komputasi');
+      setUniversity('Institut Teknologi Bandung');
+      setEmail('rahmat.wijaya@itb.ac.id');
+      setPhone('0811-9876-5432');
+      setOfficeRoom('Lab Sensor Cerdas Lt. 3, Gedung Riset FMIPA');
+      setResearchInterests('Instrumentasi Sensor Cerdas, Pemodelan Sains Komputasi, Kalibrasi Empiris');
+      setBio('Dosen pembimbing riset dan penilai standarisasi rubrik ilmiah 4 pilar STEAM tingkat nasional.');
+      setSteamFocus(['Science', 'Technology', 'Engineering', 'Mathematics']);
+      setScholarId('56192841022');
+      setOrcidId('0000-0002-1829-9281');
+      setAcademicLinks('Scopus ID: 56192841022 · ORCID: 0000-0002-1829-9281');
+      setAvatarColor('#0d9488');
+      setAvatarIcon('👨‍🏫');
+    } else {
+      setName('Administrator Sistem (Lead Dev & Architect)');
+      setTitlePrefix('');
+      setTitleSuffix('Lead Dev');
+      setIdentifier('ADM-2026-DEV01');
+      setStudy('Pusat Riset & Rekayasa Sistem');
+      setFaculty('Direktorat Sistem Informasi & Laboratorium Terpadu');
+      setUniversity('Universitas Indonesia');
+      setEmail('admin@steamcraft.ac.id');
+      setPhone('0813-8888-9999');
+      setOfficeRoom('Pusat Komputasi Data & Server Lt. 2');
+      setResearchInterests('System Architecture, Cloud Infrastructure, AI Pipeline & Data Science, Reproducibility');
+      setBio('Akun administrator utama platform STEAM-Craft untuk monitoring telemetri riset, tata kelola akses, audit repositori, dan kontrol mode sistem.');
+      setSteamFocus(['Science', 'Technology', 'Engineering', 'Art', 'Mathematics']);
+      setGithubUrl('https://github.com/steamcraft-admin');
+      setAcademicLinks('GitHub: github.com/steamcraft-admin · Docs: steamcraft.online/docs');
+      setAvatarColor('#0f172a');
+      setAvatarIcon('🛠️');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({
-      name,
-      identifier,
-      study_program: study,
-      faculty,
-      university,
-      research_interests: researchInterests,
-      bio,
-      academic_links: academicLinks,
-      avatar_color: avatarColor
-    });
+    setErrorMsg(null);
+
+    if (newPassword && newPassword !== confirmPassword) {
+      setErrorMsg('Konfirmasi password baru tidak cocok. Harap periksa kembali.');
+      setActiveTab('customization');
+      return;
+    }
+
+    // Build unified academic links
+    const linksList: string[] = [];
+    if (scholarId) linksList.push(`Scopus/Scholar: ${scholarId}`);
+    if (orcidId) linksList.push(`ORCID: ${orcidId}`);
+    if (githubUrl) linksList.push(`GitHub: ${githubUrl}`);
+    if (linkedinUrl) linksList.push(`LinkedIn: ${linkedinUrl}`);
+    if (academicLinks && !scholarId && !orcidId && !githubUrl && !linkedinUrl) {
+      linksList.push(academicLinks);
+    }
+    const finalLinks = linksList.length > 0 ? linksList.join(' · ') : academicLinks;
+
+    const payload: Partial<User> = {
+      name: name.trim(),
+      title_prefix: titlePrefix.trim(),
+      title_suffix: titleSuffix.trim(),
+      identifier: identifier.trim(),
+      role: role,
+      study_program: study.trim(),
+      faculty: faculty.trim(),
+      university: university.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      office_room: officeRoom.trim(),
+      research_interests: researchInterests.trim(),
+      bio: bio.trim(),
+      steam_focus: steamFocus,
+      academic_links: finalLinks,
+      scholar_id: scholarId.trim(),
+      orcid_id: orcidId.trim(),
+      github_url: githubUrl.trim(),
+      linkedin_url: linkedinUrl.trim(),
+      avatar_color: avatarColor,
+      avatar_icon: avatarIcon,
+      ...(newPassword ? { password: newPassword } : {})
+    };
+
+    updateProfile(payload, user.id);
   };
 
+  // Formatted displayed name
+  const formattedDisplayName = [titlePrefix, name, titleSuffix].filter(Boolean).join(' ') || 'Nama Peneliti';
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="eyebrow">Identitas Civitas Akademika</div>
-      <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginBottom: '8px' }}>
-        Edit Profil Peneliti STEAM
-      </h2>
-      <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '20px' }}>
-        Perbarui identitas akademik, fokus penelitian, dan tautan publikasi ilmiah Anda.
-      </p>
+    <form onSubmit={handleSubmit} style={{ maxHeight: '82vh', overflowY: 'auto', paddingRight: '4px' }}>
+      {/* Header with Role Context */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+        <div>
+          <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Sparkles size={13} style={{ color: 'var(--primary)' }} />
+            <span>
+              {role === 'student'
+                ? 'Profil Peneliti STEAM'
+                : role === 'lecturer'
+                  ? 'Identitas Kepakaran Dosen'
+                  : 'Konsol Identitas Administrator'}
+            </span>
+          </div>
+          <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', margin: '2px 0 4px 0' }}>
+            {role === 'student'
+              ? 'Edit Profil Mahasiswa Peneliti'
+              : role === 'lecturer'
+                ? 'Edit Profil Dosen Pembimbing'
+                : 'Edit Profil Administrator Sistem'}
+          </h2>
+          <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: 0 }}>
+            {role === 'student'
+              ? 'Kelola rekam jejak riset, pilar multidisiplin STEAM, dan repositori karya ilmiah Anda.'
+              : role === 'lecturer'
+                ? 'Perbarui data kepakaran, laboratorium riset bimbingan, dan identitas publikasi ilmiah.'
+                : 'Konfigurasi identitas arsitek sistem, unit kerja direktorat TI, dan otoritas audit platform.'}
+          </p>
+        </div>
 
-      {/* Avatar Color Picker */}
-      <div className="auth-field">
-        <label>Warna Avatar Peneliti</label>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
-          {avatarColors.map(c => (
-            <button
-              key={c}
-              type="button"
-              className={`color-dot-btn ${avatarColor === c ? 'active' : ''}`}
-              style={{ backgroundColor: c }}
-              onClick={() => setAvatarColor(c)}
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={loadPresetDemoData}
+          style={{ fontSize: '11px', padding: '5px 10px', color: 'var(--primary)', borderColor: 'var(--line)' }}
+          title="Otomatis mengisi format riset standar berdasarkan peran"
+        >
+          <RefreshCw size={12} />
+          <span>Format Standar Demo</span>
+        </button>
+      </div>
+
+      {/* Admin Warning Banner if editing another user */}
+      {isAdminEditor && !isSelf && (
+        <div
+          style={{
+            background: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontSize: '12px',
+            color: '#92400e'
+          }}
+        >
+          <Shield size={16} style={{ color: '#d97706', flexShrink: 0 }} />
+          <div>
+            <strong>Mode Konsol Administrator:</strong> Anda sedang menyunting data akun pengguna{' '}
+            <span style={{ textDecoration: 'underline' }}>{user.name}</span> (@{user.username}) dengan ID #{user.id}.
+          </div>
+        </div>
+      )}
+
+      {/* Error message if any */}
+      {errorMsg && (
+        <div
+          style={{
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            marginBottom: '16px',
+            fontSize: '12px',
+            color: '#b91c1c'
+          }}
+        >
+          ⚠️ {errorMsg}
+        </div>
+      )}
+
+      {/* ==================== 1. LIVE RESEARCHER PASSPORT PREVIEW ==================== */}
+      <div className="researcher-passport-card">
+        <div className="passport-watermark">
+          STEAM-CRAFT ID: SC-2026-{identifier || 'DEV01'}
+        </div>
+
+        <div className="passport-header">
+          <div className="passport-brand">
+            <Layers size={14} />
+            <span>STEAM-Craft Researcher Passport</span>
+          </div>
+          <div className={`passport-role-badge ${role}`}>
+            {role === 'student' && <GraduationCap size={12} />}
+            {role === 'lecturer' && <Briefcase size={12} />}
+            {role === 'admin' && <Shield size={12} />}
+            <span>
+              {role === 'student'
+                ? 'Mahasiswa Peneliti'
+                : role === 'lecturer'
+                  ? 'Dosen Pembimbing'
+                  : 'Lead Dev & Admin'}
+            </span>
+          </div>
+        </div>
+
+        <div className="passport-body">
+          <div className="passport-avatar-wrap">
+            <div className="passport-avatar" style={{ backgroundColor: avatarColor }}>
+              {name ? name.charAt(0).toUpperCase() : 'P'}
+            </div>
+            <div className="passport-avatar-icon" title="Ikon Disiplin STEAM">
+              {avatarIcon}
+            </div>
+          </div>
+
+          <div className="passport-details">
+            <h3 className="passport-name">
+              <span>{formattedDisplayName}</span>
+              <span
+                style={{
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  color: '#34d399',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  padding: '1px 8px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(52, 211, 153, 0.3)'
+                }}
+              >
+                <CheckCircle2 size={10} />
+                Terverifikasi Kampus
+              </span>
+            </h3>
+
+            <div className="passport-id-pill">
+              {role === 'student' ? 'NIM' : role === 'lecturer' ? 'NIDN/NIP' : 'ADM ID'}:{' '}
+              <strong style={{ color: '#38bdf8' }}>{identifier || 'Belum diisi'}</strong> · {study || 'Program Studi STEAM'}
+            </div>
+
+            <div className="passport-meta">
+              🏛️ {faculty || 'Fakultas Riset'} — {university || 'Universitas'}
+              {officeRoom && <span> · 📍 {officeRoom}</span>}
+            </div>
+
+            {bio && (
+              <div style={{ fontSize: '11px', color: '#cbd5e1', fontStyle: 'italic', margin: '4px 0 6px 0', maxWidth: '620px' }}>
+                "{bio}"
+              </div>
+            )}
+
+            {/* Active STEAM Pillars & Research tags preview */}
+            <div className="passport-steam-tags">
+              {steamFocus.map(p => (
+                <span key={p} className="passport-tag highlight">
+                  ★ {p}
+                </span>
+              ))}
+              {researchInterests
+                .split(',')
+                .map(t => t.trim())
+                .filter(Boolean)
+                .slice(0, 3)
+                .map((t, idx) => (
+                  <span key={idx} className="passport-tag">
+                    {t}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Completeness Bar */}
+      <div className="profile-completion-wrap">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+          <Sparkles size={14} style={{ color: 'var(--primary)' }} />
+          <span>Kelengkapan Profil Akademik:</span>
+          <span style={{ color: completeness >= 80 ? '#16a34a' : 'var(--primary)' }}>{completeness}%</span>
+        </div>
+        <div className="profile-completion-bar-track">
+          <div className="profile-completion-bar-fill" style={{ width: `${completeness}%` }} />
+        </div>
+      </div>
+
+      {/* ==================== 2. TAB NAVIGATION ==================== */}
+      <div className="profile-nav-tabs">
+        <button
+          type="button"
+          className={`profile-nav-tab ${activeTab === 'identity' ? 'active' : ''}`}
+          onClick={() => setActiveTab('identity')}
+        >
+          <UserIcon size={14} />
+          <span>1. Identitas & Akademik</span>
+        </button>
+
+        <button
+          type="button"
+          className={`profile-nav-tab ${activeTab === 'steam' ? 'active' : ''}`}
+          onClick={() => setActiveTab('steam')}
+        >
+          <Layers size={14} />
+          <span>2. Fokus Riset STEAM</span>
+        </button>
+
+        <button
+          type="button"
+          className={`profile-nav-tab ${activeTab === 'links' ? 'active' : ''}`}
+          onClick={() => setActiveTab('links')}
+        >
+          <LinkIcon size={14} />
+          <span>3. Publikasi & Tautan</span>
+        </button>
+
+        <button
+          type="button"
+          className={`profile-nav-tab ${activeTab === 'customization' ? 'active' : ''}`}
+          onClick={() => setActiveTab('customization')}
+        >
+          <Palette size={14} />
+          <span>4. Kustomisasi & Sandi</span>
+        </button>
+      </div>
+
+      {/* ==================== TAB 1: IDENTITAS & AKADEMIK ==================== */}
+      {activeTab === 'identity' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Admin Role Selector (Only for Admin editing) */}
+          {isAdminEditor && (
+            <div className="auth-field" style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid var(--line)' }}>
+              <label style={{ color: '#0f172a', fontWeight: 800 }}>Otoritas Peran Sistem (Hak Akses Akun)</label>
+              <select value={role} onChange={e => setRole(e.target.value as UserRole)} style={{ marginTop: '4px' }}>
+                <option value="student">🎓 Mahasiswa Peneliti (Student)</option>
+                <option value="lecturer">👨‍🏫 Dosen Pembimbing & Reviewer Rubrik (Lecturer)</option>
+                <option value="admin">🛠️ Administrator Sistem & Lead Dev (Admin)</option>
+              </select>
+            </div>
+          )}
+
+          {/* Name & Titles */}
+          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 140px', gap: '10px' }}>
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Gelar Depan</label>
+              <input
+                type="text"
+                placeholder="Dr. / Prof."
+                value={titlePrefix}
+                onChange={e => setTitlePrefix(e.target.value)}
+              />
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Nama Lengkap *</label>
+              <input
+                type="text"
+                placeholder="Contoh: Budi Santoso"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Gelar Belakang</label>
+              <input
+                type="text"
+                placeholder="M.Sc. / Ph.D."
+                value={titleSuffix}
+                onChange={e => setTitleSuffix(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Identifier & Program Studi */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>
+                {role === 'student'
+                  ? 'Nomor Induk Mahasiswa (NIM) *'
+                  : role === 'lecturer'
+                    ? 'NIDN / NIP Dosen *'
+                    : 'Kode Identifikasi Petugas (ADM ID) *'}
+              </label>
+              <input
+                type="text"
+                value={identifier}
+                onChange={e => setIdentifier(e.target.value)}
+                placeholder={role === 'student' ? 'Contoh: 202610101' : role === 'lecturer' ? 'Contoh: 198504122010121002' : 'ADM-2026-DEV01'}
+                required
+              />
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Program Studi / Unit Keilmuan *</label>
+              <input
+                type="text"
+                value={study}
+                onChange={e => setStudy(e.target.value)}
+                placeholder="Contoh: Sains Data, Bioteknologi, Fisika"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Fakultas & Universitas */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Fakultas / Departemen</label>
+              <input
+                type="text"
+                value={faculty}
+                onChange={e => setFaculty(e.target.value)}
+                placeholder="Contoh: FMIPA, Fasilkom, STEI"
+              />
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Perguruan Tinggi / Kampus</label>
+              <input
+                type="text"
+                value={university}
+                onChange={e => setUniversity(e.target.value)}
+                placeholder="Contoh: Universitas Indonesia, ITB, UGM"
+              />
+            </div>
+          </div>
+
+          {/* Kontak Email & Telepon */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Email Resmi Kampus</label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="nama@kampus.ac.id"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>No. WhatsApp / Telepon</label>
+              <div style={{ position: 'relative' }}>
+                <Phone size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="0812-xxxx-xxxx"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Ruang Kantor / Lokasi Riset (Khusus Dosen / Admin) */}
+          {(role === 'lecturer' || role === 'admin') && (
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Lokasi Ruang Kantor / Laboratorium Riset Bimbingan</label>
+              <div style={{ position: 'relative' }}>
+                <MapPin size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={officeRoom}
+                  onChange={e => setOfficeRoom(e.target.value)}
+                  placeholder="Contoh: Gedung Lab Terpadu Lt. 3, Ruang Sensor Cerdas"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ==================== TAB 2: FOKUS RISET & STEAM ==================== */}
+      {activeTab === 'steam' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Interactive STEAM Pillars Selector */}
+          <div>
+            <label style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+              Pilar STEAM yang Ditekuni (Pilih Minimal 1 Disiplin)
+            </label>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 8px 0' }}>
+              Menentukan pemetaan keterpaduan multidisiplin dalam portofolio akademik dan pencocokan rekan tim.
+            </p>
+
+            <div className="steam-pillar-btn-grid">
+              {steamPillars.map(p => {
+                const isActive = steamFocus.includes(p.key);
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    className={`steam-pillar-toggle ${isActive ? `active ${p.code}` : ''}`}
+                    onClick={() => togglePillar(p.key)}
+                  >
+                    <CheckCircle2 size={14} style={{ opacity: isActive ? 1 : 0.2 }} />
+                    <span>{p.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Research Interests with Quick Chips */}
+          <div className="auth-field" style={{ margin: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ fontWeight: 800, color: 'var(--navy)' }}>Topik Minat Riset & Keahlian Ilmiah</label>
+              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Pisahkan dengan koma</span>
+            </div>
+            <input
+              type="text"
+              value={researchInterests}
+              onChange={e => setResearchInterests(e.target.value)}
+              placeholder="Contoh: Biochar Kitosan, Sensor IoT, Machine Learning, Computer Vision"
             />
-          ))}
+
+            {/* Quick Suggestion Chips */}
+            <div style={{ marginTop: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>
+                💡 Rekomendasi Kata Kunci Riset Populer (Klik untuk tambah/hapus):
+              </span>
+              <div className="tag-chips-wrapper">
+                {suggestedTags.map(tag => {
+                  const isAdded = researchInterests
+                    .split(',')
+                    .map(t => t.trim().toLowerCase())
+                    .includes(tag.toLowerCase());
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      className={`tag-suggestion-chip ${isAdded ? 'added' : ''}`}
+                      onClick={() => toggleTagChip(tag)}
+                    >
+                      <span>{isAdded ? '✓' : '+'}</span>
+                      <span>{tag}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Academic Bio */}
+          <div className="auth-field" style={{ margin: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ fontWeight: 800, color: 'var(--navy)' }}>Biografi Singkat Riset</label>
+              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{bio.length} karakter</span>
+            </div>
+            <textarea
+              rows={3}
+              value={bio}
+              onChange={e => setBio(e.target.value)}
+              placeholder="Deskripsikan rekam jejak akademik, peran dalam penelitian multidisiplin, dan fokus kontribusi ilmiah Anda..."
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-        <div className="auth-field" style={{ margin: 0 }}>
-          <label>Nama Lengkap & Gelar</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+      {/* ==================== TAB 3: PUBLIKASI & TAUTAN AKADEMIK ==================== */}
+      {activeTab === 'links' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: 0 }}>
+            Tautkan akun profil ilmiah Anda untuk mendukung audit <strong>Reproducibility</strong> dan validasi rekam jejak publikasi.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>Scopus Author ID / SINTA ID</label>
+              <div style={{ position: 'relative' }}>
+                <BookOpen size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={scholarId}
+                  onChange={e => setScholarId(e.target.value)}
+                  placeholder="Contoh: 56192841022 / SINTA: 219084"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>ORCID iD</label>
+              <div style={{ position: 'relative' }}>
+                <Globe size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={orcidId}
+                  onChange={e => setOrcidId(e.target.value)}
+                  placeholder="0000-0002-1829-9281"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>URL Repositori GitHub</label>
+              <div style={{ position: 'relative' }}>
+                <Code size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={githubUrl}
+                  onChange={e => setGithubUrl(e.target.value)}
+                  placeholder="https://github.com/username"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+
+            <div className="auth-field" style={{ margin: 0 }}>
+              <label>URL Profil LinkedIn</label>
+              <div style={{ position: 'relative' }}>
+                <ExternalLink size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={linkedinUrl}
+                  onChange={e => setLinkedinUrl(e.target.value)}
+                  placeholder="https://linkedin.com/in/username"
+                  style={{ paddingLeft: '34px' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="auth-field" style={{ margin: 0 }}>
+            <label>Tautan Akademik Tambahan (Google Scholar, ResearchGate, Portofolio Web)</label>
+            <input
+              type="text"
+              value={academicLinks}
+              onChange={e => setAcademicLinks(e.target.value)}
+              placeholder="Contoh: ResearchGate: /profile/budi · Blog: budisantoso.dev"
+            />
+          </div>
         </div>
-        <div className="auth-field" style={{ margin: 0 }}>
-          <label>NIM / NIDN / NIP</label>
-          <input type="text" value={identifier} onChange={e => setIdentifier(e.target.value)} required />
+      )}
+
+      {/* ==================== TAB 4: KUSTOMISASI & KEAMANAN ==================== */}
+      {activeTab === 'customization' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Avatar Color Picker */}
+          <div>
+            <label style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+              Palet Warna Avatar Peneliti
+            </label>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 8px 0' }}>
+              Pilih warna aksen khas yang merepresentasikan identitas riset Anda di seluruh dashboard dan kartu proyek.
+            </p>
+            <div className="color-swatch-grid">
+              {avatarColors.map(color => (
+                <button
+                  key={color}
+                  type="button"
+                  className={`color-swatch-btn ${avatarColor === color ? 'active' : ''}`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => setAvatarColor(color)}
+                  title={`Pilih warna ${color}`}
+                >
+                  {avatarColor === color && <Check size={14} />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* STEAM Icon Picker */}
+          <div>
+            <label style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+              Ikon Disiplin Utama Peneliti
+            </label>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 8px 0' }}>
+              Lencana simbolik yang muncul pada sudut avatar digital Anda.
+            </p>
+            <div className="icon-selector-grid">
+              {avatarIcons.map(icon => (
+                <button
+                  key={icon}
+                  type="button"
+                  className={`icon-selector-btn ${avatarIcon === icon ? 'active' : ''}`}
+                  onClick={() => setAvatarIcon(icon)}
+                  title={`Gunakan lencana ${icon}`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Change Password Section */}
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: '14px', marginTop: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>
+                Perbarui Kata Sandi / PIN Akun (Opsional)
+              </label>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ fontSize: '11px', padding: '2px 8px' }}
+              >
+                {showPassword ? <EyeOff size={12} /> : <Eye size={12} />}
+                <span>{showPassword ? 'Sembunyikan' : 'Tampilkan'}</span>
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="auth-field" style={{ margin: 0 }}>
+                <label>Kata Sandi Baru</label>
+                <div style={{ position: 'relative' }}>
+                  <Key size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Kosongkan jika tidak diubah"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    style={{ paddingLeft: '34px' }}
+                  />
+                </div>
+              </div>
+
+              <div className="auth-field" style={{ margin: 0 }}>
+                <label>Konfirmasi Sandi Baru</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Ulangi kata sandi baru"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    style={{ paddingLeft: '34px' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-        <div className="auth-field" style={{ margin: 0 }}>
-          <label>Program Studi</label>
-          <input type="text" value={study} onChange={e => setStudy(e.target.value)} required />
-        </div>
-        <div className="auth-field" style={{ margin: 0 }}>
-          <label>Fakultas / Departemen</label>
-          <input type="text" value={faculty} onChange={e => setFaculty(e.target.value)} />
-        </div>
-      </div>
-
-      <div className="auth-field">
-        <label>Perguruan Tinggi / Universitas</label>
-        <input type="text" value={university} onChange={e => setUniversity(e.target.value)} />
-      </div>
-
-      <div className="auth-field">
-        <label>Fokus Minat Riset (Disiplin STEAM)</label>
-        <input
-          type="text"
-          placeholder="Contoh: Biochar Kitosan, Sensor IoT, Machine Learning"
-          value={researchInterests}
-          onChange={e => setResearchInterests(e.target.value)}
-        />
-      </div>
-
-      <div className="auth-field">
-        <label>Biografi Singkat Peneliti</label>
-        <textarea
-          rows={2}
-          value={bio}
-          onChange={e => setBio(e.target.value)}
-          placeholder="Ringkasan rekam jejak akademik..."
-        />
-      </div>
-
-      <div className="auth-field">
-        <label>Tautan Akademik (Scopus, ORCID, GitHub, LinkedIn)</label>
-        <input
-          type="text"
-          value={academicLinks}
-          onChange={e => setAcademicLinks(e.target.value)}
-          placeholder="Contoh: GitHub: github.com/username · ORCID: 0000-..."
-        />
-      </div>
-
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '20px' }}>
+      {/* ==================== 3. FOOTER ACTIONS ==================== */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid var(--line)',
+          paddingTop: '16px',
+          marginTop: '20px'
+        }}
+      >
         <button type="button" className="btn btn-ghost" onClick={onClose}>
           Batal
         </button>
-        <button type="submit" className="btn btn-primary">
-          Simpan Profil Peneliti
-        </button>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Check size={15} />
+            <span>Simpan Profil Peneliti</span>
+          </button>
+        </div>
       </div>
     </form>
   );

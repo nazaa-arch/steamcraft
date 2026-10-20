@@ -335,13 +335,19 @@ export const Topbar: React.FC = () => {
         >
           <div
             className="user-avatar"
-            style={{ backgroundColor: currentUser.avatar_color || '#2878d7' }}
+            style={{ backgroundColor: currentUser.avatar_color || '#2878d7', position: 'relative' }}
           >
-            {currentUser.name.charAt(0).toUpperCase()}
+            {currentUser.avatar_icon ? (
+              <span style={{ fontSize: '15px' }}>{currentUser.avatar_icon}</span>
+            ) : (
+              currentUser.name.charAt(0).toUpperCase()
+            )}
           </div>
           <div className="user-info">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <strong>{currentUser.name}</strong>
+              <strong>
+                {[currentUser.title_prefix, currentUser.name, currentUser.title_suffix].filter(Boolean).join(' ')}
+              </strong>
               <Edit3 size={11} className="profile-edit-indicator" />
             </div>
             <small>

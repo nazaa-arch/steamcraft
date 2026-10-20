@@ -1,5 +1,5 @@
 node_modules/
+dist/
 .DS_Store
 *.log
-steamcraft.db-shm
-steamcraft.db-wal
+steamcraft.db*

@@ -29,6 +29,16 @@ export interface User {
   bio?: string;
   academic_links?: string;
   avatar_color?: string;
+  avatar_icon?: string;
+  title_prefix?: string;
+  title_suffix?: string;
+  steam_focus?: string[];
+  phone?: string;
+  office_room?: string;
+  scholar_id?: string;
+  orcid_id?: string;
+  github_url?: string;
+  linkedin_url?: string;
   password?: string;
   email?: string;
   email_verified?: number;
@@ -61,6 +71,7 @@ export interface Project {
   lecturer: string;
   creator_id: number;
   creator_username?: string;
+  creator_name?: string;
   versions_count: number;
   blocker: number;
   blocker_reason?: string;

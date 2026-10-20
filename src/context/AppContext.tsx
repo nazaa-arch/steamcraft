@@ -65,7 +65,7 @@ interface AppContextType {
   switchDemoUser: (roleOrUsername: string) => void;
   logout: () => void;
   registerUser: (data: Partial<User>) => boolean;
-  updateProfile: (data: Partial<User>) => void;
+  updateProfile: (data: Partial<User>, targetUserId?: number) => void;
 
   // Projects & Workspace
   createProject: (data: Partial<Project>) => Project;
@@ -381,12 +381,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const updateProfile = (data: Partial<User>) => {
+  const updateProfile = (data: Partial<User>, targetUserId?: number) => {
     if (!currentUser) return;
-    const updated = { ...currentUser, ...data };
-    setCurrentUser(updated);
-    setUsers(prev => prev.map(u => (u.id === currentUser.id ? updated : u)));
-    showToast('Profil peneliti berhasil diperbarui!');
+    const targetId = targetUserId ?? data.id ?? currentUser.id;
+    const existing = users.find(u => u.id === targetId) || (targetId === currentUser.id ? currentUser : null);
+    if (!existing) return;
+
+    const updated: User = { ...existing, ...data, id: targetId };
+
+    setUsers(prev => prev.map(u => (u.id === targetId ? updated : u)));
+
+    if (currentUser.id === targetId) {
+      setCurrentUser(updated);
+    }
+
+    // Sync user display name in projects if changed
+    if (data.name && data.name !== existing.name) {
+      setProjects(prev =>
+        prev.map(p => {
+          let modified = false;
+          let newCreator = p.creator_name;
+          let newLecturer = p.lecturer;
+          if (p.creator_id === targetId || p.creator_username === existing.username) {
+            newCreator = data.name!;
+            modified = true;
+          }
+          if (existing.role === 'lecturer' && p.lecturer === existing.name) {
+            newLecturer = data.name!;
+            modified = true;
+          }
+          return modified ? { ...p, creator_name: newCreator, lecturer: newLecturer } : p;
+        })
+      );
+    }
+
+    showToast(`Profil ${updated.name} berhasil diperbarui!`);
     closeModal();
   };
 
