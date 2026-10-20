@@ -132,7 +132,7 @@ export const MissionControlPage: React.FC = () => {
       {/* Master-Detail Layout */}
       <div className="mission-master-detail">
         {/* Left Master List */}
-        <div>
+        <div className="mission-master-sidebar">
           <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '10px' }}>
             Daftar Proyek Riset ({filteredProjects.length})
           </h4>
@@ -169,18 +169,18 @@ export const MissionControlPage: React.FC = () => {
           <div className="project-inspector">
             <div className="inspector-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' }}>
+                <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
                     <span className="badge badge-blue">{activeProject.study}</span>
                     <span className="badge badge-purple">{activeProject.steam}</span>
                     <span className={`badge ${activeProject.blocker ? 'badge-rose' : 'badge-teal'}`}>
                       {activeProject.blocker ? '⚠️ Memerlukan Bimbingan' : activeProject.status}
                     </span>
                   </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy)', lineHeight: 1.2 }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy)', lineHeight: 1.25, wordBreak: 'break-word' }}>
                     {activeProject.name}
                   </h3>
-                  <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', marginTop: '4px' }}>
+                  <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', marginTop: '4px', wordBreak: 'break-word' }}>
                     {activeProject.desc}
                   </p>
                 </div>
