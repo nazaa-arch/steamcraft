@@ -51,6 +51,7 @@ interface AppContextType {
   activeModal: string | null;
   modalData: any;
   toastMessage: string | null;
+  maintenanceMode: boolean;
 
   // Actions
   setCurrentPage: (page: PageName) => void;
@@ -59,6 +60,7 @@ interface AppContextType {
   closeModal: () => void;
   showToast: (msg: string) => void;
   setAppMode: (mode: AppMode) => void;
+  setMaintenanceMode: (active: boolean) => void;
 
   // Auth
   login: (identifierOrUsername: string, password?: string) => boolean;
@@ -127,7 +129,8 @@ const STORAGE_KEYS = {
   RESOURCES: 'steamcraft_resources',
   RUBRICS: 'steamcraft_rubrics',
   PEER_FEEDBACKS: 'steamcraft_peer_feedbacks',
-  USERS: 'steamcraft_users'
+  USERS: 'steamcraft_users',
+  MAINTENANCE_MODE: 'steamcraft_maintenance_mode'
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -156,6 +159,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [appMode, setAppModeState] = useState<AppMode>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.APP_MODE);
     return (saved as AppMode) || 'demo';
+  });
+
+  const [maintenanceMode, setMaintenanceModeState] = useState<boolean>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('maintenance') === 'true' || urlParams.get('maintenance') === '1') {
+      return true;
+    }
+    const saved = localStorage.getItem(STORAGE_KEYS.MAINTENANCE_MODE);
+    return saved === 'true';
   });
 
   const [currentPage, setCurrentPage] = useState<PageName>('dashboard');
@@ -301,15 +313,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setModalData(null);
   };
 
-  // Check URL query parameters for invitation links (?invite=CODE or ?code=CODE)
+  // Check URL query parameters for invitation links, maintenance overrides, etc.
   useEffect(() => {
-    if (!currentUser) return;
     const urlParams = new URLSearchParams(window.location.search);
     const inviteCode = urlParams.get('invite') || urlParams.get('join') || urlParams.get('code');
-    if (inviteCode) {
+    if (inviteCode && currentUser) {
       openModal('joinProject', inviteCode);
     }
+    if (urlParams.get('maintenance') === 'off' || urlParams.get('maintenance') === '0' || urlParams.get('bypass') === 'admin') {
+      setMaintenanceModeState(false);
+      localStorage.setItem(STORAGE_KEYS.MAINTENANCE_MODE, 'false');
+    } else if (urlParams.get('maintenance') === 'true' || urlParams.get('maintenance') === '1') {
+      setMaintenanceModeState(true);
+      localStorage.setItem(STORAGE_KEYS.MAINTENANCE_MODE, 'true');
+    }
+    if (urlParams.get('page') === 'maintenance') {
+      setCurrentPage('maintenance');
+    }
   }, [currentUser]);
+
+  const setMaintenanceMode = (active: boolean) => {
+    setMaintenanceModeState(active);
+    localStorage.setItem(STORAGE_KEYS.MAINTENANCE_MODE, active ? 'true' : 'false');
+    showToast(
+      active
+        ? '⚠️ Mode Pemeliharaan Sistem DIAKTIFKAN. Akses dibatasi untuk Administrator.'
+        : '✓ Mode Pemeliharaan Sistem DINONAKTIFKAN. Platform STEAM-Craft kembali beroperasi normal.'
+    );
+  };
 
   const setAppMode = (mode: AppMode) => {
     setAppModeState(mode);
@@ -1035,6 +1066,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeModal,
         modalData,
         toastMessage,
+        maintenanceMode,
 
         setCurrentPage,
         setSelectedProjectId,
@@ -1042,6 +1074,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         closeModal,
         showToast,
         setAppMode,
+        setMaintenanceMode,
 
         login,
         resetPassword,

@@ -16,11 +16,16 @@ import {
   Database,
   BarChart3,
   Calendar,
-  Check
+  Check,
+  Wrench,
+  Server,
+  Lock,
+  Unlock,
+  Eye
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
-  const { users, projects, rubrics, consultations, setCurrentPage, openModal, showToast } = useApp();
+  const { users, projects, rubrics, consultations, setCurrentPage, openModal, showToast, maintenanceMode, setMaintenanceMode } = useApp();
 
   // Summary Generator States
   const [showSummaryGenerator, setShowSummaryGenerator] = useState(false);
@@ -278,6 +283,97 @@ Klinik riset berjalan efektif. Seluruh tahapan metodologi berada dalam koridor e
           )}
         </div>
       )}
+
+      {/* Maintenance & System Health Control Widget */}
+      <div
+        className="card"
+        style={{
+          marginBottom: '20px',
+          padding: '16px 20px',
+          borderRadius: '16px',
+          background: maintenanceMode
+            ? 'linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%)'
+            : 'linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%)',
+          border: maintenanceMode ? '1.5px solid #f59e0b' : '1px solid #bbf7d0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '14px',
+          boxShadow: maintenanceMode ? '0 8px 24px rgba(245, 158, 11, 0.15)' : '0 4px 14px rgba(0,0,0,0.03)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: maintenanceMode ? '#fef3c7' : '#dcfce7',
+              color: maintenanceMode ? '#d97706' : '#16a34a',
+              display: 'grid',
+              placeItems: 'center',
+              border: maintenanceMode ? '1px solid #fde68a' : '1px solid #bbf7d0'
+            }}
+          >
+            {maintenanceMode ? <Wrench size={22} /> : <Server size={22} />}
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: maintenanceMode ? '#f59e0b' : '#22c55e',
+                  boxShadow: maintenanceMode ? '0 0 8px #f59e0b' : '0 0 8px #22c55e',
+                  display: 'inline-block'
+                }}
+              />
+              <strong style={{ fontSize: '14px', color: 'var(--navy)' }}>
+                Status Sistem Publik: {maintenanceMode ? 'Sedang Dalam Pemeliharaan (Maintenance)' : 'Aktif & Beroperasi Normal (Live)'}
+              </strong>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '2px 0 0 0' }}>
+              {maintenanceMode
+                ? 'Halaman aplikasi umum dikunci. Seluruh pengunjung dialihkan ke Halaman Maintenance, hanya Administrator yang dapat login.'
+                : 'Platform riset aktif melayani mahasiswa, dosen pembimbing, dan tim kolaborator secara publik.'}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage('maintenance')}
+            style={{ fontSize: '12px' }}
+          >
+            <Eye size={14} />
+            <span>Pratinjau Halaman Maintenance</span>
+          </button>
+
+          {maintenanceMode ? (
+            <button
+              className="btn btn-primary btn-sm"
+              style={{ background: '#22c55e', borderColor: '#16a34a', color: '#fff', fontWeight: 800, fontSize: '12px' }}
+              onClick={() => setMaintenanceMode(false)}
+            >
+              <Unlock size={14} />
+              <span>Nonaktifkan Mode Pemeliharaan</span>
+            </button>
+          ) : (
+            <button
+              className="btn btn-sm"
+              style={{ background: '#f59e0b', borderColor: '#d97706', color: '#000', fontWeight: 800, fontSize: '12px' }}
+              onClick={() => setMaintenanceMode(true)}
+            >
+              <Lock size={14} />
+              <span>Aktifkan Mode Pemeliharaan</span>
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* System Vital KPIs Grid */}
       <div
