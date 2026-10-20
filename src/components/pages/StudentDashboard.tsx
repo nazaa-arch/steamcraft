@@ -1,6 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Plus, Compass, AlertTriangle, Users, CheckCircle2, FolderGit2, ArrowRight } from 'lucide-react';
+import {
+  Plus,
+  Compass,
+  AlertTriangle,
+  Users,
+  CheckCircle2,
+  Circle,
+  FolderGit2,
+  ArrowRight,
+  Sparkles,
+  Rocket,
+  UserCheck,
+  Bot,
+  Award
+} from 'lucide-react';
 
 export const StudentDashboard: React.FC = () => {
   const {
@@ -11,8 +25,61 @@ export const StudentDashboard: React.FC = () => {
     setCurrentPage,
     setSelectedProjectId,
     openModal,
-    markAnnouncementRead
+    markAnnouncementRead,
+    showToast
   } = useApp();
+
+  // Onboarding Checklist State
+  const [tasks, setTasks] = useState<{ [key: string]: boolean }>(() => {
+    const saved = localStorage.getItem('steamcraft_onboarding_tasks');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // default
+      }
+    }
+    return {
+      profile: false,
+      workspace: false,
+      aiChat: false,
+      portfolio: false
+    };
+  });
+
+  const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
+    return localStorage.getItem('steamcraft_onboarding_dismissed') === 'true';
+  });
+
+  const toggleTask = (key: string) => {
+    setTasks(prev => {
+      const updated = { ...prev, [key]: !prev[key] };
+      localStorage.setItem('steamcraft_onboarding_tasks', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const markTaskDone = (key: string) => {
+    setTasks(prev => {
+      if (prev[key]) return prev;
+      const updated = { ...prev, [key]: true };
+      localStorage.setItem('steamcraft_onboarding_tasks', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleDismiss = () => {
+    setOnboardingDismissed(true);
+    localStorage.setItem('steamcraft_onboarding_dismissed', 'true');
+    showToast('Panduan disembunyikan. Anda dapat membukanya kembali kapan saja.');
+  };
+
+  const handleRestore = () => {
+    setOnboardingDismissed(false);
+    localStorage.setItem('steamcraft_onboarding_dismissed', 'false');
+  };
+
+  const completedTasksCount = Object.values(tasks).filter(Boolean).length;
 
   // Metrics
   const activeProjects = projects.filter(p => p.status === 'Aktif' || p.status === 'Review diajukan');
@@ -42,6 +109,15 @@ export const StudentDashboard: React.FC = () => {
               <Compass size={15} />
               <span>Jelajahi Katalog Proyek</span>
             </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => openModal('quickTour')}
+              style={{ background: 'rgba(255, 255, 255, 0.9)', border: '1px solid var(--line)', color: 'var(--navy)' }}
+            >
+              <Sparkles size={15} style={{ color: 'var(--primary)' }} />
+              <span>Tur Pengguna Baru (2 Menit)</span>
+            </button>
           </div>
         </div>
         <div className="orbit-box">
@@ -50,6 +126,339 @@ export const StudentDashboard: React.FC = () => {
           <span className="orbit-pill op2">📐 Math + Art</span>
         </div>
       </div>
+
+      {/* ==================== ONBOARDING CHECKLIST WIDGET ==================== */}
+      {!onboardingDismissed ? (
+        <div
+          className="onboarding-widget"
+          style={{
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)',
+            border: '1.5px solid #bfdbfe',
+            borderRadius: '16px',
+            padding: '22px',
+            marginBottom: '24px',
+            boxShadow: '0 8px 24px -4px rgba(37, 99, 235, 0.08)',
+            position: 'relative'
+          }}
+        >
+          {/* Header Row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #0d9488 100%)',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  boxShadow: '0 4px 12px rgba(37,99,235,0.25)'
+                }}
+              >
+                <Rocket size={22} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      padding: '3px 9px',
+                      borderRadius: '12px',
+                      border: '1px solid #bfdbfe'
+                    }}
+                  >
+                    Panduan Responden & Pengguna Baru
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      background: completedTasksCount === 4 ? '#f0fdf4' : '#fffbeb',
+                      color: completedTasksCount === 4 ? '#166534' : '#b45309',
+                      padding: '3px 9px',
+                      borderRadius: '12px',
+                      border: `1px solid ${completedTasksCount === 4 ? '#bbf7d0' : '#fde68a'}`
+                    }}
+                  >
+                    {completedTasksCount} dari 4 Misi Selesai ({Math.round((completedTasksCount / 4) * 100)}%)
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--navy)', margin: '4px 0 2px 0' }}>
+                  Misi Eksplorasi 4 Langkah (Selesai dalam 3 Menit)
+                </h3>
+                <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', margin: 0 }}>
+                  Baru pertama kali masuk ke STEAM-Craft? Ikuti langkah praktis ini untuk memahami seluruh alur riset dan penilaian akademik.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => openModal('quickTour')}
+                style={{ fontSize: '11.5px', padding: '6px 12px' }}
+              >
+                <Sparkles size={13} />
+                <span>Buka Tur Interaktif</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={handleDismiss}
+                style={{ fontSize: '11px', color: 'var(--muted)', padding: '6px 8px' }}
+                title="Sembunyikan panduan ini"
+              >
+                Sembunyikan &times;
+              </button>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div style={{ marginBottom: '18px' }}>
+            <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: `${(completedTasksCount / 4) * 100}%`,
+                  background: 'linear-gradient(90deg, #2563eb 0%, #0d9488 100%)',
+                  borderRadius: '999px',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* 4 Task Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
+            {/* Task 1: Profile */}
+            <div
+              style={{
+                background: tasks.profile ? '#f0fdf4' : 'white',
+                border: `1.5px solid ${tasks.profile ? '#86efac' : 'var(--line)'}`,
+                borderRadius: '12px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: tasks.profile ? '#dcfce7' : '#eff6ff', color: tasks.profile ? '#15803d' : '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <UserCheck size={16} />
+                    </div>
+                    <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>Langkah 1</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleTask('profile')}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: tasks.profile ? '#16a34a' : 'var(--muted)', padding: '2px' }}
+                    title={tasks.profile ? 'Tandai belum selesai' : 'Tandai selesai'}
+                  >
+                    {tasks.profile ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                  </button>
+                </div>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+                  Lengkapi Profil & Afiliasi Riset
+                </strong>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
+                  Atur gelar akademik, universitas, program studi, dan tautan repositori profil Anda.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  openModal('profile');
+                  markTaskDone('profile');
+                }}
+                style={{ width: '100%', marginTop: '12px', fontSize: '11.5px', justifyContent: 'center' }}
+              >
+                <span>{tasks.profile ? 'Perbarui Profil' : 'Atur Profil Riset'}</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
+
+            {/* Task 2: Workspace */}
+            <div
+              style={{
+                background: tasks.workspace ? '#f0fdf4' : 'white',
+                border: `1.5px solid ${tasks.workspace ? '#86efac' : 'var(--line)'}`,
+                borderRadius: '12px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: tasks.workspace ? '#dcfce7' : '#f0fdfa', color: tasks.workspace ? '#15803d' : '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FolderGit2 size={16} />
+                    </div>
+                    <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>Langkah 2</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleTask('workspace')}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: tasks.workspace ? '#16a34a' : 'var(--muted)', padding: '2px' }}
+                    title={tasks.workspace ? 'Tandai belum selesai' : 'Tandai selesai'}
+                  >
+                    {tasks.workspace ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                  </button>
+                </div>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+                  Masuk ke Ruang Kerja Riset
+                </strong>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
+                  Pelajari alur 5 checkpoint ilmiah, logbook observasi lab, dan susunan tim proyek #1.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setSelectedProjectId(1);
+                  setCurrentPage('workspace');
+                  markTaskDone('workspace');
+                }}
+                style={{ width: '100%', marginTop: '12px', fontSize: '11.5px', justifyContent: 'center' }}
+              >
+                <span>Buka Ruang Kerja #1</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
+
+            {/* Task 3: AI Assistant */}
+            <div
+              style={{
+                background: tasks.aiChat ? '#f0fdf4' : 'white',
+                border: `1.5px solid ${tasks.aiChat ? '#86efac' : 'var(--line)'}`,
+                borderRadius: '12px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: tasks.aiChat ? '#dcfce7' : '#f5f3ff', color: tasks.aiChat ? '#15803d' : '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Bot size={16} />
+                    </div>
+                    <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>Langkah 3</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleTask('aiChat')}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: tasks.aiChat ? '#16a34a' : 'var(--muted)', padding: '2px' }}
+                    title={tasks.aiChat ? 'Tandai belum selesai' : 'Tandai selesai'}
+                  >
+                    {tasks.aiChat ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                  </button>
+                </div>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+                  Coba AI Asisten Ilmiah STEAM
+                </strong>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
+                  Gunakan Asisten AI untuk validasi rumus, pembagian dataset, atau rekomendasi metodologi.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setSelectedProjectId(1);
+                  setCurrentPage('workspace');
+                  markTaskDone('aiChat');
+                }}
+                style={{ width: '100%', marginTop: '12px', fontSize: '11.5px', justifyContent: 'center' }}
+              >
+                <span>Tanya AI Asisten</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
+
+            {/* Task 4: Portfolio */}
+            <div
+              style={{
+                background: tasks.portfolio ? '#f0fdf4' : 'white',
+                border: `1.5px solid ${tasks.portfolio ? '#86efac' : 'var(--line)'}`,
+                borderRadius: '12px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: tasks.portfolio ? '#dcfce7' : '#fff7ed', color: tasks.portfolio ? '#15803d' : '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Award size={16} />
+                    </div>
+                    <strong style={{ fontSize: '13px', color: 'var(--navy)' }}>Langkah 4</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleTask('portfolio')}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: tasks.portfolio ? '#16a34a' : 'var(--muted)', padding: '2px' }}
+                    title={tasks.portfolio ? 'Tandai belum selesai' : 'Tandai selesai'}
+                  >
+                    {tasks.portfolio ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                  </button>
+                </div>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+                  Tinjau Radar Segi Lima & Sertifikat
+                </strong>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
+                  Buka dossier akademik Anda, pelajari radar poligon segi lima S-T-E-A-M, dan cetak sertifikat.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setCurrentPage('studentPortfolio');
+                  markTaskDone('portfolio');
+                }}
+                style={{ width: '100%', marginTop: '12px', fontSize: '11.5px', justifyContent: 'center' }}
+              >
+                <span>Buka Portofolio Riset</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={handleRestore}
+            style={{ fontSize: '11.5px', background: 'var(--surface-alt)', border: '1px solid var(--line)' }}
+          >
+            <Rocket size={13} style={{ color: 'var(--primary)' }} />
+            <span>Tampilkan Panduan Memulai ({completedTasksCount}/4 Selesai)</span>
+          </button>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="stats-grid">

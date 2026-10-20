@@ -135,16 +135,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-    if (saved) {
+    // Sesi baru selalu dimulai dari Halaman Login
+    // Sesi aktif hanya disimpan dalam sessionStorage selama tab browser terbuka
+    const savedSession = sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    if (savedSession) {
       try {
-        return JSON.parse(saved);
+        return JSON.parse(savedSession);
       } catch (e) {
         return null;
       }
     }
-    // Default to Budi Santoso (Student) for immediate accessibility
-    return INITIAL_USERS[0];
+    // Hapus sisa login otomatis lama di localStorage agar pengguna baru selalu masuk ke Login Screen
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    return null;
   });
 
   const [appMode, setAppModeState] = useState<AppMode>(() => {
@@ -222,8 +225,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(currentUser));
+      sessionStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(currentUser));
     } else {
+      sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
     }
   }, [currentUser]);

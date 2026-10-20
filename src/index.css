@@ -1081,3 +1081,20 @@ textarea:focus,
     gap: 8px !important;
   }
 }
+
+/* ==================== ONBOARDING CHECKLIST & QUICK TOUR ==================== */
+.onboarding-widget {
+  transition: all 0.25s ease;
+}
+
+.onboarding-widget:hover {
+  box-shadow: 0 12px 32px -4px rgba(37, 99, 235, 0.12) !important;
+}
+
+@media (max-width: 640px) {
+  .onboarding-widget {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 18px !important;
+  }
+}

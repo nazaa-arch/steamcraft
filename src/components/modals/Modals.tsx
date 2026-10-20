@@ -33,7 +33,11 @@ import {
   Layers,
   Key,
   Phone,
-  Mail
+  Mail,
+  Compass,
+  FolderGit2,
+  Bot,
+  ArrowRight
 } from 'lucide-react';
 import { User, Project, UserRole } from '../../types';
 
@@ -60,7 +64,7 @@ export const Modals: React.FC = () => {
 
   return (
     <div className="modal-overlay active" onClick={closeModal}>
-      <div className={`modal-box ${activeModal === 'profile' ? 'modal-box-xl' : ''}`} onClick={e => e.stopPropagation()}>
+      <div className={`modal-box ${activeModal === 'profile' || activeModal === 'quickTour' ? 'modal-box-xl' : ''}`} onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={closeModal}>
           &times;
         </button>
@@ -74,6 +78,7 @@ export const Modals: React.FC = () => {
         {activeModal === 'announcementDetail' && <AnnouncementDetailContent ann={modalData} onClose={closeModal} />}
         {activeModal === 'newAnnouncement' && <NewAnnouncementContent onClose={closeModal} />}
         {activeModal === 'register' && <RegisterModalContent onClose={closeModal} />}
+        {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
       </div>
     </div>
   );
@@ -2133,6 +2138,308 @@ const PeerFeedbackModalContent: React.FC<{ data?: any; onClose: () => void }> = 
         </button>
       </div>
     </form>
+  );
+};
+
+/* ==================== 10. QUICK TOUR / ALUR RISET MODAL CONTENT ==================== */
+const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { setCurrentPage, setSelectedProjectId, showToast } = useApp();
+  const [slide, setSlide] = useState(1);
+
+  const totalSlides = 5;
+
+  const tourSlides = [
+    {
+      step: 1,
+      tag: 'Pengenalan Platform',
+      title: 'Selamat Datang di Ekosistem Riset STEAM-Craft',
+      subtitle: 'Platform riset terintegrasi civitas akademika untuk kolaborasi 5 pilar (Science, Technology, Engineering, Art, Mathematics).',
+      icon: Sparkles,
+      iconColor: '#2563eb',
+      iconBg: '#eff6ff',
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: 0 }}>
+            STEAM-Craft memfasilitasi mahasiswa dan dosen untuk merancang proyek ilmiah, mengumpulkan bukti eksperimen laboratorium, melakukan simulasi terkontrol, dan menyusun laporan penelitian yang siap diakreditasi.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '8px' }}>
+            <div style={{ background: '#eff6ff', padding: '10px 12px', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+              <strong style={{ fontSize: '12px', color: '#1d4ed8' }}>🔬 Science</strong>
+              <div style={{ fontSize: '11px', color: '#1e40af' }}>Hipotesis & Observasi</div>
+            </div>
+            <div style={{ background: '#f0fdfa', padding: '10px 12px', borderRadius: '10px', border: '1px solid #99f6e4' }}>
+              <strong style={{ fontSize: '12px', color: '#0f766e' }}>💻 Technology</strong>
+              <div style={{ fontSize: '11px', color: '#115e59' }}>Algoritma & Komputasi</div>
+            </div>
+            <div style={{ background: '#fff7ed', padding: '10px 12px', borderRadius: '10px', border: '1px solid #fed7aa' }}>
+              <strong style={{ fontSize: '12px', color: '#c2410c' }}>⚙️ Engineering</strong>
+              <div style={{ fontSize: '11px', color: '#9a3412' }}>Rekayasa & Purwarupa</div>
+            </div>
+            <div style={{ background: '#fff1f2', padding: '10px 12px', borderRadius: '10px', border: '1px solid #fecdd3' }}>
+              <strong style={{ fontSize: '12px', color: '#be123c' }}>🎨 Art</strong>
+              <div style={{ fontSize: '11px', color: '#9f1239' }}>Estetika & Desain UI</div>
+            </div>
+            <div style={{ background: '#f5f3ff', padding: '10px 12px', borderRadius: '10px', border: '1px solid #ddd6fe' }}>
+              <strong style={{ fontSize: '12px', color: '#6d28d9' }}>📐 Mathematics</strong>
+              <div style={{ fontSize: '11px', color: '#5b21b6' }}>Statistik & Model</div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 2,
+      tag: 'Alur 1: Inisiasi Riset',
+      title: 'Katalog Proyek & Perekrutan Terbuka (Open Recruitment)',
+      subtitle: 'Temukan proyek riset yang sedang berlangsung atau rekrut anggota tim lintas program studi.',
+      icon: Compass,
+      iconColor: '#0d9488',
+      iconBg: '#f0fdfa',
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: 0 }}>
+            Kolaborasi ilmiah modern membutuhkan sinergi keahlian. Di STEAM-Craft, Anda dapat:
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'var(--surface-alt)', padding: '12px', borderRadius: '10px', border: '1px solid var(--line)' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0d9488', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0 }}>1</div>
+              <div>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>Jelajahi Katalog Proyek</strong>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: '2px 0 0 0' }}>Telusuri proyek berbasis Sains Data, Internet of Things, atau Aktuaria yang dibimbing oleh dosen-dosen terkemuka.</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'var(--surface-alt)', padding: '12px', borderRadius: '10px', border: '1px solid var(--line)' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0 }}>2</div>
+              <div>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>Daftar di Open Recruitment Hub</strong>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: '2px 0 0 0' }}>Ajukan diri sebagai data engineer, desainer UI, atau hardware specialist pada tim riset yang membuka lowongan kolaborasi.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 3,
+      tag: 'Alur 2: Eksekusi Ilmiah',
+      title: 'Ruang Kerja Riset: Checkpoint, Logbook & AI Asisten',
+      subtitle: 'Pusat operasional eksperimen harian, pencatatan bukti empiris, dan asistensi kecerdasan buatan.',
+      icon: FolderGit2,
+      iconColor: '#2563eb',
+      iconBg: '#eff6ff',
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: 0 }}>
+            Ruang Kerja (Workspace) dirancang dengan standar reproduktibilitas penelitian:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#2563eb' }}>✓ 5 Tahapan Checkpoint</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Alur checkpoint terstruktur dari perumusan hipotesis hingga rilis artefak.</p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#0d9488' }}>📖 Jurnal Logbook Lab</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Catat anomali ukur, parameter sensor, dan lampiran berkas data empiris.</p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#7c3aed' }}>🤖 Asisten Ilmiah STEAM</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>AI copilot untuk validasi rumus statistik, pembagian dataset, dan uji RMSE.</p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#ea580c' }}>📦 Versi & Artefak Build</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Catat commit repositori GitHub dan file luaran riset yang teruji.</p>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 4,
+      tag: 'Alur 3: Dukungan Kampus',
+      title: 'Klinik Pembimbing & Pengajuan Fasilitas Laboratorium',
+      subtitle: 'Dukungan intervensi dosen saat menemui kendala metodologis serta akses sarana uji kampus.',
+      icon: Calendar,
+      iconColor: '#e11d48',
+      iconBg: '#fff1f2',
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: 0 }}>
+            Penelitian tidak boleh mandek karena kendala teknis atau kekurangan alat:
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#fff1f2', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fecdd3' }}>
+              <span style={{ fontSize: '20px' }}>⚠️</span>
+              <div>
+                <strong style={{ fontSize: '12.5px', color: '#9f1239' }}>Tombol "Laporkan Kendala" (Blocker Alert)</strong>
+                <p style={{ fontSize: '11.5px', color: '#881337', margin: '2px 0 0 0' }}>Tandai kendala reagen, galat alat, atau bias statistik agar dosen segera menjadwalkan intervensi.</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#f0fdf4', padding: '12px 14px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+              <span style={{ fontSize: '20px' }}>🏛️</span>
+              <div>
+                <strong style={{ fontSize: '12.5px', color: '#166534' }}>Peminjaman Fasilitas & Sensor Laboratorium</strong>
+                <p style={{ fontSize: '11.5px', color: '#14532d', margin: '2px 0 0 0' }}>Ajukan peminjaman modul mikrokontroler, server komputasi awan, atau ruang uji kampus secara resmi.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 5,
+      tag: 'Alur 4: Luaran Akademik',
+      title: 'Radar Segi Lima STEAM, Ulasan Sejawat & Sertifikasi',
+      subtitle: 'Pengakuan kompetensi multidisiplin, ulasan 360°, dan ekspor paket kelayakan ilmiah terverifikasi.',
+      icon: Award,
+      iconColor: '#7c3aed',
+      iconBg: '#f5f3ff',
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: 0 }}>
+            Hasil akhir penelitian Anda diakreditasi secara formal dengan standar kompetensi teruji:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#7c3aed' }}>📐 Radar Segi Lima STEAM</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Pemetaan visual poligon segi lima S-T-E-A-M terstandarisasi.</p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#2563eb' }}>⭐ Ulasan Sejawat 360°</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Evaluasi formatif antar anggota tim lengkap dengan lencana penghargaan.</p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#0d9488' }}>📜 Sertifikat Kelayakan Riset</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Sertifikat resmi cetak A4 dengan segel emas dan tanda tangan dosen.</p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <strong style={{ fontSize: '12px', color: '#ea580c' }}>💾 Ekspor Paket Reproducibility</strong>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Unduh berkas JSON berisi metadata riset lengkap dan hash verifikasi SHA-256.</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const current = tourSlides[slide - 1];
+  const IconComponent = current.icon;
+
+  const handleFinish = () => {
+    showToast('Tur selesai! Selamat bereksplorasi di STEAM-Craft.');
+    onClose();
+  };
+
+  return (
+    <div style={{ padding: '8px 4px' }}>
+      {/* Header Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="badge badge-blue" style={{ fontSize: '11px', fontWeight: 800 }}>
+            Langkah {slide} dari {totalSlides}
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
+            {current.tag}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={handleFinish}
+          style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+        >
+          Lewati Tur &times;
+        </button>
+      </div>
+
+      {/* Step Pills Navigation */}
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '20px' }}>
+        {tourSlides.map(s => (
+          <button
+            key={s.step}
+            type="button"
+            onClick={() => setSlide(s.step)}
+            style={{
+              flex: 1,
+              height: '6px',
+              borderRadius: '999px',
+              background: s.step === slide ? 'var(--primary)' : s.step < slide ? '#93c5fd' : '#e2e8f0',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'all 0.2s ease'
+            }}
+            title={`Langkah ${s.step}: ${s.tag}`}
+          />
+        ))}
+      </div>
+
+      {/* Slide Content Card */}
+      <div style={{ background: 'white', border: '1px solid var(--line)', borderRadius: '16px', padding: '24px', marginBottom: '20px', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: current.iconBg, color: current.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <IconComponent size={24} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy)', margin: '0 0 4px 0', lineHeight: 1.3 }}>
+              {current.title}
+            </h3>
+            <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
+              {current.subtitle}
+            </p>
+          </div>
+        </div>
+
+        {current.content}
+      </div>
+
+      {/* Slide Navigation Actions */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          disabled={slide === 1}
+          onClick={() => setSlide(prev => Math.max(1, prev - 1))}
+          style={{ opacity: slide === 1 ? 0.4 : 1 }}
+        >
+          &larr; Sebelumnya
+        </button>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {slide < totalSlides ? (
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => setSlide(prev => Math.min(totalSlides, prev + 1))}
+              style={{ padding: '8px 18px' }}
+            >
+              <span>Lanjut</span>
+              &rarr;
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setSelectedProjectId(1);
+                  setCurrentPage('workspace');
+                  handleFinish();
+                }}
+              >
+                <span>Buka Ruang Kerja #1</span>
+                <ArrowRight size={13} />
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleFinish}
+              >
+                <span>Mulai Eksplorasi 🚀</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

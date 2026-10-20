@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check, X } from 'lucide-react';
+import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -274,6 +274,29 @@ export const Topbar: React.FC = () => {
             </span>
           </div>
         )}
+
+        {/* Quick Tour / Panduan Button */}
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => openModal('quickTour')}
+          style={{
+            padding: '5px 10px',
+            fontSize: '11.5px',
+            borderRadius: '10px',
+            color: 'var(--navy)',
+            background: 'var(--surface-alt)',
+            border: '1px solid var(--line)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            cursor: 'pointer'
+          }}
+          title="Buka Panduan & Tur Alur Riset STEAM-Craft"
+        >
+          <Sparkles size={13} style={{ color: 'var(--primary)' }} />
+          <span>Panduan</span>
+        </button>
 
         {/* Notification Bell Dropdown */}
         <div className="notif-bell-wrapper" ref={notifWrapperRef}>
