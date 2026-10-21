@@ -509,7 +509,16 @@ export const Topbar: React.FC = () => {
           <div className="user-info">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <strong>
-                {[currentUser.title_prefix, currentUser.name, currentUser.title_suffix].filter(Boolean).join(' ')}
+                {(() => {
+                  let str = currentUser.name || '';
+                  if (currentUser.title_prefix && !str.startsWith(currentUser.title_prefix)) {
+                    str = `${currentUser.title_prefix} ${str}`;
+                  }
+                  if (currentUser.title_suffix && !str.endsWith(currentUser.title_suffix)) {
+                    str = `${str}, ${currentUser.title_suffix}`;
+                  }
+                  return str;
+                })()}
               </strong>
               <Edit3 size={11} className="profile-edit-indicator" />
             </div>

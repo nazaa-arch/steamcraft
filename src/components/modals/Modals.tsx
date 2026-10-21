@@ -346,7 +346,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
   // Avatar & Security
   const [avatarColor, setAvatarColor] = useState(user.avatar_color || '#2878d7');
   const [avatarIcon, setAvatarIcon] = useState(
-    user.avatar_icon || (role === 'student' ? '🔬' : role === 'lecturer' ? '👨‍🏫' : '🛠️')
+    user.avatar_icon || (role === 'student' ? '🔬' : role === 'lecturer' ? '👩‍🏫' : '🛠️')
   );
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -458,23 +458,23 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
       setAvatarIcon('🔬');
     } else if (role === 'lecturer') {
       setName('Dr. Belgis Ainatul Iza, S.Si., M.Mat.');
-      setTitlePrefix('Dr.');
-      setTitleSuffix('S.Si., M.Mat.');
+      setTitlePrefix('');
+      setTitleSuffix('');
       setIdentifier('202509237');
       setStudy('S1 Sains Data');
       setFaculty('Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)');
       setUniversity('Universitas Negeri Surabaya (UNESA)');
       setEmail('belgisiza@unesa.ac.id');
-      setPhone('0811-9876-5432');
-      setOfficeRoom('Lab Sensor Cerdas Lt. 3, Gedung Riset FMIPA');
-      setResearchInterests('Instrumentasi Sensor Cerdas, Pemodelan Sains Komputasi, Kalibrasi Empiris');
-      setBio('Dosen pembimbing riset dan penilai standarisasi rubrik ilmiah 4 pilar STEAM tingkat nasional.');
-      setSteamFocus(['Science', 'Technology', 'Engineering', 'Mathematics']);
-      setScholarId('56192841022');
-      setOrcidId('0000-0002-1829-9281');
-      setAcademicLinks('Scopus ID: 56192841022 · ORCID: 0000-0002-1829-9281');
+      setPhone('0812-3456-7890');
+      setOfficeRoom('Gedung C8 Lt. 2 FMIPA, Kampus Ketintang UNESA');
+      setResearchInterests('Sains Data, Pemodelan Matematika, Analisis Stokastik, Machine Learning, AI Reproducibility');
+      setBio('Dosen Program Studi S1 Sains Data FMIPA UNESA, pembimbing riset dan penilai standarisasi rubrik ilmiah STEAM tingkat nasional.');
+      setSteamFocus(['Science', 'Technology', 'Mathematics', 'Engineering']);
+      setScholarId('belgisiza-unesa');
+      setOrcidId('0009-0002-4182-9281');
+      setAcademicLinks('NIP: 202509237 · Email: belgisiza@unesa.ac.id · SINTA ID: 6718290');
       setAvatarColor('#0d9488');
-      setAvatarIcon('👨‍🏫');
+      setAvatarIcon('👩‍🏫');
     } else {
       setName('Administrator Sistem (Lead Dev & Architect)');
       setTitlePrefix('');
