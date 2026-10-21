@@ -16,6 +16,7 @@ import { AdminConsolePage } from './components/pages/AdminConsolePage';
 import { AdminDashboard } from './components/pages/AdminDashboard';
 import { AdminDevPortal } from './components/pages/AdminDevPortal';
 import { TeamProjectHub } from './components/pages/TeamProjectHub';
+import { MemberPublicPortfolio } from './components/pages/MemberPublicPortfolio';
 import { MaintenancePage } from './components/pages/MaintenancePage';
 import { NotFoundPage } from './components/pages/NotFoundPage';
 import { Modals } from './components/modals/Modals';
@@ -34,18 +35,51 @@ export const App: React.FC = () => {
     searchParams.get('portal') === 'adm' ||
     currentPage === 'adminDev';
 
+  // 1.5 Dedicated Member Portfolio Subdomains:
+  // portofolionaza.steamcraft.online / ?portfolio=naza
+  // portofoliobima.steamcraft.online / ?portfolio=bima
+  // portofoliosandi.steamcraft.online / ?portfolio=sandi
+  const portfolioTarget: 'naza' | 'bima' | 'sandi' | null =
+    hostname.includes('portofolionaza') || searchParams.get('portfolio') === 'naza' || searchParams.get('member') === 'naza'
+      ? 'naza'
+      : hostname.includes('portofoliobima') || searchParams.get('portfolio') === 'bima' || searchParams.get('member') === 'bima'
+      ? 'bima'
+      : hostname.includes('portofoliosandi') || searchParams.get('portfolio') === 'sandi' || searchParams.get('member') === 'sandi'
+      ? 'sandi'
+      : null;
+
   // Dynamic Browser Tab Headline Title Sync
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.title = isAdmSubdomain ? 'Adm Steam' : 'SteamCraft';
+      if (isAdmSubdomain) {
+        document.title = 'Adm Steam';
+      } else if (portfolioTarget === 'naza') {
+        document.title = 'Portofolio Muhammad Naza Firmansyah — STEAM';
+      } else if (portfolioTarget === 'bima') {
+        document.title = 'Portofolio Bima Sena — STEAM';
+      } else if (portfolioTarget === 'sandi') {
+        document.title = 'Portofolio Sandi Ardi Prayitno — STEAM';
+      } else {
+        document.title = 'SteamCraft';
+      }
     }
-  }, [isAdmSubdomain, currentPage]);
+  }, [isAdmSubdomain, portfolioTarget, currentPage]);
 
   if (isAdmSubdomain) {
     return (
       <>
         <AdminDevPortal />
         <Modals />
+        <Toast />
+      </>
+    );
+  }
+
+  // Render individual member portfolio if accessing their dedicated portfolio subdomain
+  if (portfolioTarget) {
+    return (
+      <>
+        <MemberPublicPortfolio memberId={portfolioTarget} />
         <Toast />
       </>
     );

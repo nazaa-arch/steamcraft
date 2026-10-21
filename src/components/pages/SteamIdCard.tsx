@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ExternalLink, Edit3, X, Check } from 'lucide-react';
+import { Sparkles, ExternalLink } from 'lucide-react';
 
 export interface SteamMemberData {
   id: string;
@@ -15,7 +15,7 @@ export interface SteamMemberData {
   portfolioUrl: string;
 }
 
-// 3 Official Team Members exactly matching the uploaded screenshot layout
+// 3 Official Team Members with designated portfolio subdomains
 export const DEFAULT_STEAM_MEMBERS: SteamMemberData[] = [
   {
     id: 'naza',
@@ -28,7 +28,7 @@ export const DEFAULT_STEAM_MEMBERS: SteamMemberData[] = [
     avatarInitial: 'NF',
     gradient: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
     focus: ['Cloud Architecture', 'Full-Stack React/Node Engine', 'FAIR Data Pipeline', 'Security & DevOps'],
-    portfolioUrl: 'https://github.com/nazaa-arch'
+    portfolioUrl: 'https://portofolionaza.steamcraft.online'
   },
   {
     id: 'bima',
@@ -41,7 +41,7 @@ export const DEFAULT_STEAM_MEMBERS: SteamMemberData[] = [
     avatarInitial: 'BS',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
     focus: ['ESP32 Microcontroller', 'LoRaWAN Modulations', 'Sensor Array & MPPT Solar', 'Hardware Telemetry'],
-    portfolioUrl: 'https://github.com/bimasena-iot'
+    portfolioUrl: 'https://portofoliobima.steamcraft.online'
   },
   {
     id: 'sandi',
@@ -54,7 +54,7 @@ export const DEFAULT_STEAM_MEMBERS: SteamMemberData[] = [
     avatarInitial: 'SP',
     gradient: 'linear-gradient(135deg, #0d9488 0%, #10b981 100%)',
     focus: ['Scientific Methodology', 'UI/UX Visual Identity', 'Data Stochastic Modeling', 'Bio-materials Science'],
-    portfolioUrl: 'https://github.com/sandiardi'
+    portfolioUrl: 'https://portofoliosandi.steamcraft.online'
   }
 ];
 
@@ -121,12 +121,14 @@ export const TeamMemberCard: React.FC<{
 }> = ({ member, onOpenPortfolio }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  const displayDomain = member.portfolioUrl.replace('https://', '').replace(/\/$/, '');
+
   return (
     <div
       onClick={() => onOpenPortfolio(member.portfolioUrl)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      title={`Klik untuk membuka website portofolio resmi ${member.name}`}
+      title={`Buka portofolio resmi: ${displayDomain}`}
       style={{
         background: '#ffffff',
         borderRadius: '24px',
@@ -158,7 +160,7 @@ export const TeamMemberCard: React.FC<{
           {/* Logo + STEAM text */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img
-              src="/team-logo.jpg?v=20261021"
+              src="/team-logo.jpg"
               alt="STEAM Logo"
               style={{
                 width: '32px',
@@ -286,21 +288,25 @@ export const TeamMemberCard: React.FC<{
           ))}
         </div>
 
-        {/* Hover / Click Portfolio CTA Hint */}
+        {/* Portfolio Subdomain Action Pill */}
         <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '5px',
+            gap: '6px',
             fontSize: '11px',
             fontWeight: 800,
+            padding: '4px 12px',
+            borderRadius: '999px',
+            background: isHovered ? '#eff6ff' : '#f8fafc',
+            border: isHovered ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
             color: isHovered ? '#2563eb' : '#64748b',
-            transition: 'color 0.2s ease',
+            transition: 'all 0.2s ease',
             marginTop: '2px'
           }}
         >
-          <span>Kunjungi Website Portofolio</span>
-          <ExternalLink size={12} />
+          <span>{displayDomain}</span>
+          <ExternalLink size={12} color={isHovered ? '#2563eb' : '#94a3b8'} />
         </div>
       </div>
 
@@ -332,48 +338,11 @@ export const TeamMemberCard: React.FC<{
 
 // Section Component displaying all 3 members simultaneously side-by-side
 export const SteamTeamCardSection: React.FC = () => {
-  const [members, setMembers] = useState<SteamMemberData[]>(() => {
-    try {
-      const saved = localStorage.getItem('steam_team_members_custom_urls');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch {
-      // fallback
-    }
-    return DEFAULT_STEAM_MEMBERS;
-  });
-
-  const [editUrlModal, setEditUrlModal] = useState<boolean>(false);
-  const [editingUrls, setEditingUrls] = useState<{ [id: string]: string }>({
-    naza: members[0].portfolioUrl,
-    bima: members[1].portfolioUrl,
-    sandi: members[2].portfolioUrl
-  });
-  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const members = DEFAULT_STEAM_MEMBERS;
 
   const handleOpenPortfolio = (url: string) => {
     if (!url) return;
     window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleSaveUrls = (e: React.FormEvent) => {
-    e.preventDefault();
-    const updated = members.map((m) => ({
-      ...m,
-      portfolioUrl: editingUrls[m.id] || m.portfolioUrl
-    }));
-    setMembers(updated);
-    try {
-      localStorage.setItem('steam_team_members_custom_urls', JSON.stringify(updated));
-    } catch {
-      // ignore
-    }
-    setSaveSuccess(true);
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setEditUrlModal(false);
-    }, 1200);
   };
 
   return (
@@ -402,35 +371,12 @@ export const SteamTeamCardSection: React.FC = () => {
         >
           Anggota Tim Peneliti STEAM
         </h2>
-        <p style={{ fontSize: '14.5px', color: '#64748b', maxWidth: '640px', margin: '0 auto 12px auto' }}>
+        <p style={{ fontSize: '14.5px', color: '#64748b', maxWidth: '640px', margin: '0 auto 10px auto' }}>
           Tiga inovator multidisiplin yang memimpin perancangan platform perangkat lunak, instrumen IoT, dan metodologi ilmiah.
         </p>
-        <p style={{ fontSize: '12.5px', color: '#2563eb', fontWeight: 700, margin: '0 0 14px 0' }}>
+        <p style={{ fontSize: '13px', color: '#2563eb', fontWeight: 700, margin: 0 }}>
           💡 Klik pada kartu anggota mana pun untuk langsung mengunjungi website portofolio resmi masing-masing.
         </p>
-
-        {/* Small Action to Customize Portfolio URLs */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <button
-            onClick={() => setEditUrlModal(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#94a3b8',
-              fontSize: '11px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 8px',
-              borderRadius: '6px'
-            }}
-          >
-            <Edit3 size={11} />
-            <span>Kustomisasi URL Portofolio</span>
-          </button>
-        </div>
       </div>
 
       {/* 3 ID Cards Grid - Lined Up Simultaneously Side-by-Side */}
@@ -450,128 +396,6 @@ export const SteamTeamCardSection: React.FC = () => {
           />
         ))}
       </div>
-
-      {/* Modal to Customize Portfolio URLs */}
-      {editUrlModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            background: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '20px'
-          }}
-          onClick={() => setEditUrlModal(false)}
-        >
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: '24px',
-              padding: '28px',
-              maxWidth: '560px',
-              width: '100%',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
-              position: 'relative'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#1e3a8a', margin: '0 0 4px 0' }}>
-                  Atur Tautan Website Portofolio
-                </h3>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>
-                  Sesuaikan URL tujuan saat masing-masing kartu anggota diklik oleh pengunjung.
-                </span>
-              </div>
-              <button
-                onClick={() => setEditUrlModal(false)}
-                style={{
-                  background: '#f1f5f9',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'grid',
-                  placeItems: 'center',
-                  cursor: 'pointer',
-                  color: '#475569'
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveUrls} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {members.map((m) => (
-                <div key={m.id}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>
-                    {m.name} ({m.steamId} • {m.division})
-                  </label>
-                  <input
-                    type="url"
-                    value={editingUrls[m.id] || ''}
-                    onChange={(e) => setEditingUrls({ ...editingUrls, [m.id]: e.target.value })}
-                    placeholder="https://..."
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: '1.5px solid #cbd5e1',
-                      fontSize: '13px',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-              ))}
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <button
-                  type="button"
-                  onClick={() => setEditUrlModal(false)}
-                  style={{
-                    padding: '9px 16px',
-                    borderRadius: '10px',
-                    background: '#f1f5f9',
-                    border: 'none',
-                    color: '#475569',
-                    fontSize: '12.5px',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '9px 20px',
-                    borderRadius: '10px',
-                    background: '#2563eb',
-                    border: 'none',
-                    color: '#ffffff',
-                    fontSize: '12.5px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  {saveSuccess ? <Check size={16} /> : null}
-                  <span>{saveSuccess ? 'Tersimpan!' : 'Simpan Tautan'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </section>
   );
 };
