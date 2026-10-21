@@ -127,7 +127,7 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
       goal,
       tools: tools || 'Perangkat Standar Riset',
       repo_url: repoUrl || '',
-      lecturer: lecturer || 'Dr. Rahmat Wijaya, M.Sc.',
+      lecturer: lecturer || 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.',
       open_recruitment: openRec,
       recruitment_roles: recRoles
     });
@@ -210,7 +210,7 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
           <label>Dosen Pembimbing</label>
           <select value={lecturer} onChange={e => setLecturer(e.target.value)} required>
             <option value="" disabled>-- Pilih Dosen Pembimbing --</option>
-            <option value="Dr. Rahmat Wijaya, M.Sc.">Dr. Rahmat Wijaya, M.Sc.</option>
+            <option value="Dr. Belgis Ainatul Iza, S.Si., M.Mat.">Dr. Belgis Ainatul Iza, S.Si., M.Mat. (FMIPA UNESA)</option>
             <option value="Prof. Dr. Ir. Dewi Kartika">Prof. Dr. Ir. Dewi Kartika</option>
             <option value="Prof. Dr. Hartono, M.Si.">Prof. Dr. Hartono, M.Si.</option>
           </select>
@@ -457,14 +457,14 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
       setAvatarColor('#2878d7');
       setAvatarIcon('🔬');
     } else if (role === 'lecturer') {
-      setName('Dr. Rahmat Wijaya, M.Sc.');
+      setName('Dr. Belgis Ainatul Iza, S.Si., M.Mat.');
       setTitlePrefix('Dr.');
-      setTitleSuffix('M.Sc.');
-      setIdentifier('198504122010121002');
-      setStudy('Fakultas Sains & Teknologi');
-      setFaculty('Departemen Fisika & Instrumentasi Komputasi');
-      setUniversity('Institut Teknologi Bandung');
-      setEmail('rahmat.wijaya@itb.ac.id');
+      setTitleSuffix('S.Si., M.Mat.');
+      setIdentifier('202509237');
+      setStudy('S1 Sains Data');
+      setFaculty('Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)');
+      setUniversity('Universitas Negeri Surabaya (UNESA)');
+      setEmail('belgisiza@unesa.ac.id');
       setPhone('0811-9876-5432');
       setOfficeRoom('Lab Sensor Cerdas Lt. 3, Gedung Riset FMIPA');
       setResearchInterests('Instrumentasi Sensor Cerdas, Pemodelan Sains Komputasi, Kalibrasi Empiris');
@@ -850,7 +850,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
                 type="text"
                 value={identifier}
                 onChange={e => setIdentifier(e.target.value)}
-                placeholder={role === 'student' ? 'Contoh: 202610101' : role === 'lecturer' ? 'Contoh: 198504122010121002' : 'ADM-2026-DEV01'}
+                placeholder={role === 'student' ? 'Contoh: 202610101' : role === 'lecturer' ? 'Contoh: 202509237' : 'ADM-2026-DEV01'}
                 required
               />
             </div>
@@ -1241,7 +1241,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
 const ConsultationModalContent: React.FC<{ data?: any; onClose: () => void }> = ({ data, onClose }) => {
   const { projects, currentUser, bookConsultation } = useApp();
   const [projectId, setProjectId] = useState<number>(data?.projectId || projects[0]?.id || 1);
-  const [lecturerName, setLecturerName] = useState(data?.lecturer || 'Dr. Rahmat Wijaya, M.Sc.');
+  const [lecturerName, setLecturerName] = useState(data?.lecturer || 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.');
   const [topic, setTopic] = useState('');
   const [type, setType] = useState('Review checkpoint');
   const [mode, setMode] = useState('Online (Google Meet)');
@@ -1290,7 +1290,7 @@ const ConsultationModalContent: React.FC<{ data?: any; onClose: () => void }> = 
         <div className="auth-field" style={{ margin: 0 }}>
           <label>Dosen Pembimbing</label>
           <select value={lecturerName} onChange={e => setLecturerName(e.target.value)}>
-            <option value="Dr. Rahmat Wijaya, M.Sc.">Dr. Rahmat Wijaya, M.Sc.</option>
+            <option value="Dr. Belgis Ainatul Iza, S.Si., M.Mat.">Dr. Belgis Ainatul Iza, S.Si., M.Mat. (FMIPA UNESA)</option>
             <option value="Prof. Dr. Ir. Dewi Kartika">Prof. Dr. Ir. Dewi Kartika</option>
             <option value="Prof. Dr. Hartono, M.Si.">Prof. Dr. Hartono, M.Si.</option>
           </select>
@@ -2549,14 +2549,14 @@ const ForgotPasswordModalContent: React.FC<{ onClose: () => void }> = ({ onClose
             <label>NIM / NIDN / Username / Email Terdaftar</label>
             <input
               type="text"
-              placeholder="Contoh: 202610101 (NIM) atau 198504122010121002 (NIP)"
+              placeholder="Contoh: 202610101 (NIM) atau 202509237 (NIP)"
               value={identifier}
               onChange={e => setIdentifier(e.target.value)}
               required
               autoFocus
             />
             <small style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px', display: 'block' }}>
-              Tip demo: Masukkan NIM Mahasiswa (<code>202610101</code>) atau NIP Dosen (<code>198504122010121002</code>).
+              Tip demo: Masukkan NIM Mahasiswa (<code>202610101</code>) atau NIP Dosen (<code>202509237</code>).
             </small>
           </div>
 

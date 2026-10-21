@@ -145,7 +145,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.USERS);
     const parsed: User[] = saved ? JSON.parse(saved) : INITIAL_USERS;
-    return parsed.map(u => (u.role === 'admin' ? { ...u, email: 'cs@steamcraft.online' } : u));
+    return parsed.map(u => {
+      if (u.id === 5 || u.username === 'dosen' || u.name.includes('Rahmat') || u.name.includes('Belgis')) {
+        return {
+          ...u,
+          name: 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.',
+          study_program: 'S1 Sains Data',
+          faculty: 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)',
+          university: 'Universitas Negeri Surabaya (UNESA)',
+          identifier: '202509237',
+          email: 'belgisiza@unesa.ac.id',
+          research_interests: 'Sains Data, Pemodelan Matematika, Analisis Stokastik, Machine Learning',
+          bio: 'Dosen Program Studi S1 Sains Data FMIPA UNESA, pembimbing riset dan penilai standarisasi rubrik ilmiah STEAM.',
+          academic_links: 'NIP: 202509237 · Email: belgisiza@unesa.ac.id'
+        };
+      }
+      if (u.role === 'admin') {
+        return { ...u, email: 'cs@steamcraft.online' };
+      }
+      return u;
+    });
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -191,7 +210,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-    return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
+    const parsed: Project[] = saved ? JSON.parse(saved) : INITIAL_PROJECTS;
+    return parsed.map(p => (p.lecturer?.includes('Rahmat') ? { ...p, lecturer: 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.' } : p));
   });
 
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(() => {
@@ -590,7 +610,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       goal: data.goal || 'Tujuan riset dan hipotesis eksperimental.',
       tools: data.tools || 'Python, Git, Lab Instruments',
       repo_url: data.repo_url || 'https://github.com/steamcraft/new-research-project',
-      lecturer: data.lecturer || 'Dr. Rahmat Wijaya, M.Sc.',
+      lecturer: data.lecturer || 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.',
       creator_id: currentUser?.id || 1,
       creator_username: currentUser?.username || 'budi',
       versions_count: 1,

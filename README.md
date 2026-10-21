@@ -74,5 +74,5 @@ npm run build
 ## 🔑 Akun Demo Siap Pakai
 
 - **Mahasiswa**: `budi` / `202610101` (Budi Santoso — Sains Data, pass: `password123`)
-- **Dosen**: `dosen` / `198504122010121002` (Dr. Rahmat Wijaya, M.Sc., pass: `dosen123`)
+- **Dosen**: `dosen` / `202509237` (Dr. Belgis Ainatul Iza, S.Si., M.Mat. — S1 Sains Data FMIPA UNESA, pass: `dosen123`)
 - **Admin**: `admin` (Administrator Sistem, pass: `admin2026!`)

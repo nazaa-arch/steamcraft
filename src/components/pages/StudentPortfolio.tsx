@@ -1155,7 +1155,7 @@ export const StudentPortfolio: React.FC = () => {
                     {selectedCertProject?.lecturer.split(' ')[0] || 'Rahmat'} Wijaya
                   </div>
                   <div style={{ borderTop: '1px solid #475569', paddingTop: '4px', fontWeight: 800, fontSize: '12px', color: '#0f172a' }}>
-                    {selectedCertProject?.lecturer || 'Dr. Rahmat Wijaya, M.Sc.'}
+                    {selectedCertProject?.lecturer || 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.'}
                   </div>
                   <div style={{ fontSize: '10px', color: '#64748b' }}>Dosen Pembimbing & Evaluator Rubrik</div>
                 </div>

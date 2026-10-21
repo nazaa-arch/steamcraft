@@ -16,7 +16,7 @@ export const LoginScreen: React.FC = () => {
       setUsername('202610101');
       setPassword('password123');
     } else {
-      setUsername('198504122010121002');
+      setUsername('202509237');
       setPassword('dosen123');
     }
     setError('');
@@ -131,7 +131,7 @@ export const LoginScreen: React.FC = () => {
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder={roleTab === 'student' ? 'Contoh: 202610101 (NIM) atau budi' : 'Contoh: 198504122010121002 atau dosen'}
+                placeholder={roleTab === 'student' ? 'Contoh: 202610101 (NIM) atau budi' : 'Contoh: 202509237 atau dosen'}
                 required
               />
             </div>
@@ -198,7 +198,7 @@ export const LoginScreen: React.FC = () => {
                   className="demo-btn"
                   onClick={() => switchDemoUser('dosen')}
                 >
-                  <span>👨‍🏫 Dr. Rahmat Wijaya, M.Sc. (Dosen Pembimbing)</span>
+                  <span>👩‍🏫 Dr. Belgis Ainatul Iza, S.Si., M.Mat. (FMIPA UNESA)</span>
                   <span style={{ fontSize: '10px', opacity: 0.8 }}>Dosen STEAM &rarr;</span>
                 </button>
               </div>

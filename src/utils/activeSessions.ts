@@ -68,10 +68,10 @@ export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
   {
     sessionId: 'sess_live_103',
     userId: 4,
-    userName: 'Dr. Eng. Hendra Kurniawan, S.T., M.Eng.',
+    userName: 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.',
     role: 'lecturer',
-    identifier: 'NIDN 0012058201',
-    faculty: 'Fakultas Teknik — Lab Robotika',
+    identifier: 'NIP 202509237',
+    faculty: 'FMIPA — S1 Sains Data (UNESA)',
     activePage: 'Penilaian Rubrik Kompetisi Riset',
     device: 'Chrome 124 / Windows 10 Pro',
     deviceType: 'desktop',
