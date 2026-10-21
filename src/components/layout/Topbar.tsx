@@ -113,7 +113,7 @@ export const Topbar: React.FC = () => {
           setCurrentPage('dashboard');
         }}
       >
-        <img src="/logo.jpg" alt="Logo" className="brand-logo-img" />
+        <img src="/logo.jpg?v=20261021" alt="Logo" className="brand-logo-img" />
         <div className="brand-text">
           <h2>SteamCraft</h2>
           <span>Ruang Kolaborasi Multidisiplin</span>

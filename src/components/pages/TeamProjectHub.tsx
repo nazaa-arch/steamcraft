@@ -337,7 +337,7 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
         {/* Brand Logo & Name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <img
-            src="/team-logo.jpg"
+            src="/team-logo.jpg?v=20261021"
             alt="STEAM Logo"
             style={{
               width: '46px',
@@ -461,7 +461,7 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
           {/* Logo Showcase Hero Badge */}
           <div style={{ marginBottom: '24px' }}>
             <img
-              src="/team-logo.jpg"
+              src="/team-logo.jpg?v=20261021"
               alt="Logo STEAM Resmi"
               style={{
                 width: '120px',
@@ -930,7 +930,7 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
               <img
-                src="/team-logo.jpg"
+                src="/team-logo.jpg?v=20261021"
                 alt="STEAM Logo"
                 style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff', padding: '2px' }}
               />

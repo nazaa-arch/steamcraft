@@ -41,7 +41,7 @@ export const LoginScreen: React.FC = () => {
         </div>
 
         <div className="login-brand-image">
-          <img src="/logo.jpg" alt="SteamCraft Logo" />
+          <img src="/logo.jpg?v=20261021" alt="SteamCraft Logo" />
         </div>
 
         <div className="login-copy">
@@ -82,7 +82,7 @@ export const LoginScreen: React.FC = () => {
       <section className="login-panel">
         {/* Mobile Brand Header */}
         <div className="login-mobile-brand" style={{ display: 'none' }}>
-          <img src="/logo.jpg" alt="SteamCraft" className="brand-logo-img" style={{ width: '44px', height: '44px' }} />
+          <img src="/logo.jpg?v=20261021" alt="SteamCraft" className="brand-logo-img" style={{ width: '44px', height: '44px' }} />
           <div>
             <h2 style={{ fontSize: '19px', fontWeight: 900, color: 'var(--navy)', lineHeight: 1.1, margin: 0 }}>
               SteamCraft

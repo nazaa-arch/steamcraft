@@ -158,7 +158,7 @@ export const TeamMemberCard: React.FC<{
           {/* Logo + STEAM text */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img
-              src="/team-logo.jpg"
+              src="/team-logo.jpg?v=20261021"
               alt="STEAM Logo"
               style={{
                 width: '32px',
