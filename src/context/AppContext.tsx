@@ -36,6 +36,7 @@ import {
   startServerMaintenancePolling
 } from '../utils/maintenanceSync';
 import { trackPageView, trackEvent } from '../utils/analytics';
+import { registerCurrentSession } from '../utils/activeSessions';
 
 interface AppContextType {
   currentUser: User | null;
@@ -353,6 +354,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setMaintenanceModeState((prev) => (prev !== serverActive ? serverActive : prev));
     });
     return cleanup;
+  }, []);
+
+  // Real-time Heartbeat session sync & admin termination listener
+  useEffect(() => {
+    if (currentUser) {
+      registerCurrentSession(currentUser, currentPage);
+      const interval = setInterval(() => {
+        registerCurrentSession(currentUser, currentPage);
+      }, 8000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser, currentPage]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      const termChannel = new BroadcastChannel('steamcraft_terminate_channel');
+      termChannel.onmessage = (msg) => {
+        const mySessionId = sessionStorage.getItem('steamcraft_my_session_id');
+        if (msg.data && msg.data.sessionId === mySessionId) {
+          setCurrentUser(null);
+          showToast('⚠️ Sesi Anda telah diputus oleh Master Administrator.');
+        }
+      };
+      const alertChannel = new BroadcastChannel('steamcraft_alert_channel');
+      alertChannel.onmessage = (msg) => {
+        const mySessionId = sessionStorage.getItem('steamcraft_my_session_id');
+        if (msg.data && msg.data.sessionId === mySessionId) {
+          showToast(`💬 Pesan Administrator: ${msg.data.message}`);
+        }
+      };
+      return () => {
+        termChannel.close();
+        alertChannel.close();
+      };
+    }
   }, []);
 
   const setMaintenanceMode = (active: boolean) => {

@@ -17,12 +17,14 @@ export interface ActiveSession {
   location: string;
   loginTime: string;
   lastActive: string;
+  lastPingTimestamp: number;
   status: 'active' | 'idle';
   requestsCount: number;
   avatarColor?: string;
 }
 
 const STORAGE_KEY = 'steamcraft_active_sessions';
+const BROADCAST_NAME = 'steamcraft_sessions_sync';
 
 export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
   {
@@ -37,10 +39,11 @@ export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
     deviceType: 'desktop',
     ipAddress: '180.252.74.112',
     location: 'Denpasar, Bali',
-    loginTime: '24 menit lalu',
-    lastActive: 'Aktif baru saja (5s)',
+    loginTime: '15 menit lalu',
+    lastActive: 'Aktif baru saja (2s)',
+    lastPingTimestamp: Date.now() - 2000,
     status: 'active',
-    requestsCount: 68,
+    requestsCount: 74,
     avatarColor: '#2563eb'
   },
   {
@@ -55,10 +58,11 @@ export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
     deviceType: 'desktop',
     ipAddress: '114.125.89.201',
     location: 'Badung, Bali',
-    loginTime: '45 menit lalu',
+    loginTime: '32 menit lalu',
     lastActive: 'Aktif 1m lalu',
+    lastPingTimestamp: Date.now() - 45000,
     status: 'active',
-    requestsCount: 114,
+    requestsCount: 128,
     avatarColor: '#7c3aed'
   },
   {
@@ -73,10 +77,11 @@ export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
     deviceType: 'desktop',
     ipAddress: '36.85.112.45',
     location: 'Surabaya, Jawa Timur',
-    loginTime: '1 jam lalu',
-    lastActive: 'Aktif baru saja (12s)',
+    loginTime: '48 menit lalu',
+    lastActive: 'Aktif baru saja (8s)',
+    lastPingTimestamp: Date.now() - 8000,
     status: 'active',
-    requestsCount: 203,
+    requestsCount: 215,
     avatarColor: '#059669'
   },
   {
@@ -93,8 +98,9 @@ export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
     location: 'Denpasar, Bali',
     loginTime: '12 menit lalu',
     lastActive: 'Aktif 3m lalu',
+    lastPingTimestamp: Date.now() - 180000,
     status: 'active',
-    requestsCount: 37,
+    requestsCount: 42,
     avatarColor: '#d97706'
   },
   {
@@ -110,46 +116,11 @@ export const INITIAL_ACTIVE_SESSIONS: ActiveSession[] = [
     ipAddress: '125.163.22.90',
     location: 'Jakarta Selatan',
     loginTime: '8 menit lalu',
-    lastActive: 'Aktif baru saja (2s)',
+    lastActive: 'Aktif baru saja (4s)',
+    lastPingTimestamp: Date.now() - 4000,
     status: 'active',
-    requestsCount: 29,
+    requestsCount: 36,
     avatarColor: '#0891b2'
-  },
-  {
-    sessionId: 'sess_live_106',
-    userId: 7,
-    userName: 'Dewi Lestari, S.Farm.',
-    role: 'partner',
-    identifier: 'Mitra PT Bali Bio Herbal',
-    faculty: 'Kolaborator Industri Riset',
-    activePage: 'Review Portofolio Ekstrak Herbal Mangrove',
-    device: 'Safari / iPhone 15 Pro',
-    deviceType: 'mobile',
-    ipAddress: '139.195.44.18',
-    location: 'Bandung, Jawa Barat',
-    loginTime: '32 menit lalu',
-    lastActive: 'Idle 4m lalu',
-    status: 'idle',
-    requestsCount: 52,
-    avatarColor: '#e11d48'
-  },
-  {
-    sessionId: 'sess_live_107',
-    userId: 8,
-    userName: 'Kadek Surya Dharmawan',
-    role: 'student',
-    identifier: 'NIM 2308561008',
-    faculty: 'FMIPA — Kimia Terapan',
-    activePage: 'Workspace Proyek: Baterai Biosintesis Jamur',
-    device: 'Edge 123 / Windows 11',
-    deviceType: 'desktop',
-    ipAddress: '180.244.15.221',
-    location: 'Singaraja, Bali',
-    loginTime: '50 menit lalu',
-    lastActive: 'Aktif baru saja (8s)',
-    status: 'active',
-    requestsCount: 88,
-    avatarColor: '#4f46e5'
   }
 ];
 
@@ -166,7 +137,6 @@ export function getActiveSessions(): ActiveSession[] {
     // ignore
   }
 
-  // Save initial if not existing
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_ACTIVE_SESSIONS));
   } catch (e) {
@@ -178,6 +148,65 @@ export function getActiveSessions(): ActiveSession[] {
 export function saveActiveSessions(sessions: ActiveSession[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    if ('BroadcastChannel' in window) {
+      const channel = new BroadcastChannel(BROADCAST_NAME);
+      channel.postMessage({ type: 'SESSIONS_UPDATED', count: sessions.length });
+      channel.close();
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+// Register or update the currently active session from the browser
+export function registerCurrentSession(user: { id: number; name: string; role: any; identifier: string; study_program?: string; faculty?: string }, activePage: string): void {
+  try {
+    let mySessionId = sessionStorage.getItem('steamcraft_my_session_id');
+    if (!mySessionId) {
+      mySessionId = `sess_live_${user.id}_${Date.now().toString(36)}`;
+      sessionStorage.setItem('steamcraft_my_session_id', mySessionId);
+    }
+
+    const sessions = getActiveSessions();
+    const existingIdx = sessions.findIndex(s => s.sessionId === mySessionId || s.userId === user.id);
+
+    const ua = navigator.userAgent;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+    const isTablet = /iPad/i.test(ua);
+    const deviceType: 'desktop' | 'mobile' | 'tablet' = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop';
+    const browser = ua.includes('Chrome') ? 'Chrome' : ua.includes('Safari') ? 'Safari' : ua.includes('Firefox') ? 'Firefox' : 'Browser';
+
+    const sessionObj: ActiveSession = {
+      sessionId: mySessionId,
+      userId: user.id,
+      userName: user.name,
+      role: user.role,
+      identifier: user.identifier || `UID-${user.id}`,
+      faculty: user.study_program || user.faculty || 'Civitas STEAM',
+      activePage: activePage || 'Dashboard',
+      device: `${browser} / ${deviceType === 'desktop' ? 'PC' : 'Mobile'}`,
+      deviceType,
+      ipAddress: '163.223.227.38 (Client)',
+      location: 'Indonesia (WITA/WIB)',
+      loginTime: 'Baru saja',
+      lastActive: 'Aktif sekarang (1s)',
+      lastPingTimestamp: Date.now(),
+      status: 'active',
+      requestsCount: (existingIdx !== -1 ? sessions[existingIdx].requestsCount + 1 : 1),
+      avatarColor: user.role === 'admin' ? '#0f172a' : user.role === 'lecturer' ? '#059669' : '#2563eb'
+    };
+
+    if (existingIdx !== -1) {
+      sessions[existingIdx] = {
+        ...sessions[existingIdx],
+        ...sessionObj,
+        requestsCount: sessions[existingIdx].requestsCount + 1
+      };
+    } else {
+      sessions.unshift(sessionObj);
+    }
+
+    saveActiveSessions(sessions);
   } catch (e) {
     // ignore
   }
@@ -187,11 +216,21 @@ export function terminateActiveSession(sessionId: string): ActiveSession[] {
   const current = getActiveSessions();
   const updated = current.filter(s => s.sessionId !== sessionId);
   saveActiveSessions(updated);
+
+  // Broadcast terminate command to the target tab
+  try {
+    if ('BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('steamcraft_terminate_channel');
+      channel.postMessage({ type: 'FORCE_LOGOUT', sessionId });
+      channel.close();
+    }
+  } catch (e) {
+    // ignore
+  }
   return updated;
 }
 
 export function sendAlertToSession(sessionId: string, message: string): boolean {
-  // Store a pending alert for this session in localStorage so that tab can display it
   try {
     const alertKey = `steamcraft_session_alert_${sessionId}`;
     localStorage.setItem(alertKey, JSON.stringify({
@@ -199,6 +238,11 @@ export function sendAlertToSession(sessionId: string, message: string): boolean 
       timestamp: new Date().toISOString(),
       sentBy: 'Master Administrator / DevOps'
     }));
+    if ('BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('steamcraft_alert_channel');
+      channel.postMessage({ type: 'DIRECT_ALERT', sessionId, message });
+      channel.close();
+    }
     return true;
   } catch (e) {
     return false;
