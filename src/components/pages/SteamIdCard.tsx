@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   Users,
   Calendar,
   Sparkles,
-  RotateCw,
-  Printer,
-  Download,
-  CheckCircle2,
   ExternalLink,
   GraduationCap,
   Settings,
   Globe,
+  RotateCw,
+  Printer,
   Maximize2,
-  X
+  X,
+  Edit3,
+  Check
 } from 'lucide-react';
 
 export interface SteamMemberData {
@@ -28,10 +28,11 @@ export interface SteamMemberData {
   quote: string;
   avatarInitial: string;
   focus: string[];
+  portfolioUrl: string;
 }
 
-// 3 Official Team Members matching brand guidelines & ID Card mockup
-export const OFFICIAL_STEAM_MEMBERS: SteamMemberData[] = [
+// 3 Official Team Members with designated portfolio URLs
+export const DEFAULT_STEAM_MEMBERS: SteamMemberData[] = [
   {
     id: 'adhizentra',
     name: 'Adhizentra',
@@ -43,7 +44,8 @@ export const OFFICIAL_STEAM_MEMBERS: SteamMemberData[] = [
     joinDate: '21 Oct 2026',
     quote: 'Together We Build the Future',
     avatarInitial: 'A',
-    focus: ['Cloud Architecture', 'Full-Stack React/Node Engine', 'FAIR Data Standard', 'DevOps & Security']
+    focus: ['Cloud Architecture', 'Full-Stack React/Node Engine', 'FAIR Data Standard', 'DevOps & Security'],
+    portfolioUrl: 'https://github.com/nazaa-arch'
   },
   {
     id: 'bima',
@@ -56,7 +58,8 @@ export const OFFICIAL_STEAM_MEMBERS: SteamMemberData[] = [
     joinDate: '21 Oct 2026',
     quote: 'Build Skills, Create Solutions, Make an Impact',
     avatarInitial: 'B',
-    focus: ['ESP32 Microcontroller', 'LoRaWAN 915MHz', 'Sensor Telemetry', 'Solar MPPT Systems']
+    focus: ['ESP32 Microcontroller', 'LoRaWAN 915MHz', 'Sensor Telemetry', 'Solar MPPT Systems'],
+    portfolioUrl: 'https://github.com/bimasena-iot'
   },
   {
     id: 'sandi',
@@ -69,7 +72,8 @@ export const OFFICIAL_STEAM_MEMBERS: SteamMemberData[] = [
     joinDate: '21 Oct 2026',
     quote: 'Together We Build the Future',
     avatarInitial: 'S',
-    focus: ['Scientific Methodology', 'UI/UX Visual Identity', 'Stochastic Data Modeling', 'Bio-materials']
+    focus: ['Scientific Methodology', 'UI/UX Visual Identity', 'Stochastic Data Modeling', 'Bio-materials'],
+    portfolioUrl: 'https://github.com/sandiardi'
   }
 ];
 
@@ -155,29 +159,39 @@ export const SparkleIcon: React.FC<{ size?: number; color?: string }> = ({ size 
   </svg>
 );
 
-// Front Side Component of the ID Card
+// Front Side Component of the ID Card with Clickable Portfolio Link
 export const SteamIdCardFront: React.FC<{
   member: SteamMemberData;
-  onFlip?: () => void;
-  showFlipButton?: boolean;
-}> = ({ member, onFlip, showFlipButton = false }) => {
+  onFlip?: (e: React.MouseEvent) => void;
+  onClickCard?: () => void;
+}> = ({ member, onFlip, onClickCard }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
+      onClick={onClickCard}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      title={`Klik untuk membuka website portofolio ${member.name}`}
       style={{
         width: '100%',
-        maxWidth: '340px',
-        height: '520px',
+        maxWidth: '350px',
+        minHeight: '540px',
         background: '#ffffff',
         borderRadius: '26px',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 20px 45px rgba(30, 58, 138, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04)',
-        border: '1px solid rgba(226, 232, 240, 0.85)',
+        boxShadow: isHovered
+          ? '0 26px 55px rgba(37, 99, 235, 0.22), 0 8px 24px rgba(0, 0, 0, 0.08)'
+          : '0 16px 40px rgba(30, 58, 138, 0.1), 0 4px 12px rgba(0, 0, 0, 0.04)',
+        border: isHovered ? '1.5px solid #38bdf8' : '1px solid rgba(226, 232, 240, 0.9)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        userSelect: 'none',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+        cursor: 'pointer',
+        transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        userSelect: 'none'
       }}
     >
       {/* Top-Left Waves SVG */}
@@ -191,47 +205,47 @@ export const SteamIdCardFront: React.FC<{
           pointerEvents: 'none',
           zIndex: 1
         }}
-        viewBox="0 0 340 520"
+        viewBox="0 0 350 540"
         fill="none"
       >
         <defs>
-          <linearGradient id="front-tl-navy" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`tl-navy-${member.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#1e3a8a" />
             <stop offset="100%" stopColor="#2563eb" />
           </linearGradient>
-          <linearGradient id="front-tl-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`tl-purple-${member.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#7c3aed" />
             <stop offset="100%" stopColor="#8b5cf6" />
           </linearGradient>
-          <linearGradient id="front-tl-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`tl-cyan-${member.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0284c7" />
             <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>
 
           {/* Bottom-Right Gradients */}
-          <linearGradient id="front-br-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`br-purple-${member.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#8b5cf6" />
             <stop offset="100%" stopColor="#6366f1" />
           </linearGradient>
-          <linearGradient id="front-br-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`br-blue-${member.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#1d4ed8" />
             <stop offset="100%" stopColor="#2563eb" />
           </linearGradient>
-          <linearGradient id="front-br-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`br-cyan-${member.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#06b6d4" />
             <stop offset="100%" stopColor="#22d3ee" />
           </linearGradient>
         </defs>
 
         {/* Top-Left Wave Curves */}
-        <path d="M0 0 L135 0 C110 32 65 48 45 92 C26 128 14 150 0 165 Z" fill="url(#front-tl-navy)" />
-        <path d="M0 35 C38 28 62 55 42 105 C26 140 12 165 0 180 Z" fill="url(#front-tl-purple)" opacity="0.9" />
-        <path d="M0 85 C22 80 38 108 28 145 C18 170 8 190 0 200 Z" fill="url(#front-tl-cyan)" opacity="0.95" />
+        <path d="M0 0 L135 0 C110 32 65 48 45 92 C26 128 14 150 0 165 Z" fill={`url(#tl-navy-${member.id})`} />
+        <path d="M0 35 C38 28 62 55 42 105 C26 140 12 165 0 180 Z" fill={`url(#tl-purple-${member.id})`} opacity="0.9" />
+        <path d="M0 85 C22 80 38 108 28 145 C18 170 8 190 0 200 Z" fill={`url(#tl-cyan-${member.id})`} opacity="0.95" />
 
         {/* Bottom-Right Wave Curves */}
-        <path d="M340 370 C310 390 280 425 260 460 C235 500 200 515 160 520 L340 520 Z" fill="url(#front-br-purple)" />
-        <path d="M340 405 C315 425 295 455 275 485 C250 515 220 520 190 520 L340 520 Z" fill="url(#front-br-blue)" />
-        <path d="M340 445 C325 460 305 485 285 508 C265 520 240 520 220 520 L340 520 Z" fill="url(#front-br-cyan)" />
+        <path d="M350 380 C320 400 290 435 270 470 C245 510 210 525 170 540 L350 540 Z" fill={`url(#br-purple-${member.id})`} />
+        <path d="M350 415 C325 435 305 465 285 495 C260 525 230 535 200 540 L350 540 Z" fill={`url(#br-blue-${member.id})`} />
+        <path d="M350 455 C335 470 315 495 295 520 C275 535 250 540 230 540 L350 540 Z" fill={`url(#br-cyan-${member.id})`} />
       </svg>
 
       {/* Faint Watermark Logo on Middle-Right */}
@@ -242,7 +256,7 @@ export const SteamIdCardFront: React.FC<{
           top: '115px',
           width: '210px',
           height: '210px',
-          opacity: 0.1,
+          opacity: 0.09,
           pointerEvents: 'none',
           userSelect: 'none',
           zIndex: 1
@@ -324,11 +338,11 @@ export const SteamIdCardFront: React.FC<{
             justifyContent: 'center',
             alignItems: 'center',
             overflow: 'hidden',
-            marginBottom: '16px',
+            marginBottom: '14px',
             boxShadow: '0 8px 20px rgba(0, 192, 247, 0.2)'
           }}
         >
-          {/* User Silhouette Placeholder matching exact mockup */}
+          {/* User Silhouette Placeholder */}
           <svg width="60" height="60" viewBox="0 0 24 24" fill="#94a3b8">
             <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
           </svg>
@@ -337,12 +351,12 @@ export const SteamIdCardFront: React.FC<{
         {/* Member Name */}
         <h3
           style={{
-            fontSize: '24px',
+            fontSize: '23px',
             fontWeight: 900,
             color: '#1e293b',
-            margin: '0 0 3px 0',
+            margin: '0 0 2px 0',
             letterSpacing: '-0.3px',
-            fontFamily: "'Montserrat', 'Inter', sans-serif"
+            fontFamily: "'Montserrat', sans-serif"
           }}
         >
           {member.name}
@@ -356,7 +370,7 @@ export const SteamIdCardFront: React.FC<{
             color: '#2563eb',
             letterSpacing: '2px',
             textTransform: 'uppercase',
-            marginBottom: '18px',
+            marginBottom: '16px',
             display: 'block'
           }}
         >
@@ -369,7 +383,7 @@ export const SteamIdCardFront: React.FC<{
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px',
+            gap: '9px',
             fontSize: '12px'
           }}
         >
@@ -396,55 +410,85 @@ export const SteamIdCardFront: React.FC<{
         </div>
       </div>
 
-      {/* Card Footer Quote & Accent */}
+      {/* Card Footer: Quote + Prominent Portfolio CTA */}
       <div
         style={{
-          padding: '14px 22px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          padding: '12px 20px 18px 20px',
           position: 'relative',
-          zIndex: 2
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <SparkleIcon size={12} color="#00c0f7" />
-          <span
-            style={{
-              fontSize: '11px',
-              fontStyle: 'italic',
-              color: '#64748b',
-              fontWeight: 500,
-              letterSpacing: '0.2px'
-            }}
-          >
-            {member.quote}
-          </span>
+        {/* Quote & Optional Flip Button */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <SparkleIcon size={12} color="#00c0f7" />
+            <span
+              style={{
+                fontSize: '11px',
+                fontStyle: 'italic',
+                color: '#64748b',
+                fontWeight: 500,
+                letterSpacing: '0.2px'
+              }}
+            >
+              {member.quote}
+            </span>
+          </div>
+
+          {onFlip && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onFlip(e);
+              }}
+              title="Balik Kartu (Lihat Tampak Belakang)"
+              style={{
+                background: 'rgba(59, 130, 246, 0.1)',
+                border: 'none',
+                borderRadius: '999px',
+                padding: '4px 8px',
+                color: '#2563eb',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '10px',
+                fontWeight: 700
+              }}
+            >
+              <RotateCw size={11} />
+              <span>Balik</span>
+            </button>
+          )}
         </div>
 
-        {/* Optional Flip Button */}
-        {showFlipButton && onFlip && (
-          <button
-            onClick={onFlip}
-            title="Balik Kartu (Lihat Bagian Belakang)"
-            style={{
-              background: 'rgba(59, 130, 246, 0.1)',
-              border: 'none',
-              borderRadius: '999px',
-              padding: '6px 10px',
-              color: '#2563eb',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '10px',
-              fontWeight: 700
-            }}
-          >
-            <RotateCw size={12} />
-            <span>Balik</span>
-          </button>
-        )}
+        {/* PROMINENT ACTION BUTTON: Kunjungi Website Portofolio */}
+        <div
+          style={{
+            width: '100%',
+            padding: '10px 16px',
+            borderRadius: '12px',
+            background: isHovered
+              ? 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)'
+              : 'linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(37, 99, 235, 0.12) 100%)',
+            border: isHovered ? '1px solid transparent' : '1px solid rgba(37, 99, 235, 0.3)',
+            color: isHovered ? '#ffffff' : '#1e40af',
+            fontSize: '12.5px',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: isHovered ? '0 6px 20px rgba(37, 99, 235, 0.3)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <span>Kunjungi Website Portofolio</span>
+          <ExternalLink size={14} />
+        </div>
       </div>
     </div>
   );
@@ -453,15 +497,17 @@ export const SteamIdCardFront: React.FC<{
 // Back Side Component of the ID Card
 export const SteamIdCardBack: React.FC<{
   member: SteamMemberData;
-  onFlip?: () => void;
-  showFlipButton?: boolean;
-}> = ({ onFlip, showFlipButton = false }) => {
+  onFlip?: (e: React.MouseEvent) => void;
+  onClickCard?: () => void;
+}> = ({ member, onFlip, onClickCard }) => {
   return (
     <div
+      onClick={onClickCard}
+      title={`Klik untuk membuka website portofolio ${member.name}`}
       style={{
         width: '100%',
-        maxWidth: '340px',
-        height: '520px',
+        maxWidth: '350px',
+        minHeight: '540px',
         background: 'linear-gradient(160deg, #0b2e88 0%, #1e40af 35%, #2563eb 70%, #0284c7 100%)',
         borderRadius: '26px',
         position: 'relative',
@@ -472,9 +518,10 @@ export const SteamIdCardBack: React.FC<{
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '28px 20px 22px 20px',
+        padding: '28px 20px 20px 20px',
         boxSizing: 'border-box',
         color: '#ffffff',
+        cursor: 'pointer',
         userSelect: 'none',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease'
       }}
@@ -490,24 +537,11 @@ export const SteamIdCardBack: React.FC<{
           pointerEvents: 'none',
           zIndex: 1
         }}
-        viewBox="0 0 340 520"
+        viewBox="0 0 350 540"
         fill="none"
       >
-        <defs>
-          <linearGradient id="back-tr-cyan" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#818cf8" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="back-bl-wave" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.1" />
-          </linearGradient>
-        </defs>
-
-        {/* Top-Right Curve */}
-        <path d="M340 0 L220 0 C250 35 285 70 310 115 C325 145 335 180 340 210 Z" fill="url(#back-tr-cyan)" />
-        {/* Bottom Curve Accent */}
-        <path d="M0 430 C50 410 110 440 150 480 C180 505 210 520 240 520 L0 520 Z" fill="url(#back-bl-wave)" />
+        <path d="M350 0 L220 0 C250 35 285 70 310 115 C325 145 335 180 350 210 Z" fill="rgba(56, 189, 248, 0.25)" />
+        <path d="M0 430 C50 410 110 440 150 480 C180 505 210 540 240 540 L0 540 Z" fill="rgba(6, 182, 212, 0.25)" />
       </svg>
 
       {/* Top STEAM Logo in White */}
@@ -520,14 +554,14 @@ export const SteamIdCardBack: React.FC<{
           zIndex: 2
         }}
       >
-        <SteamLogoVector variant="white" size={60} />
+        <SteamLogoVector variant="white" size={56} />
         <span
           style={{
-            fontSize: '19px',
+            fontSize: '18px',
             fontWeight: 900,
             color: '#ffffff',
             letterSpacing: '2px',
-            marginTop: '3px'
+            marginTop: '2px'
           }}
         >
           STEAM
@@ -536,12 +570,12 @@ export const SteamIdCardBack: React.FC<{
         {/* Tagline / Philosophy */}
         <p
           style={{
-            fontSize: '13px',
+            fontSize: '12.5px',
             color: 'rgba(255, 255, 255, 0.95)',
             textAlign: 'center',
-            lineHeight: 1.45,
+            lineHeight: 1.4,
             fontStyle: 'italic',
-            margin: '10px 0 6px 0',
+            margin: '8px 0 4px 0',
             maxWidth: '220px'
           }}
         >
@@ -552,10 +586,7 @@ export const SteamIdCardBack: React.FC<{
           Make an Impact.
         </p>
 
-        {/* Sparkle below tagline */}
-        <div style={{ marginTop: '2px' }}>
-          <SparkleIcon size={14} color="#38bdf8" />
-        </div>
+        <SparkleIcon size={12} color="#38bdf8" />
       </div>
 
       {/* Center QR Code Container */}
@@ -563,17 +594,17 @@ export const SteamIdCardBack: React.FC<{
         style={{
           background: '#ffffff',
           borderRadius: '16px',
-          padding: '12px',
+          padding: '10px',
           boxShadow: '0 12px 28px rgba(0, 0, 0, 0.25)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           position: 'relative',
           zIndex: 2,
-          margin: '4px 0'
+          margin: '2px 0'
         }}
       >
-        <SteamQrCodeVector size={110} />
+        <SteamQrCodeVector size={105} />
       </div>
 
       {/* Bottom Row: 4 STEAM Pillars */}
@@ -586,89 +617,73 @@ export const SteamIdCardBack: React.FC<{
           textAlign: 'center',
           position: 'relative',
           zIndex: 2,
-          paddingTop: '8px'
+          paddingTop: '6px'
         }}
       >
-        {/* Pillar 1: Science & Tech */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-          <GraduationCap size={17} color="#ffffff" />
-          <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
-            Science &amp;
-            <br />
-            Technology
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+          <GraduationCap size={16} color="#ffffff" />
+          <span style={{ fontSize: '8.5px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
+            Science &amp; Tech
           </span>
         </div>
 
-        {/* Pillar 2: Engineering */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            borderLeft: '1px solid rgba(255,255,255,0.2)'
-          }}
-        >
-          <Settings size={17} color="#ffffff" />
-          <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>
+          <Settings size={16} color="#ffffff" />
+          <span style={{ fontSize: '8.5px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
             Engineering
           </span>
         </div>
 
-        {/* Pillar 3: Arts */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            borderLeft: '1px solid rgba(255,255,255,0.2)'
-          }}
-        >
-          <Globe size={17} color="#ffffff" />
-          <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>
+          <Globe size={16} color="#ffffff" />
+          <span style={{ fontSize: '8.5px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
             Arts
           </span>
         </div>
 
-        {/* Pillar 4: Mathematics */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            borderLeft: '1px solid rgba(255,255,255,0.2)'
-          }}
-        >
-          <span style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff', lineHeight: 1 }}>&pi;</span>
-          <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#ffffff', lineHeight: 1 }}>&pi;</span>
+          <span style={{ fontSize: '8.5px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>
             Mathematics
           </span>
         </div>
       </div>
 
-      {/* Decorative Cyan Sparkle at Bottom Right */}
+      {/* Bottom Action: Kunjungi Portofolio Ribbon */}
       <div
         style={{
-          position: 'absolute',
-          bottom: '18px',
-          right: '18px',
-          zIndex: 2
+          width: '100%',
+          marginTop: '12px',
+          padding: '8px',
+          borderRadius: '10px',
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(8px)',
+          textAlign: 'center',
+          fontSize: '11.5px',
+          fontWeight: 700,
+          color: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
         }}
       >
-        <SparkleIcon size={16} color="#38bdf8" />
+        <span>Buka Portofolio ({member.name})</span>
+        <ExternalLink size={13} />
       </div>
 
-      {/* Optional Flip Button */}
-      {showFlipButton && onFlip && (
+      {/* Flip Button */}
+      {onFlip && (
         <button
-          onClick={onFlip}
-          title="Balik ke Bagian Depan"
+          onClick={(e) => {
+            e.stopPropagation();
+            onFlip(e);
+          }}
+          title="Balik ke Depan"
           style={{
             position: 'absolute',
-            top: '16px',
-            right: '16px',
+            top: '14px',
+            right: '14px',
             zIndex: 3,
             background: 'rgba(255, 255, 255, 0.15)',
             border: 'none',
@@ -692,8 +707,11 @@ export const SteamIdCardBack: React.FC<{
   );
 };
 
-// 3D Flippable Card Wrapper
-export const SteamIdCardFlip: React.FC<{ member: SteamMemberData }> = ({ member }) => {
+// Flippable Card Wrapper for Individual Member in the Grid
+export const FlippableMemberCard: React.FC<{
+  member: SteamMemberData;
+  onOpenPortfolio: (url: string) => void;
+}> = ({ member, onOpenPortfolio }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -701,8 +719,8 @@ export const SteamIdCardFlip: React.FC<{ member: SteamMemberData }> = ({ member 
       style={{
         perspective: '1200px',
         width: '100%',
-        maxWidth: '340px',
-        height: '520px',
+        maxWidth: '350px',
+        minHeight: '540px',
         margin: '0 auto'
       }}
     >
@@ -711,12 +729,12 @@ export const SteamIdCardFlip: React.FC<{ member: SteamMemberData }> = ({ member 
           position: 'relative',
           width: '100%',
           height: '100%',
-          transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
           transformStyle: 'preserve-3d',
           transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
         }}
       >
-        {/* Front Face */}
+        {/* Front */}
         <div
           style={{
             position: 'absolute',
@@ -731,11 +749,11 @@ export const SteamIdCardFlip: React.FC<{ member: SteamMemberData }> = ({ member 
           <SteamIdCardFront
             member={member}
             onFlip={() => setIsFlipped(true)}
-            showFlipButton={true}
+            onClickCard={() => onOpenPortfolio(member.portfolioUrl)}
           />
         </div>
 
-        {/* Back Face */}
+        {/* Back */}
         <div
           style={{
             position: 'absolute',
@@ -751,7 +769,7 @@ export const SteamIdCardFlip: React.FC<{ member: SteamMemberData }> = ({ member 
           <SteamIdCardBack
             member={member}
             onFlip={() => setIsFlipped(false)}
-            showFlipButton={true}
+            onClickCard={() => onOpenPortfolio(member.portfolioUrl)}
           />
         </div>
       </div>
@@ -759,535 +777,257 @@ export const SteamIdCardFlip: React.FC<{ member: SteamMemberData }> = ({ member 
   );
 };
 
-// Main Team Showcase Section with Side-by-Side Mockup & 3D Cards
+// Main Team Section: 3 Cards Lined Up Directly Side-by-Side
 export const SteamTeamCardSection: React.FC = () => {
-  const [selectedMemberId, setSelectedMemberId] = useState<string>('adhizentra');
-  const [viewMode, setViewMode] = useState<'mockup' | 'interactive' | 'all'>('mockup');
-  const [showOriginalModal, setShowOriginalModal] = useState<boolean>(false);
+  const [members, setMembers] = useState<SteamMemberData[]>(() => {
+    try {
+      const saved = localStorage.getItem('steam_team_members_custom_urls');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_STEAM_MEMBERS;
+  });
 
-  const currentMember =
-    OFFICIAL_STEAM_MEMBERS.find((m) => m.id === selectedMemberId) || OFFICIAL_STEAM_MEMBERS[0];
+  const [editUrlModal, setEditUrlModal] = useState<boolean>(false);
+  const [editingUrls, setEditingUrls] = useState<{ [id: string]: string }>({
+    adhizentra: members[0].portfolioUrl,
+    bima: members[1].portfolioUrl,
+    sandi: members[2].portfolioUrl
+  });
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
+  const handleOpenPortfolio = (url: string) => {
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleSaveUrls = (e: React.FormEvent) => {
+    e.preventDefault();
+    const updated = members.map((m) => ({
+      ...m,
+      portfolioUrl: editingUrls[m.id] || m.portfolioUrl
+    }));
+    setMembers(updated);
+    try {
+      localStorage.setItem('steam_team_members_custom_urls', JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
+    setSaveSuccess(true);
+    setTimeout(() => {
+      setSaveSuccess(false);
+      setEditUrlModal(false);
+    }, 1200);
+  };
 
   return (
-    <section id="team" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+    <section id="team" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
       {/* Header Info */}
-      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '46px' }}>
         <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '4px 14px',
+            padding: '4px 16px',
             borderRadius: '999px',
             background: 'rgba(59, 130, 246, 0.08)',
             border: '1px solid rgba(59, 130, 246, 0.25)',
             color: '#2563eb',
-            fontSize: '11.5px',
+            fontSize: '12px',
             fontWeight: 800,
             letterSpacing: '1px',
-            marginBottom: '10px'
+            marginBottom: '12px'
           }}
         >
-          <Sparkles size={13} color="#2563eb" />
-          <span>KARTU TANDA PENGENAL RESMI (OFFICIAL STEAM ID CARD)</span>
+          <Sparkles size={14} color="#2563eb" />
+          <span>KARTU TANDA PENGENAL RESMI &amp; PORTOFOLIO TIM</span>
         </div>
 
         <h2
           style={{
-            fontSize: 'clamp(28px, 4vw, 38px)',
+            fontSize: 'clamp(28px, 4vw, 40px)',
             fontWeight: 900,
             color: '#1e3a8a',
-            margin: '0 0 10px 0',
-            letterSpacing: '-0.5px'
+            margin: '0 0 12px 0',
+            letterSpacing: '-0.5px',
+            fontFamily: "'Montserrat', sans-serif"
           }}
         >
-          Identitas &amp; Profil Peneliti Tim STEAM
+          Inovator Tim Peneliti STEAM
         </h2>
 
-        <p style={{ fontSize: '15px', color: '#64748b', maxWidth: '680px', margin: '0 auto 28px auto' }}>
-          Kartu pengenal resmi yang memadukan 5 pilar STEAM, identitas visual tim, serta kode verifikasi kredensial
-          digital untuk setiap inovator riset.
+        <p style={{ fontSize: '15px', color: '#64748b', maxWidth: '720px', margin: '0 auto 16px auto', lineHeight: 1.6 }}>
+          Tiga inovator multidisiplin yang memimpin perancangan platform perangkat lunak, instrumen IoT, dan metodologi riset ilmiah.
+          <br />
+          <strong style={{ color: '#2563eb' }}>Klik pada kartu anggota mana pun untuk langsung mengunjungi website portofolio resminya.</strong>
         </p>
 
-        {/* Member Switcher Tabs */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '10px',
-            flexWrap: 'wrap',
-            marginBottom: '22px'
-          }}
-        >
-          {OFFICIAL_STEAM_MEMBERS.map((member) => (
-            <button
-              key={member.id}
-              onClick={() => setSelectedMemberId(member.id)}
-              style={{
-                padding: '9px 18px',
-                borderRadius: '12px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s ease',
-                border: selectedMemberId === member.id ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                background: selectedMemberId === member.id ? '#eff6ff' : '#ffffff',
-                color: selectedMemberId === member.id ? '#1e40af' : '#475569',
-                boxShadow:
-                  selectedMemberId === member.id
-                    ? '0 4px 14px rgba(37, 99, 235, 0.15)'
-                    : '0 2px 6px rgba(0,0,0,0.02)'
-              }}
-            >
-              <div
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  background: selectedMemberId === member.id ? '#2563eb' : '#94a3b8',
-                  color: '#fff',
-                  fontSize: '10px',
-                  fontWeight: 800,
-                  display: 'grid',
-                  placeItems: 'center'
-                }}
-              >
-                {member.avatarInitial}
-              </div>
-              <span>
-                {member.name} ({member.steamId})
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Mode Selector Tabs (Mockup Side-by-Side vs 3D Flip vs All 3 Members) */}
-        <div
-          style={{
-            display: 'inline-flex',
-            background: '#e2e8f0',
-            padding: '4px',
-            borderRadius: '12px',
-            gap: '4px',
-            marginBottom: '32px'
-          }}
-        >
+        {/* Small URL Setting Link */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button
-            onClick={() => setViewMode('mockup')}
+            onClick={() => setEditUrlModal(true)}
             style={{
-              padding: '7px 16px',
-              borderRadius: '9px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
+              background: 'none',
               border: 'none',
-              background: viewMode === 'mockup' ? '#ffffff' : 'transparent',
-              color: viewMode === 'mockup' ? '#1e3a8a' : '#64748b',
-              boxShadow: viewMode === 'mockup' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-              transition: 'all 0.15s ease'
+              color: '#64748b',
+              fontSize: '11.5px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '4px 10px',
+              borderRadius: '6px'
             }}
           >
-            Tampilan Berdampingan (Depan &amp; Belakang)
-          </button>
-          <button
-            onClick={() => setViewMode('interactive')}
-            style={{
-              padding: '7px 16px',
-              borderRadius: '9px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              border: 'none',
-              background: viewMode === 'interactive' ? '#ffffff' : 'transparent',
-              color: viewMode === 'interactive' ? '#1e3a8a' : '#64748b',
-              boxShadow: viewMode === 'interactive' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            Kartu Interaktif 3D (Bisa Dibalik)
-          </button>
-          <button
-            onClick={() => setViewMode('all')}
-            style={{
-              padding: '7px 16px',
-              borderRadius: '9px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              border: 'none',
-              background: viewMode === 'all' ? '#ffffff' : 'transparent',
-              color: viewMode === 'all' ? '#1e3a8a' : '#64748b',
-              boxShadow: viewMode === 'all' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            Semua 3 Anggota Tim
+            <Edit3 size={12} />
+            <span>Kustomisasi Tautan Website Portofolio Anggota</span>
           </button>
         </div>
       </div>
 
-      {/* VIEW MODE 1: Mockup Side-by-Side (Persis Desain Gambar Resmi yang Diunggah) */}
-      {viewMode === 'mockup' && (
-        <div
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 50%, rgba(241, 245, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
-            border: '1px solid rgba(226, 232, 240, 0.9)',
-            borderRadius: '32px',
-            padding: '60px 24px',
-            boxShadow: '0 20px 50px rgba(30, 58, 138, 0.05)',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Authentic Ambient Corner Waves matching mockup backdrop */}
-          <svg
-            style={{
-              position: 'absolute',
-              top: '-80px',
-              left: '-80px',
-              width: '420px',
-              height: '420px',
-              pointerEvents: 'none',
-              opacity: 0.4,
-              zIndex: 1
-            }}
-            viewBox="0 0 400 400"
-            fill="none"
-          >
-            <path d="M0 0 C150 50 250 150 280 280 C300 370 260 400 0 400 Z" fill="url(#mockup-tl-wave)" />
-            <defs>
-              <linearGradient id="mockup-tl-wave" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.1" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          <svg
-            style={{
-              position: 'absolute',
-              bottom: '-80px',
-              right: '-80px',
-              width: '420px',
-              height: '420px',
-              pointerEvents: 'none',
-              opacity: 0.4,
-              zIndex: 1
-            }}
-            viewBox="0 0 400 400"
-            fill="none"
-          >
-            <path d="M400 400 C250 350 150 250 120 120 C100 30 140 0 400 0 Z" fill="url(#mockup-br-wave)" />
-            <defs>
-              <linearGradient id="mockup-br-wave" x1="100%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#818cf8" stopOpacity="0.1" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          {/* Floating Sparkles in Mockup Area */}
-          <div style={{ position: 'absolute', top: '24px', left: '32px', opacity: 0.6, zIndex: 1 }}>
-            <SparkleIcon size={24} color="#93c5fd" />
-          </div>
-          <div style={{ position: 'absolute', bottom: '28px', right: '36px', opacity: 0.6, zIndex: 1 }}>
-            <SparkleIcon size={30} color="#38bdf8" />
-          </div>
-
-          {/* Subtle Ambient Glow */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '80%',
-              height: '80%',
-              background:
-                'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 80%)',
-              filter: 'blur(60px)',
-              pointerEvents: 'none',
-              zIndex: 1
-            }}
-          />
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '36px',
-              flexWrap: 'wrap',
-              position: 'relative',
-              zIndex: 2
-            }}
-          >
-            {/* Front Card */}
-            <div>
-              <div
-                style={{
-                  textAlign: 'center',
-                  marginBottom: '10px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  color: '#2563eb',
-                  letterSpacing: '0.8px'
-                }}
-              >
-                TAMPAK DEPAN (FRONT)
-              </div>
-              <SteamIdCardFront member={currentMember} />
-            </div>
-
-            {/* Back Card */}
-            <div>
-              <div
-                style={{
-                  textAlign: 'center',
-                  marginBottom: '10px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  color: '#2563eb',
-                  letterSpacing: '0.8px'
-                }}
-              >
-                TAMPAK BELAKANG (BACK)
-              </div>
-              <SteamIdCardBack member={currentMember} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* VIEW MODE 2: Interactive 3D Flippable Card */}
-      {viewMode === 'interactive' && (
-        <div
-          style={{
-            background: 'linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%)',
-            border: '1px solid #e2e8f0',
-            borderRadius: '28px',
-            padding: '50px 24px',
-            textAlign: 'center'
-          }}
-        >
-          <div style={{ marginBottom: '24px' }}>
-            <span
-              style={{
-                fontSize: '12.5px',
-                color: '#64748b',
-                background: '#ffffff',
-                padding: '6px 16px',
-                borderRadius: '999px',
-                border: '1px solid #cbd5e1',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <RotateCw size={14} color="#2563eb" />
-              <span>Klik tombol &quot;Balik&quot; pada kartu di bawah untuk membalik kartu tanda pengenal secara interaktif</span>
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <SteamIdCardFlip member={currentMember} />
-          </div>
-        </div>
-      )}
-
-      {/* VIEW MODE 3: All 3 Team Members in a Responsive Grid */}
-      {viewMode === 'all' && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '30px',
-            justifyItems: 'center'
-          }}
-        >
-          {OFFICIAL_STEAM_MEMBERS.map((member) => (
-            <div key={member.id} style={{ width: '100%', maxWidth: '340px' }}>
-              <div
-                style={{
-                  textAlign: 'center',
-                  marginBottom: '8px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  color: '#2563eb',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                {member.fullName}
-              </div>
-              <SteamIdCardFlip member={member} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Action Bar Below Cards */}
+      {/* DIRECT 3-MEMBER CARDS GRID (LINED UP SIDE-BY-SIDE) */}
       <div
         style={{
-          marginTop: '36px',
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '30px',
           justifyContent: 'center',
-          alignItems: 'center',
-          gap: '14px',
-          flexWrap: 'wrap'
+          alignItems: 'stretch'
         }}
       >
-        <button
-          onClick={() => setShowOriginalModal(true)}
-          style={{
-            padding: '11px 20px',
-            borderRadius: '12px',
-            background: '#ffffff',
-            border: '1.5px solid #cbd5e1',
-            color: '#1e3a8a',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-          }}
-        >
-          <Maximize2 size={15} color="#2563eb" />
-          <span>Lihat Gambar Mockup Asli (steam-id-card.png)</span>
-        </button>
-
-        <button
-          onClick={() => window.print()}
-          style={{
-            padding: '11px 20px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
-            border: 'none',
-            color: '#ffffff',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 16px rgba(37, 99, 235, 0.25)'
-          }}
-        >
-          <Printer size={15} />
-          <span>Cetak / Simpan PDF Kartu Tanda Anggota</span>
-        </button>
+        {members.map((member) => (
+          <div key={member.id} style={{ display: 'flex', justifyContent: 'center' }}>
+            <FlippableMemberCard
+              member={member}
+              onOpenPortfolio={handleOpenPortfolio}
+            />
+          </div>
+        ))}
       </div>
 
-      {/* Modal for Original Mockup Image Inspection */}
-      {showOriginalModal && (
+      {/* Modal to Customize Portfolio URLs */}
+      {editUrlModal && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 9999,
-            background: 'rgba(15, 23, 42, 0.85)',
+            background: 'rgba(15, 23, 42, 0.75)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             padding: '20px'
           }}
-          onClick={() => setShowOriginalModal(false)}
+          onClick={() => setEditUrlModal(false)}
         >
           <div
             style={{
               background: '#ffffff',
               borderRadius: '24px',
-              padding: '24px',
-              maxWidth: '960px',
+              padding: '28px',
+              maxWidth: '560px',
               width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px'
-              }}
-            >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#1e3a8a', margin: 0 }}>
-                  Dokumen Desain Resmi Kartu Tanda Anggota (ID Card Mockup)
+                <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#1e3a8a', margin: '0 0 4px 0' }}>
+                  Atur Tautan Website Portofolio
                 </h3>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>
-                  Aset resmi STEAM: steam-id-card.png (Depan &amp; Belakang)
+                  Sesuaikan URL tujuan saat masing-masing kartu anggota diklik oleh pengunjung.
                 </span>
               </div>
               <button
-                onClick={() => setShowOriginalModal(false)}
+                onClick={() => setEditUrlModal(false)}
                 style={{
                   background: '#f1f5f9',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '36px',
-                  height: '36px',
+                  width: '32px',
+                  height: '32px',
                   display: 'grid',
                   placeItems: 'center',
                   cursor: 'pointer',
                   color: '#475569'
                 }}
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
 
-            <div style={{ textAlign: 'center', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-              <img
-                src="/steam-id-card.png"
-                alt="Desain Asli ID Card STEAM"
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
-            </div>
+            <form onSubmit={handleSaveUrls} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {members.map((m) => (
+                <div key={m.id}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>
+                    {m.name} ({m.steamId} • {m.division})
+                  </label>
+                  <input
+                    type="url"
+                    value={editingUrls[m.id] || ''}
+                    onChange={(e) => setEditingUrls({ ...editingUrls, [m.id]: e.target.value })}
+                    placeholder="https://..."
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: '1.5px solid #cbd5e1',
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              ))}
 
-            <div
-              style={{
-                marginTop: '16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '12px'
-              }}
-            >
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
-                Format: Kartu CR80 Standar Industri • Rasio Asli 1024x682
-              </span>
-              <a
-                href="/steam-id-card.png"
-                download="steam-id-card-official.png"
-                style={{
-                  padding: '9px 18px',
-                  borderRadius: '10px',
-                  background: '#2563eb',
-                  color: '#fff',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Download size={14} />
-                <span>Unduh Gambar Asli</span>
-              </a>
-            </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditUrlModal(false)}
+                  style={{
+                    padding: '9px 16px',
+                    borderRadius: '10px',
+                    background: '#f1f5f9',
+                    border: 'none',
+                    color: '#475569',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '9px 20px',
+                    borderRadius: '10px',
+                    background: '#2563eb',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {saveSuccess ? <Check size={16} /> : null}
+                  <span>{saveSuccess ? 'Tersimpan!' : 'Simpan Tautan'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

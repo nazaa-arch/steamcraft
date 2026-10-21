@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SteamTeamCardSection, SparkleIcon } from './SteamIdCard';
-import { SteamBrandGuidelineSection } from './SteamBrandGuideline';
+import { SteamEcosystemSection } from './SteamEcosystemSection';
 import {
   Sparkles,
   ArrowRight,
@@ -397,7 +397,7 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
             href="#philosophy"
             style={{ color: '#475569', fontSize: '13px', fontWeight: 600, textDecoration: 'none', padding: '6px 12px' }}
           >
-            Filosofi STEAM
+            Pilar Riset
           </a>
           <a
             href="#roadmap"
@@ -848,10 +848,8 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
         </div>
       </section>
 
-      {/* Section: STEAM Brand Guideline & Philosophy (Official Guidelines Panel 01-08) */}
-      <div id="philosophy">
-        <SteamBrandGuidelineSection />
-      </div>
+      {/* Section: STEAM Ecosystem & Research Methodology */}
+      <SteamEcosystemSection onOpenApp={handleOpenApp} />
 
       {/* Section: Future Pipeline Roadmap */}
       <section id="roadmap" style={{ padding: '60px 24px', background: '#f1f5f9', borderTop: '1px solid #e2e8f0' }}>

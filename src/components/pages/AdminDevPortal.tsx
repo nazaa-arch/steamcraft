@@ -92,6 +92,13 @@ export const AdminDevPortal: React.FC = () => {
   const [adminPasscode, setAdminPasscode] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
 
+  // Set browser tab title to 'Adm Steam'
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = 'Adm Steam';
+    }
+  }, []);
+
   // Subscribe to live telemetry events
   useEffect(() => {
     const unsub = subscribeTelemetry((newEvent) => {
@@ -362,7 +369,7 @@ export const AdminDevPortal: React.FC = () => {
               SUBDOMAIN OTORISASI: adm.steamcraft.online
             </div>
             <h1 style={{ fontSize: '22px', fontWeight: 900, margin: '6px 0', letterSpacing: '-0.3px', color: '#fff' }}>
-              Master DevOps &amp; Admin Gate
+              Adm Steam
             </h1>
             <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
               Akses terbatas untuk administrator sistem dan teknisi pengembang.
@@ -504,7 +511,7 @@ export const AdminDevPortal: React.FC = () => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '16px', fontWeight: 900, color: '#fff' }}>
-                STEAM-Craft <span style={{ color: '#38bdf8' }}>Master DevOps</span>
+                Adm Steam
               </span>
               <span
                 style={{

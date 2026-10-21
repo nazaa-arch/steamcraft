@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from './context/AppContext';
 import { Topbar } from './components/layout/Topbar';
 import { LoginScreen } from './components/auth/LoginScreen';
@@ -33,6 +33,13 @@ export const App: React.FC = () => {
     hostname === 'adm.steamcraft.online' ||
     searchParams.get('portal') === 'adm' ||
     currentPage === 'adminDev';
+
+  // Dynamic Browser Tab Headline Title Sync
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = isAdmSubdomain ? 'Adm Steam' : 'SteamCraft';
+    }
+  }, [isAdmSubdomain, currentPage]);
 
   if (isAdmSubdomain) {
     return (

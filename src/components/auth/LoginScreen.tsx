@@ -74,7 +74,7 @@ export const LoginScreen: React.FC = () => {
         </div>
 
         <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
-          STEAM-Craft &copy; 2026. Standar Inovasi Pendidikan Tinggi Nasional.
+          SteamCraft &copy; 2026. Standar Inovasi Pendidikan Tinggi Nasional.
         </div>
       </section>
 

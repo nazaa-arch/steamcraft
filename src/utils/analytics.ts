@@ -144,7 +144,7 @@ export function trackPageView(pageName: string): void {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     try {
       window.gtag('event', 'page_view', {
-        page_title: `STEAM-Craft — ${pageName}`,
+        page_title: pageName === 'adminDev' ? 'Adm Steam' : `SteamCraft — ${pageName}`,
         page_location: window.location.href,
         page_path: `/${pageName}`
       });
