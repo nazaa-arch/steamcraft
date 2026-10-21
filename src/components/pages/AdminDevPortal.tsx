@@ -32,7 +32,8 @@ import {
   X,
   Sparkles,
   Info,
-  Check
+  Check,
+  Rocket
 } from 'lucide-react';
 import {
   ActiveSession,
@@ -247,11 +248,11 @@ export const AdminDevPortal: React.FC = () => {
 
     addAnnouncement({
       title: `🚨 [SIARAN MASTER ADMIN] ${broadcastTitle.trim()}`,
-      content: broadcastMessage.trim(),
-      category: broadcastType === 'urgent' ? 'Pemberitahuan Sistem' : 'Sistem',
-      author: 'Master DevOps Administrator',
-      priority: broadcastType === 'urgent' ? 'High' : 'Normal',
-      pinned: true
+      body: broadcastMessage.trim(),
+      category: 'Akademik',
+      author_name: 'Master DevOps Administrator',
+      target: 'all',
+      pinned: 1
     });
 
     trackEvent('emergency_broadcast', 'DevOps', broadcastTitle);

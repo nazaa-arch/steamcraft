@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { SteamTeamCardSection } from './SteamIdCard';
+import { SteamTeamCardSection, SparkleIcon } from './SteamIdCard';
+import { SteamBrandGuidelineSection } from './SteamBrandGuideline';
 import {
   Sparkles,
   ArrowRight,
@@ -219,12 +220,76 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
     <div
       style={{
         minHeight: '100vh',
-        background: '#f8fafc',
+        background:
+          'radial-gradient(ellipse at 80% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 15% 25%, rgba(139, 92, 246, 0.06) 0%, transparent 45%), radial-gradient(ellipse at 85% 65%, rgba(16, 185, 129, 0.05) 0%, transparent 50%), radial-gradient(ellipse at 20% 85%, rgba(59, 130, 246, 0.06) 0%, transparent 50%), #f8fafc',
         color: '#0f172a',
-        fontFamily: "'Montserrat', 'Inter', sans-serif",
-        lineHeight: 1.6
+        fontFamily: "'Montserrat', sans-serif",
+        lineHeight: 1.6,
+        position: 'relative',
+        overflowX: 'hidden'
       }}
     >
+      {/* Ambient Decorative Background Waves & Sparkles */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden'
+        }}
+      >
+        {/* Soft Wave Ribbon Top Right */}
+        <svg
+          style={{ position: 'absolute', top: '-60px', right: '-120px', width: '620px', height: '620px', opacity: 0.45 }}
+          viewBox="0 0 600 600"
+          fill="none"
+        >
+          <path d="M100 0 C250 150 350 220 450 350 C550 480 580 540 600 600 L600 0 Z" fill="url(#bg-wave-1)" />
+          <defs>
+            <linearGradient id="bg-wave-1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.5" />
+              <stop offset="50%" stopColor="#c4b5fd" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.1" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        {/* Soft Wave Ribbon Mid Left */}
+        <svg
+          style={{ position: 'absolute', top: '35%', left: '-150px', width: '500px', height: '600px', opacity: 0.35 }}
+          viewBox="0 0 500 600"
+          fill="none"
+        >
+          <path d="M0 0 C180 80 280 200 320 340 C360 480 300 550 0 600 Z" fill="url(#bg-wave-2)" />
+          <defs>
+            <linearGradient id="bg-wave-2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.12" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        {/* Floating Sparkle Stars Scattered Authentically */}
+        <div style={{ position: 'absolute', top: '12%', left: '3%', opacity: 0.55 }}>
+          <SparkleIcon size={26} color="#3b82f6" />
+        </div>
+        <div style={{ position: 'absolute', top: '22%', right: '5%', opacity: 0.65 }}>
+          <SparkleIcon size={34} color="#8b5cf6" />
+        </div>
+        <div style={{ position: 'absolute', top: '48%', right: '3%', opacity: 0.5 }}>
+          <SparkleIcon size={28} color="#06b6d4" />
+        </div>
+        <div style={{ position: 'absolute', top: '65%', left: '3%', opacity: 0.45 }}>
+          <SparkleIcon size={36} color="#c4b5fd" />
+        </div>
+        <div style={{ position: 'absolute', top: '82%', right: '4%', opacity: 0.55 }}>
+          <SparkleIcon size={30} color="#93c5fd" />
+        </div>
+      </div>
       {/* Top Banner Tagline */}
       <div
         style={{
@@ -783,78 +848,10 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
         </div>
       </section>
 
-      {/* Section: STEAM Philosophy & Meaning (From Brand Guidelines) */}
-      <section id="philosophy" style={{ padding: '70px 24px', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
-            PANDUAN IDENTITAS &amp; NILAI RESMI
-          </span>
-          <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#1e3a8a', margin: '6px 0 10px 0' }}>
-            Makna Filosofi STEAM
-          </h2>
-          <p style={{ fontSize: '14.5px', color: '#64748b', maxWidth: '700px', margin: '0 auto' }}>
-            STEAM merupakan singkatan dari 5 pilar keilmuan yang bersatu untuk menciptakan solusi aplikatif berdaya guna.
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-          {[
-            { letter: 'S', title: 'Science', desc: 'Ilmu pengetahuan, rasa ingin tahu, dan pencarian kebenaran empiris.', color: '#1e3a8a' },
-            { letter: 'T', title: 'Technology', desc: 'Teknologi, inovasi digital, dan solusi mutakhir untuk masa depan.', color: '#3b82f6' },
-            { letter: 'E', title: 'Engineering', desc: 'Rekayasa teknis, proses manufaktur, dan implementasi ide fisik.', color: '#8b5cf6' },
-            { letter: 'A', title: 'Arts', desc: 'Seni, estetika desain, kreativitas, ekspresi, dan nilai kemanusiaan.', color: '#10b981' },
-            { letter: 'M', title: 'Mathematics', desc: 'Logika, analisis kuantitatif, dan dasar dari segala pemodelan ilmu.', color: '#0891b2' }
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '16px',
-                padding: '20px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
-                textAlign: 'center'
-              }}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: item.color,
-                  color: '#fff',
-                  fontSize: '22px',
-                  fontWeight: 900,
-                  display: 'grid',
-                  placeItems: 'center',
-                  margin: '0 auto 12px auto'
-                }}
-              >
-                {item.letter}
-              </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>{item.title}</h4>
-              <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Official Quote Box */}
-        <div
-          style={{
-            background: 'linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%)',
-            border: '1px solid #bfdbfe',
-            borderRadius: '16px',
-            padding: '20px 28px',
-            textAlign: 'center',
-            fontSize: '13.5px',
-            color: '#1e40af',
-            fontStyle: 'italic',
-            fontWeight: 600
-          }}
-        >
-          "STEAM adalah tentang bagaimana ilmu, teknologi, rekayasa, seni, dan matematika bersatu untuk menciptakan dampak positif bagi masa depan."
-        </div>
-      </section>
+      {/* Section: STEAM Brand Guideline & Philosophy (Official Guidelines Panel 01-08) */}
+      <div id="philosophy">
+        <SteamBrandGuidelineSection />
+      </div>
 
       {/* Section: Future Pipeline Roadmap */}
       <section id="roadmap" style={{ padding: '60px 24px', background: '#f1f5f9', borderTop: '1px solid #e2e8f0' }}>

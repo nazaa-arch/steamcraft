@@ -933,15 +933,71 @@ export const SteamTeamCardSection: React.FC = () => {
       {viewMode === 'mockup' && (
         <div
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(238, 242, 255, 0.9) 0%, #f8fafc 100%)',
-            border: '1px solid #e2e8f0',
+            background:
+              'radial-gradient(ellipse at 50% 50%, rgba(241, 245, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
+            border: '1px solid rgba(226, 232, 240, 0.9)',
             borderRadius: '32px',
-            padding: '50px 24px',
+            padding: '60px 24px',
             boxShadow: '0 20px 50px rgba(30, 58, 138, 0.05)',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
+          {/* Authentic Ambient Corner Waves matching mockup backdrop */}
+          <svg
+            style={{
+              position: 'absolute',
+              top: '-80px',
+              left: '-80px',
+              width: '420px',
+              height: '420px',
+              pointerEvents: 'none',
+              opacity: 0.4,
+              zIndex: 1
+            }}
+            viewBox="0 0 400 400"
+            fill="none"
+          >
+            <path d="M0 0 C150 50 250 150 280 280 C300 370 260 400 0 400 Z" fill="url(#mockup-tl-wave)" />
+            <defs>
+              <linearGradient id="mockup-tl-wave" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.1" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <svg
+            style={{
+              position: 'absolute',
+              bottom: '-80px',
+              right: '-80px',
+              width: '420px',
+              height: '420px',
+              pointerEvents: 'none',
+              opacity: 0.4,
+              zIndex: 1
+            }}
+            viewBox="0 0 400 400"
+            fill="none"
+          >
+            <path d="M400 400 C250 350 150 250 120 120 C100 30 140 0 400 0 Z" fill="url(#mockup-br-wave)" />
+            <defs>
+              <linearGradient id="mockup-br-wave" x1="100%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#818cf8" stopOpacity="0.1" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Floating Sparkles in Mockup Area */}
+          <div style={{ position: 'absolute', top: '24px', left: '32px', opacity: 0.6, zIndex: 1 }}>
+            <SparkleIcon size={24} color="#93c5fd" />
+          </div>
+          <div style={{ position: 'absolute', bottom: '28px', right: '36px', opacity: 0.6, zIndex: 1 }}>
+            <SparkleIcon size={30} color="#38bdf8" />
+          </div>
+
           {/* Subtle Ambient Glow */}
           <div
             style={{
@@ -952,9 +1008,10 @@ export const SteamTeamCardSection: React.FC = () => {
               width: '80%',
               height: '80%',
               background:
-                'radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 80%)',
+                'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 80%)',
               filter: 'blur(60px)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              zIndex: 1
             }}
           />
 

@@ -176,7 +176,6 @@ export const App: React.FC = () => {
         {currentPage === 'analytics' && <AnalyticsPage />}
         {currentPage === 'announcements' && <AnnouncementsPage />}
         {currentPage === 'admin' && <AdminConsolePage />}
-        {currentPage === 'adminDev' && <AdminDevPortal />}
         {currentPage === 'hub' && <TeamProjectHub />}
         {currentPage === 'maintenance' && <MaintenancePage />}
         {![
