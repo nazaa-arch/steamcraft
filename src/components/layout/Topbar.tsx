@@ -214,20 +214,8 @@ export const Topbar: React.FC = () => {
         </div>
       </a>
 
-      <button
-        type="button"
-        className={`mobile-menu-toggle ${mobileMenuOpen ? 'open' : ''}`}
-        aria-label="Buka menu navigasi"
-        aria-expanded={mobileMenuOpen}
-        onClick={() => setMobileMenuOpen(prev => !prev)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
-
       {/* Role-Separated Primary Navigation */}
-      <div className={`nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+      <div className="nav-container">
         <nav className="nav" id="mainNav">
         {/* Student Navigation */}
         {role === 'student' && (
