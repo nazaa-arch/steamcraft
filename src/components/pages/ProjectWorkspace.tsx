@@ -108,6 +108,15 @@ export const ProjectWorkspace: React.FC = () => {
   const projectJournals = journals.filter(j => j.project_id === currentProject.id);
   const projectVersions = versions.filter(v => v.project_id === currentProject.id);
   const projectMembers = members.filter(m => m.project_id === currentProject.id);
+  const isMember = isUserMemberOfProject(currentProject.id);
+  const currentMemberRecord = projectMembers.find(
+    m =>
+      (m.user_id && m.user_id === currentUser?.id) ||
+      (m.identifier && currentUser?.identifier && m.identifier === currentUser.identifier) ||
+      (m.name && currentUser?.name && m.name.toLowerCase().includes(currentUser.name.toLowerCase())) ||
+      (currentUser?.id === 1 && (m.user_id === 1 || m.name.toLowerCase().includes('budi')))
+  );
+  const isLead = Boolean(currentMemberRecord?.is_lead === 1);
   const projectApplications = applications.filter(a => a.project_id === currentProject.id);
   const projectRubric = rubrics.find(r => r.project_id === currentProject.id);
   const projectPeerFeedbacks = peerFeedbacks.filter(f => f.project_id === currentProject.id);
@@ -889,18 +898,52 @@ export const ProjectWorkspace: React.FC = () => {
               {/* Recruitment Requirements */}
               {currentProject.open_recruitment === 1 && (
                 <div style={{ marginTop: '24px', background: 'var(--surface-alt)', padding: '16px', borderRadius: '12px', border: '1px solid var(--line)' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '4px' }}>
-                    Peran Kolaborator yang Dibutuhkan:
-                  </h4>
-                  <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', marginBottom: '10px' }}>
-                    {currentProject.recruitment_roles || 'Terbuka untuk mahasiswa berminat dari prodi terkait.'}
-                  </p>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => openModal('apply', currentProject)}
-                  >
-                    <span>Ajukan Diri Bergabung &rarr;</span>
-                  </button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ flex: '1 1 280px' }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '4px' }}>
+                        Peran Kolaborator yang Dibutuhkan:
+                      </h4>
+                      <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', margin: 0 }}>
+                        {currentProject.recruitment_roles || 'Terbuka untuk mahasiswa berminat dari prodi terkait.'}
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {isMember ? (
+                        <>
+                          <span
+                            className="badge badge-teal"
+                            style={{ fontSize: '11px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            title="Status keanggotaan Anda di proyek riset ini"
+                          >
+                            ✓ {isLead ? 'Anda adalah Ketua Tim' : 'Anda Anggota Tim Aktif'}
+                          </span>
+                          {isLead && (
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => openModal('inviteMember', currentProject)}
+                              style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                              title="Undang mahasiswa secara langsung via NIM/NAMA"
+                            >
+                              <UserPlus size={13} />
+                              <span>+ Undang Anggota</span>
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => openModal('apply', currentProject)}
+                          title="Ajukan diri bergabung dalam tim riset ini"
+                        >
+                          <UserPlus size={13} />
+                          <span>Ajukan Diri Bergabung &rarr;</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -948,7 +991,7 @@ export const ProjectWorkspace: React.FC = () => {
                               </button>
                               <button
                                 className="btn btn-danger btn-sm"
-                                onClick={() => updateApplicationStatus(app.id, 'Diterima')}
+                                onClick={() => updateApplicationStatus(app.id, 'Ditolak')}
                               >
                                 <X size={13} />
                                 <span>Tolak</span>

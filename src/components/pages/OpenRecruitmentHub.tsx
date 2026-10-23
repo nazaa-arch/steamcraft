@@ -3,7 +3,13 @@ import { useApp } from '../../context/AppContext';
 import { UserPlus, Sparkles, Search, Users, ArrowRight, Info } from 'lucide-react';
 
 export const OpenRecruitmentHub: React.FC = () => {
-  const { projects, openModal } = useApp();
+  const {
+    projects,
+    openModal,
+    isUserMemberOfProject,
+    setSelectedProjectId,
+    setCurrentPage
+  } = useApp();
   const [filterQuery, setFilterQuery] = useState('');
 
   const recruitingProjects = projects.filter(
@@ -47,76 +53,100 @@ export const OpenRecruitmentHub: React.FC = () => {
 
       {/* Grid of Open Recruitment Projects */}
       <div className="projects-grid">
-        {recruitingProjects.map(proj => (
-          <div key={proj.id} className="project-card" style={{ borderTop: '4px solid var(--accent-teal)' }}>
-            <div>
-              <div className="project-card-top">
-                <span className="badge badge-teal">Mencari Anggota Baru</span>
-                <span className="badge badge-blue">{proj.study}</span>
-              </div>
+        {recruitingProjects.map(proj => {
+          const isMember = isUserMemberOfProject(proj.id);
+          return (
+            <div key={proj.id} className="project-card" style={{ borderTop: isMember ? '4px solid var(--primary)' : '4px solid var(--accent-teal)' }}>
+              <div>
+                <div className="project-card-top">
+                  <span className="badge badge-teal">Mencari Anggota Baru</span>
+                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                    {isMember && (
+                      <span className="badge badge-purple" title="Proyek yang Anda ikuti">
+                        ✓ Tim Saya
+                      </span>
+                    )}
+                    <span className="badge badge-blue">{proj.study}</span>
+                  </div>
+                </div>
 
-              <h3>{proj.name}</h3>
-              <p>{proj.desc}</p>
+                <h3>{proj.name}</h3>
+                <p>{proj.desc}</p>
+
+                <div
+                  style={{
+                    background: 'var(--accent-teal-light)',
+                    border: '1px solid #99f6e4',
+                    borderRadius: '10px',
+                    padding: '10px 12px',
+                    marginBottom: '14px'
+                  }}
+                >
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent-teal)', marginBottom: '4px' }}>
+                    PERAN YANG DIBUTUHKAN:
+                  </div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--navy)' }}>
+                    {proj.recruitment_roles || 'Terbuka untuk kolaborator multidisiplin'}
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginBottom: '12px' }}>
+                  👨‍🏫 Dosen Pembimbing: <strong>{proj.lecturer}</strong>
+                </div>
+              </div>
 
               <div
                 style={{
-                  background: 'var(--accent-teal-light)',
-                  border: '1px solid #99f6e4',
-                  borderRadius: '10px',
-                  padding: '10px 12px',
-                  marginBottom: '14px'
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTop: '1px solid var(--line)',
+                  paddingTop: '12px',
+                  gap: '8px'
                 }}
               >
-                <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent-teal)', marginBottom: '4px' }}>
-                  PERAN YANG DIBUTUHKAN:
+                <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Users size={13} />
+                  <span>{proj.members_count} anggota saat ini</span>
                 </div>
-                <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--navy)' }}>
-                  {proj.recruitment_roles || 'Terbuka untuk kolaborator multidisiplin'}
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => openModal('projectDetail', proj)}
+                    title="Lihat Abstrak & Rincian Riset"
+                  >
+                    <Info size={13} />
+                    <span>Info Riset</span>
+                  </button>
+                  {isMember ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => {
+                        setSelectedProjectId(proj.id);
+                        setCurrentPage('workspace');
+                      }}
+                      title="Masuk ke ruang kerja kolaborasi tim Anda"
+                    >
+                      <span>Ruang Kerja Tim &rarr;</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => openModal('apply', proj)}
+                      title="Daftar & Ajukan Diri Bergabung"
+                    >
+                      <UserPlus size={13} />
+                      <span>Daftar Bergabung</span>
+                    </button>
+                  )}
                 </div>
-              </div>
-
-              <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginBottom: '12px' }}>
-                👨‍🏫 Dosen Pembimbing: <strong>{proj.lecturer}</strong>
               </div>
             </div>
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderTop: '1px solid var(--line)',
-                paddingTop: '12px',
-                gap: '8px'
-              }}
-            >
-              <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Users size={13} />
-                <span>{proj.members_count} anggota saat ini</span>
-              </div>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => openModal('projectDetail', proj)}
-                  title="Lihat Abstrak & Rincian Riset"
-                >
-                  <Info size={13} />
-                  <span>Info Riset</span>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={() => openModal('apply', proj)}
-                  title="Daftar & Ajukan Diri Bergabung"
-                >
-                  <UserPlus size={13} />
-                  <span>Daftar Bergabung</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
