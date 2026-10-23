@@ -39,6 +39,7 @@ import {
   Bot,
   ArrowRight,
   UserPlus,
+  Users,
   Copy
 } from 'lucide-react';
 import { User, Project, UserRole } from '../../types';
@@ -355,27 +356,128 @@ const NewProjectModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) 
         </div>
       </div>
 
-      <div className="auth-field">
-        <label>Buka Rekrutmen Anggota Baru?</label>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginTop: '6px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-            <input
-              type="radio"
-              name="openRec"
-              checked={openRec === 1}
-              onChange={() => setOpenRec(1)}
-            />
-            Ya, Buka Rekrutmen Multidisiplin
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-            <input
-              type="radio"
-              name="openRec"
-              checked={openRec === 0}
-              onChange={() => setOpenRec(0)}
-            />
-            Tidak (Tim Lengkap)
-          </label>
+      <div className="auth-field" style={{ marginBottom: '16px' }}>
+        <label style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--navy)', marginBottom: '8px', display: 'block' }}>
+          Buka Rekrutmen Anggota Baru?
+        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
+          {/* Opsi 1: Buka Rekrutmen */}
+          <div
+            onClick={() => setOpenRec(1)}
+            style={{
+              padding: '12px 14px',
+              borderRadius: '12px',
+              border: `2px solid ${openRec === 1 ? 'var(--primary)' : '#e2e8f0'}`,
+              background: openRec === 1 ? '#eff6ff' : '#ffffff',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              boxShadow: openRec === 1 ? '0 2px 8px rgba(37, 99, 235, 0.12)' : 'none',
+              boxSizing: 'border-box'
+            }}
+          >
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: openRec === 1 ? 'var(--primary)' : '#f1f5f9',
+                color: openRec === 1 ? '#ffffff' : 'var(--muted)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <UserPlus size={18} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: openRec === 1 ? 'var(--primary)' : 'var(--navy)', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+                Ya, Buka Rekrutmen
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px', lineHeight: 1.3 }}>
+                Kolaborasi terbuka lintas prodi
+              </div>
+            </div>
+            <div
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: `2px solid ${openRec === 1 ? 'var(--primary)' : '#cbd5e1'}`,
+                background: openRec === 1 ? 'var(--primary)' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              {openRec === 1 && (
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffffff' }} />
+              )}
+            </div>
+          </div>
+
+          {/* Opsi 2: Tidak (Tim Lengkap) */}
+          <div
+            onClick={() => setOpenRec(0)}
+            style={{
+              padding: '12px 14px',
+              borderRadius: '12px',
+              border: `2px solid ${openRec === 0 ? 'var(--primary)' : '#e2e8f0'}`,
+              background: openRec === 0 ? '#eff6ff' : '#ffffff',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              boxShadow: openRec === 0 ? '0 2px 8px rgba(37, 99, 235, 0.12)' : 'none',
+              boxSizing: 'border-box'
+            }}
+          >
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: openRec === 0 ? 'var(--primary)' : '#f1f5f9',
+                color: openRec === 0 ? '#ffffff' : 'var(--muted)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <Users size={18} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: openRec === 0 ? 'var(--primary)' : 'var(--navy)', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+                Tidak (Tim Lengkap)
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px', lineHeight: 1.3 }}>
+                Anggota riset telah terpenuhi
+              </div>
+            </div>
+            <div
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: `2px solid ${openRec === 0 ? 'var(--primary)' : '#cbd5e1'}`,
+                background: openRec === 0 ? 'var(--primary)' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              {openRec === 0 && (
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffffff' }} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
