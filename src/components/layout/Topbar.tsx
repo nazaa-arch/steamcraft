@@ -167,22 +167,6 @@ export const Topbar: React.FC = () => {
 
   return (
     <header className="topbar">
-      {/* Backdrop for Mobile Navigation Dropdowns */}
-      {(projectDropdownOpen || toolsDropdownOpen) && (
-        <div
-          className="nav-dropdown-backdrop"
-          onClick={() => {
-            setProjectDropdownOpen(false);
-            setToolsDropdownOpen(false);
-          }}
-          onTouchStart={() => {
-            setProjectDropdownOpen(false);
-            setToolsDropdownOpen(false);
-          }}
-          aria-hidden="true"
-        />
-      )}
-
       <a
         href="#"
         className="brand"
