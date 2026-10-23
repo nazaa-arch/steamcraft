@@ -20,14 +20,7 @@ export const ProjectCatalog: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   const myProjects = projects.filter(p => isUserMemberOfProject(p.id));
-  const recruitingProjects = projects.filter(p => p.open_recruitment === 1);
-
-  const baseProjects =
-    projectCatalogTab === 'myProjects'
-      ? myProjects
-      : projectCatalogTab === 'recruitment'
-      ? recruitingProjects
-      : projects;
+  const baseProjects = projectCatalogTab === 'myProjects' ? myProjects : projects;
 
   const filteredProjects = baseProjects.filter(p => {
     // Search match
@@ -56,20 +49,20 @@ export const ProjectCatalog: React.FC = () => {
     <section className="page active">
       <div className="section-head">
         <div>
-          <div className="eyebrow">Repositori Riset Civitas Akademika</div>
+          <div className="eyebrow">
+            {projectCatalogTab === 'myProjects'
+              ? 'Ruang Kolaborasi Tim Aktif'
+              : 'Repositori Riset Civitas Akademika'}
+          </div>
           <h2 className="h1">
             {projectCatalogTab === 'myProjects'
               ? (currentUser?.role === 'lecturer' ? 'Daftar Proyek Riset Bimbingan Saya' : 'Daftar Proyek Riset Saya')
-              : projectCatalogTab === 'recruitment'
-              ? 'Pusat Rekrutmen Kolaborator Terbuka'
               : 'Katalog Proyek Riset Multidisiplin'}
           </h2>
           <p className="sub">
             {projectCatalogTab === 'myProjects'
               ? 'Kelola ruang kerja dan pantau perkembangan proyek riset di mana Anda terdaftar aktif sebagai anggota tim atau pembimbing.'
-              : projectCatalogTab === 'recruitment'
-              ? 'Temukan proyek riset yang sedang membuka rekrutmen kolaborator dan ajukan diri untuk berkolaborasi lintas keilmuan.'
-              : 'Eksplorasi seluruh riset berbasis 5 pilar STEAM di lingkungan kampus. Jadikan referensi topik ilmiah atau temukan tim kolaborasi.'}
+              : 'Eksplorasi seluruh riset berbasis 5 pilar STEAM di lingkungan kampus. Bergabunglah dengan tim yang sedang membuka rekrutmen atau jadikan referensi untuk inisiasi topik baru.'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -82,72 +75,6 @@ export const ProjectCatalog: React.FC = () => {
             <span>Buat Proyek Baru</span>
           </button>
         </div>
-      </div>
-
-      {/* Tabs Navigation: Proyek Saya vs Semua Proyek vs Rekrutmen */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          borderBottom: '2px solid var(--line)',
-          marginBottom: '20px',
-          overflowX: 'auto',
-          paddingBottom: '4px'
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setProjectCatalogTab('myProjects')}
-          className={`btn ${projectCatalogTab === 'myProjects' ? 'btn-primary' : 'btn-ghost'}`}
-          style={{ borderRadius: '10px 10px 0 0', fontSize: '13px', fontWeight: 700, padding: '9px 18px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-        >
-          <span>🗂️ {currentUser?.role === 'lecturer' ? 'Proyek Bimbingan Saya' : 'Proyek Saya'}</span>
-          <span
-            className="badge"
-            style={{
-              background: projectCatalogTab === 'myProjects' ? 'rgba(255,255,255,0.25)' : 'var(--line)',
-              color: projectCatalogTab === 'myProjects' ? 'white' : 'var(--navy)'
-            }}
-          >
-            {myProjects.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setProjectCatalogTab('all')}
-          className={`btn ${projectCatalogTab === 'all' ? 'btn-primary' : 'btn-ghost'}`}
-          style={{ borderRadius: '10px 10px 0 0', fontSize: '13px', fontWeight: 700, padding: '9px 18px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-        >
-          <span>🌐 Semua Riset Kampus</span>
-          <span
-            className="badge"
-            style={{
-              background: projectCatalogTab === 'all' ? 'rgba(255,255,255,0.25)' : 'var(--line)',
-              color: projectCatalogTab === 'all' ? 'white' : 'var(--navy)'
-            }}
-          >
-            {projects.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setProjectCatalogTab('recruitment')}
-          className={`btn ${projectCatalogTab === 'recruitment' ? 'btn-primary' : 'btn-ghost'}`}
-          style={{ borderRadius: '10px 10px 0 0', fontSize: '13px', fontWeight: 700, padding: '9px 18px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-        >
-          <span>✨ Rekrutmen Terbuka</span>
-          <span
-            className="badge"
-            style={{
-              background: projectCatalogTab === 'recruitment' ? 'rgba(255,255,255,0.25)' : 'var(--line)',
-              color: projectCatalogTab === 'recruitment' ? 'white' : 'var(--navy)'
-            }}
-          >
-            {recruitingProjects.length}
-          </span>
-        </button>
       </div>
 
       {/* Filter & Search Bar */}
