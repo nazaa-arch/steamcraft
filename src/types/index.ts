@@ -103,6 +103,7 @@ export interface Checkpoint {
   is_completed: number;
   completed_at?: string | null;
   completed_by?: string | null;
+  category?: string;
 }
 
 export interface Journal {
@@ -163,7 +164,8 @@ export interface Consultation {
   time: string;
   note?: string;
   feedback?: string | null;
-  status: 'Menunggu respons' | 'Terjadwal' | 'Selesai' | 'Dibatalkan';
+  rejection_reason?: string | null;
+  status: 'Menunggu respons' | 'Terjadwal' | 'Selesai' | 'Ditolak' | 'Dibatalkan';
   is_read?: number;
   created_at: string;
 }

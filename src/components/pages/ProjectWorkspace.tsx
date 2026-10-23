@@ -117,6 +117,7 @@ export const ProjectWorkspace: React.FC = () => {
       (currentUser?.id === 1 && (m.user_id === 1 || m.name.toLowerCase().includes('budi')))
   );
   const isLead = Boolean(currentMemberRecord?.is_lead === 1);
+  const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
   const projectApplications = applications.filter(a => a.project_id === currentProject.id);
   const projectRubric = rubrics.find(r => r.project_id === currentProject.id);
   const projectPeerFeedbacks = peerFeedbacks.filter(f => f.project_id === currentProject.id);
@@ -424,26 +425,53 @@ export const ProjectWorkspace: React.FC = () => {
           {/* TAB 1: CHECKPOINTS */}
           {activeTab === 'checkpoints' && (
             <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
                   <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--navy)' }}>
                     Alur Kerja Checkpoint Ilmiah
                   </h3>
                   <p style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                    Centang tahapan yang telah selesai diverifikasi oleh tim atau pembimbing.
+                    {isLecturerOrAdmin
+                      ? 'Sebagai Dosen Pembimbing, Anda berwenang memvalidasi dan mengesahkan tahapan riset yang telah memenuhi syarat.'
+                      : 'Tahapan riset wajib divalidasi oleh Dosen Pembimbing. Mahasiswa mencatat observasi dan kemajuan di Logbook.'}
                   </p>
                 </div>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setShowAddCp(!showAddCp)}
-                >
-                  <Plus size={13} />
-                  <span>Tambah Checkpoint</span>
-                </button>
+                {isLecturerOrAdmin && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setShowAddCp(!showAddCp)}
+                  >
+                    <Plus size={13} />
+                    <span>Tambah Checkpoint</span>
+                  </button>
+                )}
               </div>
 
-              {/* Add Checkpoint Form */}
-              {showAddCp && (
+              {/* Informative Workflow Guidance Banner */}
+              <div
+                style={{
+                  background: isLecturerOrAdmin ? '#f0fdf4' : '#eff6ff',
+                  border: `1px solid ${isLecturerOrAdmin ? '#bbf7d0' : '#bfdbfe'}`,
+                  borderRadius: '10px',
+                  padding: '10px 14px',
+                  marginBottom: '16px',
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+              >
+                <span style={{ fontSize: '18px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👩‍🏫' : 'ℹ️'}</span>
+                <div style={{ color: isLecturerOrAdmin ? '#166534' : '#1e40af', lineHeight: 1.4 }}>
+                  <strong>{isLecturerOrAdmin ? 'Otoritas Validasi Checkpoint (Dosen):' : 'Prosedur Validasi Checkpoint:'}</strong>{' '}
+                  {isLecturerOrAdmin
+                    ? 'Centang tahapan alur kerja di bawah ini untuk memvalidasi pencapaian ilmiah tim mahasiswa bimbingan Anda.'
+                    : 'Validasi checkpoint ini merupakan wewenang Dosen Pembimbing. Silakan ajukan konsultasi/bimbingan setelah menyiapkan bukti empiris.'}
+                </div>
+              </div>
+
+              {/* Add Checkpoint Form (Lecturer/Admin only) */}
+              {isLecturerOrAdmin && showAddCp && (
                 <form
                   onSubmit={handleCreateCheckpoint}
                   style={{
@@ -488,29 +516,46 @@ export const ProjectWorkspace: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {projectCheckpoints.map((cp, idx) => (
                   <div key={cp.id} className={`checkpoint-item ${cp.is_completed ? 'done' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={cp.is_completed === 1}
-                      onChange={() => toggleCheckpoint(cp.id)}
-                      id={`cp-${cp.id}`}
-                    />
+                    {isLecturerOrAdmin ? (
+                      <input
+                        type="checkbox"
+                        checked={cp.is_completed === 1}
+                        onChange={() => toggleCheckpoint(cp.id)}
+                        id={`cp-${cp.id}`}
+                        title="Klik untuk memvalidasi / membatalkan verifikasi tahapan ini sebagai Dosen Pembimbing"
+                        style={{ cursor: 'pointer' }}
+                      />
+                    ) : (
+                      <div
+                        onClick={() => showToast('⚠️ Validasi checkpoint ilmiah hanya dapat dilakukan oleh Dosen Pembimbing.')}
+                        title="Hanya Dosen Pembimbing yang berhak memvalidasi tahapan ini"
+                        style={{ cursor: 'not-allowed', display: 'flex', alignItems: 'center' }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={cp.is_completed === 1}
+                          disabled
+                          style={{ cursor: 'not-allowed', opacity: cp.is_completed ? 1 : 0.6 }}
+                        />
+                      </div>
+                    )}
                     <div className="checkpoint-info">
                       <h4>
                         <span>
                           {idx + 1}. {cp.title}
                         </span>
                         <span className={`checkpoint-status-pill ${cp.is_completed ? 'done' : 'pending'}`}>
-                          {cp.is_completed ? '✓ Selesai' : 'Belum Selesai'}
+                          {cp.is_completed ? '✓ Divalidasi Dosen' : '⏳ Menunggu Verifikasi Dosen'}
                         </span>
                       </h4>
                       <p>{cp.description}</p>
                       <div className="checkpoint-meta-row">
                         <span style={{ color: 'var(--muted)' }}>
-                          Status: <strong>{cp.is_completed ? 'Terverifikasi' : 'Dalam Pengerjaan'}</strong>
+                          Status: <strong>{cp.is_completed ? 'Terverifikasi Dosen' : 'Dalam Pengerjaan Mahasiswa'}</strong>
                         </span>
                         {cp.completed_by && (
                           <span style={{ color: 'var(--primary)' }}>
-                            Diselesaikan oleh: <strong>{cp.completed_by}</strong>
+                            Divalidasi oleh: <strong>{cp.completed_by}</strong>
                           </span>
                         )}
                         {cp.completed_at && (

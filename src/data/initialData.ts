@@ -875,8 +875,8 @@ export const INITIAL_CONSULTATIONS: Consultation[] = [
     time: '10:00',
     note: 'Siapkan grafik loss training vs validation dan data kalibrasi BME280.',
     feedback: null,
-    status: 'Terjadwal',
-    created_at: '2026-10-15 10:00:00'
+    status: 'Menunggu respons',
+    created_at: '2026-10-23 09:30:00'
   },
   {
     id: 2,
@@ -907,6 +907,22 @@ export const INITIAL_CONSULTATIONS: Consultation[] = [
     feedback: 'Hasil adsorpsi sangat menjanjikan, tambahkan uji isoterm Freundlich dan kaji laju kinetika pseudo orde kedua.',
     status: 'Selesai',
     created_at: '2026-10-12 11:00:00'
+  },
+  {
+    id: 4,
+    project_id: 2,
+    student_name: 'Ahmad Fauzi',
+    lecturer_name: 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.',
+    topic: 'Konsultasi Pengajuan Dana Hibah Prototipe Bio-briket',
+    type: 'Klinik metodologi',
+    mode: 'Ruang dosen FST 302',
+    date: '2026-10-16',
+    time: '14:00',
+    note: 'Mohon review RAB dan rancangan ruang bakar pirolisis.',
+    feedback: null,
+    rejection_reason: 'RAB belum menyertakan lembar justifikasi alat dari laboratorium teknik kimia. Harap lengkapi rincian anggaran dan ajukan kembali.',
+    status: 'Ditolak',
+    created_at: '2026-10-15 08:30:00'
   }
 ];
 

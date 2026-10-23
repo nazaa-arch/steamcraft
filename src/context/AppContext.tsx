@@ -684,6 +684,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cp = checkpoints.find(c => c.id === checkpointId);
     if (!cp) return;
 
+    // Checkpoint validation must be conducted by Lecturer (or Admin)
+    const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
+    if (!isLecturerOrAdmin) {
+      showToast('⚠️ Validasi checkpoint ilmiah hanya dapat dilakukan oleh Dosen Pembimbing.');
+      return;
+    }
+
     const newCompleted = cp.is_completed ? 0 : 1;
     const updatedCheckpoints = checkpoints.map(c =>
       c.id === checkpointId
@@ -691,7 +698,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...c,
             is_completed: newCompleted,
             completed_at: newCompleted ? new Date().toISOString() : null,
-            completed_by: newCompleted ? `${currentUser?.name || 'Peneliti'} (${currentUser?.study_program || 'STEAM'})` : null
+            completed_by: newCompleted ? `Dosen Pembimbing: ${currentUser?.name || 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.'}` : null
           }
         : c
     );
@@ -714,7 +721,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
-    showToast(newCompleted ? `✓ Checkpoint "${cp.title}" ditandai selesai!` : `Checkpoint "${cp.title}" dibuka kembali.`);
+    addJournal(
+      cp.project_id,
+      'Validasi',
+      `Tahapan Checkpoint #${cp.stage_index || 1} "${cp.title}" telah ${newCompleted ? 'divalidasi dan disetujui' : 'dibatalkan validasinya'} oleh Dosen Pembimbing (${currentUser?.name || 'Dr. Belgis Ainatul Iza'}).`
+    );
+
+    if (newCompleted) {
+      showToast(`✓ Checkpoint "${cp.title}" berhasil divalidasi oleh Dosen Pembimbing.`);
+    } else {
+      showToast(`Status validasi checkpoint "${cp.title}" dibatalkan.`);
+    }
   };
 
   const addCheckpoint = (projectId: number, title: string, description: string) => {
@@ -1003,11 +1020,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newConsult: Consultation = {
       ...data,
       id: Date.now(),
-      status: 'Terjadwal',
+      status: 'Menunggu respons',
       created_at: new Date().toISOString()
     };
     setConsultations(prev => [newConsult, ...prev]);
-    showToast('Sesi bimbingan riset berhasil dijadwalkan!');
+    showToast('Permohonan bimbingan berhasil diajukan! Menunggu konfirmasi Dosen Pembimbing.');
     closeModal();
   };
 

@@ -1010,7 +1010,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
           )}
 
           {/* Name & Titles */}
-          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 140px', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
             <div className="auth-field" style={{ margin: 0 }}>
               <label>Gelar Depan</label>
               <input
@@ -1493,7 +1493,7 @@ const ConsultationModalContent: React.FC<{ data?: any; onClose: () => void }> = 
         </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
         <div className="auth-field" style={{ margin: 0 }}>
           <label>Dosen Pembimbing</label>
           <select value={lecturerName} onChange={e => setLecturerName(e.target.value)}>
@@ -1524,7 +1524,7 @@ const ConsultationModalContent: React.FC<{ data?: any; onClose: () => void }> = 
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '12px' }}>
         <div className="auth-field" style={{ margin: 0 }}>
           <label>Metode Konsultasi</label>
           <select value={mode} onChange={e => setMode(e.target.value)}>
