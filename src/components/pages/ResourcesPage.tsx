@@ -268,7 +268,7 @@ export const ResourcesPage: React.FC = () => {
                   <th style={{ padding: '10px 12px', fontWeight: 800 }}>FASILITAS & KEPERLUAN</th>
                   <th style={{ padding: '10px 12px', fontWeight: 800 }}>PEMOHON & PROYEK</th>
                   <th style={{ padding: '10px 12px', fontWeight: 800 }}>TANGGAL PEMAKAIAN</th>
-                  <th style={{ padding: '10px 12px', fontWeight: 800 }}>STATUS</th>
+                  <th style={{ padding: '10px 12px', fontWeight: 800, whiteSpace: 'nowrap', minWidth: '115px' }}>STATUS</th>
                   <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800 }}>AKSI VERIFIKASI</th>
                 </tr>
               </thead>
@@ -299,15 +299,16 @@ export const ResourcesPage: React.FC = () => {
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+                      <td style={{ padding: '12px', fontWeight: 700, color: 'var(--navy)', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                           <Calendar size={13} style={{ color: 'var(--primary)' }} />
                           <span>{formatHumanDate(req.date_needed)}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '12px' }}>
-                        <span className="badge badge-orange" style={{ fontSize: '10.5px' }}>
-                          ⏳ Menunggu
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
+                        <span className="badge badge-orange" style={{ fontSize: '11px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span>⏳</span>
+                          <span>Menunggu</span>
                         </span>
                       </td>
                       <td style={{ padding: '12px', textAlign: 'right' }}>
@@ -438,7 +439,7 @@ export const ResourcesPage: React.FC = () => {
                   <th style={{ padding: '10px 12px', fontWeight: 800 }}>FASILITAS & CATATAN LAB</th>
                   <th style={{ padding: '10px 12px', fontWeight: 800 }}>PEMOHON & PROYEK</th>
                   <th style={{ padding: '10px 12px', fontWeight: 800 }}>TANGGAL JADWAL</th>
-                  <th style={{ padding: '10px 12px', fontWeight: 800 }}>STATUS</th>
+                  <th style={{ padding: '10px 12px', fontWeight: 800, whiteSpace: 'nowrap', minWidth: '125px' }}>STATUS</th>
                   <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800 }}>AKSI PENGGUNAAN</th>
                 </tr>
               </thead>
@@ -469,18 +470,18 @@ export const ResourcesPage: React.FC = () => {
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+                      <td style={{ padding: '12px', fontWeight: 700, color: 'var(--navy)', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                           <Calendar size={13} style={{ color: '#10b981' }} />
                           <span>{formatHumanDate(req.date_needed)}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '12px' }}>
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
                         <span
                           className={`badge ${
                             req.status === 'Disetujui' ? 'badge-teal' : req.status === 'Selesai' ? 'badge-blue' : 'badge-rose'
                           }`}
-                          style={{ fontSize: '10.5px' }}
+                          style={{ fontSize: '11px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
                           {req.status === 'Disetujui' ? '✓ Disetujui' : req.status === 'Selesai' ? '★ Selesai Digunakan' : '✕ Ditolak'}
                         </span>

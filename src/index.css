@@ -41,6 +41,17 @@
   }
 }
 
+/* Ensure all status badges stay horizontal on one line and never wrap onto 2 lines */
+.badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  flex-shrink: 0 !important;
+}
+
 /* ==================== CREATIVE PROFILE EDITOR STYLING ==================== */
 .modal-box.modal-box-xl {
   width: min(100%, 860px);

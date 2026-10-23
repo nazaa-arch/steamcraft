@@ -319,7 +319,7 @@ export const ResearchLogbook: React.FC = () => {
                 <th style={{ padding: '10px 12px', fontWeight: 800, width: '60px' }}>DURASI</th>
                 <th style={{ padding: '10px 12px', fontWeight: 800 }}>KEGIATAN & URAIAN</th>
                 <th style={{ padding: '10px 12px', fontWeight: 800 }}>CAPAIAN</th>
-                <th style={{ padding: '10px 12px', fontWeight: 800 }}>STATUS</th>
+                <th style={{ padding: '10px 12px', fontWeight: 800, whiteSpace: 'nowrap', minWidth: '130px' }}>STATUS</th>
                 <th style={{ padding: '10px 12px', fontWeight: 800, textAlign: 'right' }}>AKSI</th>
               </tr>
             </thead>
@@ -329,10 +329,10 @@ export const ResearchLogbook: React.FC = () => {
                 return (
                   <tr key={entry.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px', fontWeight: 700, color: 'var(--muted)' }}>{rowNum}</td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '12px' }}>{formatHumanDate(entry.date)}</div>
                     </td>
-                    <td style={{ padding: '12px', fontWeight: 700, color: 'var(--primary)' }}>
+                    <td style={{ padding: '12px', fontWeight: 700, color: 'var(--primary)', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Clock size={12} /> {entry.duration}
                       </div>
@@ -348,21 +348,27 @@ export const ResearchLogbook: React.FC = () => {
                     <td style={{ padding: '12px', maxWidth: '220px' }}>
                       <div style={{ color: 'var(--ink-secondary)', lineHeight: 1.4 }}>{entry.achievement || '-'}</div>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
                       {entry.verified ? (
                         <div>
-                          <span className="badge badge-teal" style={{ fontSize: '10px' }}>✓ Terverifikasi</span>
-                          <div style={{ fontSize: '10px', color: '#15803d', marginTop: '3px', fontWeight: 600 }}>
+                          <span className="badge badge-teal" style={{ fontSize: '10.5px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <span>✓</span>
+                            <span>Terverifikasi</span>
+                          </span>
+                          <div style={{ fontSize: '10px', color: '#15803d', marginTop: '3px', fontWeight: 600, whiteSpace: 'nowrap' }}>
                             oleh {entry.verified_by.split(',')[0]}
                           </div>
                           {entry.notes && (
-                            <div style={{ fontSize: '10.5px', color: 'var(--muted)', marginTop: '2px', fontStyle: 'italic' }}>
+                            <div style={{ fontSize: '10.5px', color: 'var(--muted)', marginTop: '2px', fontStyle: 'italic', maxWidth: '200px', whiteSpace: 'normal' }}>
                               "{entry.notes}"
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span className="badge badge-orange" style={{ fontSize: '10px' }}>⏳ Menunggu</span>
+                        <span className="badge badge-orange" style={{ fontSize: '11px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span>⏳</span>
+                          <span>Menunggu</span>
+                        </span>
                       )}
                     </td>
                     <td style={{ padding: '12px', textAlign: 'right' }}>
