@@ -1368,6 +1368,50 @@ html, body {
   font-weight: normal;
 }
 
+/* Peer Review 4-Card Summary Grid (Exactly 4 columns in 1 row on desktop) */
+.peer-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.peer-summary-card {
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justifyContent: space-between;
+  min-width: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.peer-summary-card:hover {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 860px) {
+  .peer-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .peer-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .peer-summary-card {
+    padding: 10px 12px !important;
+  }
+}
+
 .mission-master-sidebar {
   min-width: 0;
   max-width: 100%;

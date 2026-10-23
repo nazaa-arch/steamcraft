@@ -1197,13 +1197,13 @@ export const ProjectWorkspace: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* 4 Team Summary Tiles */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '22px' }}>
-                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                  {/* 4 Team Summary Tiles - 4 Boxes in 1 Row on Desktop, 2x2 on Mobile */}
+                  <div className="peer-summary-grid">
+                    <div className="peer-summary-card">
                       <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
                         Total Ulasan Sejawat
                       </span>
-                      <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '2px' }}>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '4px', marginBottom: '4px' }}>
                         {totalProjectFeedbacks} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>ulasan</span>
                       </div>
                       <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
@@ -1211,11 +1211,11 @@ export const ProjectWorkspace: React.FC = () => {
                       </span>
                     </div>
 
-                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                    <div className="peer-summary-card">
                       <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
                         Skor Rata-Rata Tim
                       </span>
-                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#b45309', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#b45309', marginTop: '4px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         ★ {avgTeamScore > 0 ? avgTeamScore : '0.0'} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>/ 5.0</span>
                       </div>
                       <span style={{ fontSize: '11px', color: 'var(--ink-secondary)' }}>
@@ -1223,11 +1223,11 @@ export const ProjectWorkspace: React.FC = () => {
                       </span>
                     </div>
 
-                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                    <div className="peer-summary-card">
                       <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
                         Cakupan Evaluasi 360°
                       </span>
-                      <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '2px' }}>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '4px', marginBottom: '4px' }}>
                         {coveragePct}%
                       </div>
                       <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
@@ -1235,11 +1235,11 @@ export const ProjectWorkspace: React.FC = () => {
                       </span>
                     </div>
 
-                    <div style={{ background: 'var(--surface-alt)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+                    <div className="peer-summary-card">
                       <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>
                         Lencana Tersemat
                       </span>
-                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#0d9488', marginTop: '2px' }}>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#0d9488', marginTop: '4px', marginBottom: '4px' }}>
                         {totalBadgesEarned} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>penghargaan</span>
                       </div>
                       <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
