@@ -72,6 +72,8 @@ export const MissionControlPage: React.FC = () => {
     (currentProjPage - 1) * projRowsPerPage,
     currentProjPage * projRowsPerPage
   );
+  // Anchored min-height so Prev/Next never jumps when project count is small
+  const listMinHeight = Math.max(540, projRowsPerPage * 108);
 
   return (
     <section className="page active">
@@ -188,61 +190,88 @@ export const MissionControlPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mission-project-list">
-            {pagedProjects.map(proj => (
+          <div
+            className="mission-project-list"
+            style={{ '--mission-list-min-height': `${listMinHeight}px` } as React.CSSProperties}
+          >
+            {filteredProjects.length === 0 ? (
               <div
-                key={proj.id}
-                className={`project-list-item ${proj.id === selectedId ? 'selected' : ''}`}
-                onClick={() => handleSelectProject(proj.id)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '36px 16px',
+                  textAlign: 'center',
+                  background: '#f8fafc',
+                  borderRadius: '12px',
+                  border: '1px dashed #cbd5e1',
+                  color: 'var(--muted)',
+                  minHeight: '220px'
+                }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                  <span className="badge badge-blue" style={{ fontSize: '10px' }}>{proj.study}</span>
-                  {proj.blocker === 1 && (
-                    <span className="badge badge-rose" style={{ fontSize: '9px' }}>Blocker</span>
-                  )}
-                  {proj.status === 'Selesai' && (
-                    <span className="badge badge-teal" style={{ fontSize: '9px' }}>Selesai</span>
-                  )}
-                </div>
-                <strong style={{ fontSize: '13px', color: 'var(--navy)', display: 'block', lineHeight: 1.3 }}>
-                  {proj.name}
+                <span style={{ fontSize: '26px', marginBottom: '8px' }}>📂</span>
+                <strong style={{ fontSize: '13px', color: 'var(--navy)', marginBottom: '4px' }}>
+                  Tidak Ada Proyek
                 </strong>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', color: 'var(--muted)' }}>
-                  <span>Progres: {proj.progress}%</span>
-                  <span>{proj.members_count} Anggota</span>
-                </div>
+                <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: 0, maxWidth: '240px', lineHeight: 1.4 }}>
+                  Tidak ditemukan proyek riset pada kategori filter ini.
+                </p>
               </div>
-            ))}
+            ) : (
+              pagedProjects.map(proj => (
+                <div
+                  key={proj.id}
+                  className={`project-list-item ${proj.id === selectedId ? 'selected' : ''}`}
+                  onClick={() => handleSelectProject(proj.id)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                    <span className="badge badge-blue" style={{ fontSize: '10px' }}>{proj.study}</span>
+                    {proj.blocker === 1 && (
+                      <span className="badge badge-rose" style={{ fontSize: '9px' }}>Blocker</span>
+                    )}
+                    {proj.status === 'Selesai' && (
+                      <span className="badge badge-teal" style={{ fontSize: '9px' }}>Selesai</span>
+                    )}
+                  </div>
+                  <strong style={{ fontSize: '13px', color: 'var(--navy)', display: 'block', lineHeight: 1.3 }}>
+                    {proj.name}
+                  </strong>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', color: 'var(--muted)' }}>
+                    <span>Progres: {proj.progress}%</span>
+                    <span>{proj.members_count} Anggota</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
-          {/* Master Sidebar Prev-Next Pagination */}
-          {totalProjPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '11px' }}>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setProjPage(p => Math.max(1, p - 1))}
-                disabled={currentProjPage === 1}
-                style={{ padding: '3px 8px', fontSize: '11px', opacity: currentProjPage === 1 ? 0.5 : 1 }}
-              >
-                <ChevronLeft size={12} />
-                <span>Prev</span>
-              </button>
-              <span style={{ fontWeight: 700, color: 'var(--navy)' }}>
-                {currentProjPage} / {totalProjPages}
-              </span>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setProjPage(p => Math.min(totalProjPages, p + 1))}
-                disabled={currentProjPage === totalProjPages}
-                style={{ padding: '3px 8px', fontSize: '11px', opacity: currentProjPage === totalProjPages ? 0.5 : 1 }}
-              >
-                <span>Next</span>
-                <ChevronRight size={12} />
-              </button>
-            </div>
-          )}
+          {/* Master Sidebar Prev-Next Pagination - Always Stably Anchored */}
+          <div className="mission-pagination-bar">
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm mission-page-btn"
+              onClick={() => setProjPage(p => Math.max(1, p - 1))}
+              disabled={currentProjPage <= 1}
+              title={currentProjPage <= 1 ? 'Halaman awal' : 'Halaman sebelumnya'}
+            >
+              <ChevronLeft size={13} />
+              <span>Prev</span>
+            </button>
+            <span className="mission-page-indicator">
+              {filteredProjects.length === 0 ? '0 / 0' : `${currentProjPage} / ${totalProjPages}`}
+            </span>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm mission-page-btn"
+              onClick={() => setProjPage(p => Math.min(totalProjPages, p + 1))}
+              disabled={currentProjPage >= totalProjPages || filteredProjects.length === 0}
+              title={currentProjPage >= totalProjPages ? 'Halaman akhir' : 'Halaman berikutnya'}
+            >
+              <span>Next</span>
+              <ChevronRight size={13} />
+            </button>
+          </div>
         </div>
 
         {/* Right Detail Inspector & Rubric Form */}

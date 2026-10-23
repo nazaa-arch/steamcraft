@@ -384,17 +384,29 @@ export const ResearchLogbook: React.FC = () => {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {entries.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
               Menampilkan {(currentPage - 1) * rowsPerPage + 1} - {Math.min(currentPage * rowsPerPage, entries.length)} dari {entries.length} entri
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPage === 1 ? 0.5 : 1 }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPage <= 1 ? 0.4 : 1 }}
+              >
                 <ChevronLeft size={13} /> <span>Prev</span>
               </button>
               <span style={{ fontSize: '11.5px', fontWeight: 700 }}>{currentPage} / {totalPages}</span>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPage === totalPages ? 0.5 : 1 }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPage >= totalPages ? 0.4 : 1 }}
+              >
                 <span>Next</span> <ChevronRight size={13} />
               </button>
             </div>

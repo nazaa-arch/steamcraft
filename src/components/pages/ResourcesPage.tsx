@@ -349,7 +349,7 @@ export const ResourcesPage: React.FC = () => {
         )}
 
         {/* Pending Pagination Navigation */}
-        {totalPendingPages > 1 && (
+        {pendingRequests.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
             <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
               Menampilkan {(currentPendingPage - 1) * pendingRowsPerPage + 1} - {Math.min(currentPendingPage * pendingRowsPerPage, pendingRequests.length)} dari {pendingRequests.length} permohonan
@@ -359,8 +359,8 @@ export const ResourcesPage: React.FC = () => {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setPendingPage(p => Math.max(1, p - 1))}
-                disabled={currentPendingPage === 1}
-                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPendingPage === 1 ? 0.5 : 1 }}
+                disabled={currentPendingPage <= 1}
+                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPendingPage <= 1 ? 0.4 : 1 }}
               >
                 <ChevronLeft size={13} />
                 <span>Prev</span>
@@ -372,8 +372,8 @@ export const ResourcesPage: React.FC = () => {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setPendingPage(p => Math.min(totalPendingPages, p + 1))}
-                disabled={currentPendingPage === totalPendingPages}
-                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPendingPage === totalPendingPages ? 0.5 : 1 }}
+                disabled={currentPendingPage >= totalPendingPages}
+                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentPendingPage >= totalPendingPages ? 0.4 : 1 }}
               >
                 <span>Next</span>
                 <ChevronRight size={13} />
@@ -552,7 +552,7 @@ export const ResourcesPage: React.FC = () => {
         )}
 
         {/* History Pagination Navigation */}
-        {totalHistoryPages > 1 && (
+        {approvedRequests.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
             <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
               Menampilkan {(currentHistoryPage - 1) * historyRowsPerPage + 1} - {Math.min(currentHistoryPage * historyRowsPerPage, approvedRequests.length)} dari {approvedRequests.length} permohonan
@@ -562,8 +562,8 @@ export const ResourcesPage: React.FC = () => {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
-                disabled={currentHistoryPage === 1}
-                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentHistoryPage === 1 ? 0.5 : 1 }}
+                disabled={currentHistoryPage <= 1}
+                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentHistoryPage <= 1 ? 0.4 : 1 }}
               >
                 <ChevronLeft size={13} />
                 <span>Prev</span>
@@ -575,8 +575,8 @@ export const ResourcesPage: React.FC = () => {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setHistoryPage(p => Math.min(totalHistoryPages, p + 1))}
-                disabled={currentHistoryPage === totalHistoryPages}
-                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentHistoryPage === totalHistoryPages ? 0.5 : 1 }}
+                disabled={currentHistoryPage >= totalHistoryPages}
+                style={{ padding: '4px 8px', fontSize: '11px', opacity: currentHistoryPage >= totalHistoryPages ? 0.4 : 1 }}
               >
                 <span>Next</span>
                 <ChevronRight size={13} />
