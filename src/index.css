@@ -2066,6 +2066,10 @@ html, body {
     padding: 0 16px !important;
   }
 
+  .brand {
+    margin-right: 22px !important;
+  }
+
   .brand-text span {
     display: none !important;
   }
@@ -2527,18 +2531,40 @@ html, body {
 }
 
 /* 4. PROPORTIONAL BRAND TOPBAR LOGO & HEADLINE */
+.brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  text-decoration: none !important;
+  margin-right: 36px !important; /* Ruang lega yang nyaman antara brand SteamCraft dan menu navigasi */
+  flex-shrink: 0 !important;
+  transition: opacity 0.2s ease;
+}
+
+.brand:hover {
+  opacity: 0.92;
+}
+
 .brand-logo-img {
-  width: 36px !important;
-  height: 36px !important;
+  width: 38px !important;
+  height: 38px !important;
   border-radius: 9px !important;
   object-fit: contain !important;
+  flex-shrink: 0 !important;
+}
+
+.brand-text {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
 
 .brand-text h2 {
-  font-size: 17px !important;
+  font-size: 17.5px !important;
   font-weight: 900 !important;
-  line-height: 1.1 !important;
+  line-height: 1.15 !important;
   margin: 0 !important;
+  letter-spacing: 0.3px !important;
 }
 
 .brand-text span {
@@ -2546,7 +2572,8 @@ html, body {
   font-weight: 700 !important;
   color: var(--primary) !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.6px !important;
+  letter-spacing: 0.7px !important;
+  margin-top: 2px !important;
 }
 
 /* ======================================================== */

@@ -357,6 +357,8 @@ button {
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  margin-right: 36px;
+  flex-shrink: 0;
 }
 
 .brand-logo-img {
