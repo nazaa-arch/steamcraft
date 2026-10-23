@@ -120,4 +120,35 @@ Dokumen ini mencatat seluruh kronologi iterasi, perbaikan antarmuka (*User Inter
 
 ---
 
+### 7. 🚀 Peluncuran 4 Fitur Unggulan Riset STEAM Nasional (Mode Mahasiswa & Dosen)
+- **Fitur 1 — STEAM Radar Matrix (`SteamRadarMatrix.tsx`)**:
+  - Visualisasi diagram radar 5 sumbu (Science, Technology, Engineering, Art, Mathematics) berbasis kalkulasi SVG murni real-time.
+  - Dilengkapi checklist kontribusi per pilar yang dapat dicentang langsung oleh tim peneliti.
+  - Algoritma *Smart Warning*: Mendeteksi pilar yang berada di bawah ambang batas minimum (50%) dan secara proaktif merekomendasikan rekrutmen kolaborator lintas prodi (misal: pilar Art rendah disarankan merekrut mahasiswa DKV/Desain).
+  - Predikat integrasi STEAM otomatis (*Sempurna*, *Baik*, *Cukup*, *Perlu Penguatan*).
+
+- **Fitur 2 — Generator Logbook Riset & Ekspor PDF Resmi (`ResearchLogbook.tsx`)**:
+  - Pencatatan logbook kronologis harian/mingguan mencakup tanggal, durasi sesi, uraian kegiatan, capaian hasil, dan tautan bukti digital.
+  - Kartu ringkasan statistik (Total Sesi, Jam Akumulatif, Terverifikasi Dosen, Menunggu Verifikasi).
+  - Fitur verifikasi 1-klik untuk Dosen Pembimbing (**Dr. Belgis Ainatul Iza, S.Si., M.Mat.**).
+  - **Ekspor PDF Berstandar SIMBELMAWA / PKM Dikti**: Fitur 1-klik unduh dokumen PDF siap cetak berkop surat resmi Universitas Negeri Surabaya (UNESA) FMIPA, tabel logbook rapi, tanda tangan digital mahasiswa dan dosen, serta URL verifikasi keaslian.
+  - Paginasi tabel (*Rows per page: 3, 5, 10*) dan navigasi *Prev - Next*.
+
+- **Fitur 3 — STEAM Co-Pilot (Asisten Metodologi Riset AI) (`SteamCoPilot.tsx`)**:
+  - Widget melayang (*floating action button*) di pojok kanan bawah dengan aksen gradien biru-teal dan animasi berpendar (*pulse indicator*).
+  - Konsultasi interaktif seputar perumusan hipotesis ilmiah, pemilihan model Machine Learning & statistik (Sains Data), pencarian sumber dataset terbuka (Kaggle, BMKG, BPS, Zenodo), checklist kesiapan evaluasi Mission Control, panduan poster ilmiah A1, hingga integrasi sensor IoT & LoRa.
+  - Fitur *Quick Prompts* 1-klik, panel minimize/maximize, dan gelembung percakapan responsif.
+
+- **Fitur 4 — Repository Data Empiris & Reproducibility Checker (`DataRepository.tsx`)**:
+  - Sistem repositori artefak riset digital (Dataset CSV/JSON, Source Code, Protokol SOP Eksperimen, Notebook Google Colab, Bobot Model Terlatih).
+  - **Audit 12 Kriteria Reproduktibilitas**: Menilai kelayakan replikasi eksperimen (data mentah, kamus data, random seed, requirements environment, hyperparameter, SOP tertulis) dengan penghitungan skor persentase otomatis dan predikat jurnal internasional.
+  - Status verifikasi artefak oleh dosen pembimbing.
+
+- **Integrasi Penuh pada Mode Mahasiswa & Dosen**:
+  - **Bilah Navigasi Topbar**: Menambahkan menu dropdown *"Instrumen STEAM ▾"* yang ringkas tanpa menambah beban horizontal navbar.
+  - **Beranda Mahasiswa (`StudentDashboard.tsx`)**: Menampilkan 3 kartu aksi unggulan bertema futuristik tepat di bawah ringkasan statistik.
+  - **Ruang Kerja Riset (`ProjectWorkspace.tsx`)**: Menambahkan tombol jalan pintas langsung (*"🎯 Radar STEAM"*, *"📝 Logbook Riset"*, *"🔬 Data Repo"*) pada bilah aksi proyek.
+
+---
+
 *Catatan: Seluruh riwayat perubahan di atas tersimpan dengan riwayat diff baris kode per komit pada repositori Git (`main`).*

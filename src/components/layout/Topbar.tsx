@@ -19,8 +19,10 @@ export const Topbar: React.FC = () => {
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const notifWrapperRef = useRef<HTMLDivElement>(null);
   const profileWrapperRef = useRef<HTMLDivElement>(null);
+  const toolsWrapperRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -66,12 +68,16 @@ export const Topbar: React.FC = () => {
       if (profileDropdownOpen && profileWrapperRef.current && !profileWrapperRef.current.contains(target)) {
         setProfileDropdownOpen(false);
       }
+      if (toolsDropdownOpen && toolsWrapperRef.current && !toolsWrapperRef.current.contains(target)) {
+        setToolsDropdownOpen(false);
+      }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setNotifDropdownOpen(false);
         setProfileDropdownOpen(false);
+        setToolsDropdownOpen(false);
       }
     };
 
@@ -84,7 +90,7 @@ export const Topbar: React.FC = () => {
       document.removeEventListener('touchstart', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [notifDropdownOpen, profileDropdownOpen]);
+  }, [notifDropdownOpen, profileDropdownOpen, toolsDropdownOpen]);
 
   if (!currentUser) return null;
 
@@ -292,6 +298,131 @@ export const Topbar: React.FC = () => {
             </button>
           </>
         )}
+
+        {/* Dropdown Menu: Instrumen Riset STEAM (Available for Student, Lecturer, & Admin) */}
+        <div className="nav-dropdown-wrapper" ref={toolsWrapperRef} style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+          <button
+            type="button"
+            className={`nav-btn ${['radar', 'logbook', 'dataRepo'].includes(currentPage) ? 'active' : ''}`}
+            onClick={() => setToolsDropdownOpen(!toolsDropdownOpen)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+          >
+            <Sparkles size={13} style={{ color: 'var(--primary)' }} />
+            <span>Instrumen STEAM</span>
+            <ChevronDown size={11} style={{ transform: toolsDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+
+          {toolsDropdownOpen && (
+            <div
+              className="nav-dropdown-menu"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 6px)',
+                right: 0,
+                width: '240px',
+                background: 'white',
+                borderRadius: '12px',
+                border: '1px solid var(--line)',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                padding: '6px',
+                zIndex: 1000,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px'
+              }}
+            >
+              <button
+                type="button"
+                className={`dropdown-menu-item ${currentPage === 'radar' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('radar');
+                  setToolsDropdownOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: currentPage === 'radar' ? '#eff6ff' : 'transparent',
+                  color: currentPage === 'radar' ? 'var(--primary)' : 'var(--navy)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  width: '100%'
+                }}
+              >
+                <span>🎯</span>
+                <div style={{ flex: 1 }}>
+                  <div>STEAM Radar Matrix</div>
+                  <small style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 500 }}>Keseimbangan 5 pilar riset</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={`dropdown-menu-item ${currentPage === 'logbook' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('logbook');
+                  setToolsDropdownOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: currentPage === 'logbook' ? '#eff6ff' : 'transparent',
+                  color: currentPage === 'logbook' ? 'var(--primary)' : 'var(--navy)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  width: '100%'
+                }}
+              >
+                <span>📝</span>
+                <div style={{ flex: 1 }}>
+                  <div>Logbook Riset Ilmiah</div>
+                  <small style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 500 }}>Catatan & Ekspor PDF PKM</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={`dropdown-menu-item ${currentPage === 'dataRepo' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('dataRepo');
+                  setToolsDropdownOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: currentPage === 'dataRepo' ? '#eff6ff' : 'transparent',
+                  color: currentPage === 'dataRepo' ? 'var(--primary)' : 'var(--navy)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  width: '100%'
+                }}
+              >
+                <span>🔬</span>
+                <div style={{ flex: 1 }}>
+                  <div>Repository Data Empiris</div>
+                  <small style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 500 }}>Dataset & Reproducibility</small>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
         </nav>
 
         {canScrollRight && (

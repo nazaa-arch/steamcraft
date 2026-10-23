@@ -488,6 +488,135 @@ export const StudentDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* ==================== INSTRUMEN UNGGULAN RISET STEAM ==================== */}
+      <div style={{ marginTop: '24px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: '2px' }}>Instrumen Riset Baru</div>
+            <h3 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--navy)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>⚡</span>
+              <span>Instrumen Unggulan Riset Ilmiah STEAM</span>
+            </h3>
+          </div>
+          <span style={{ fontSize: '11.5px', color: 'var(--muted)', fontWeight: 600 }}>
+            Terintegrasi dengan Kurikulum Sains Data & Standar Dikti
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          {/* Card 1: STEAM Radar Matrix */}
+          <div
+            className="card"
+            style={{
+              padding: '20px',
+              borderRadius: '16px',
+              border: '1.5px solid #bfdbfe',
+              background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)',
+              boxShadow: '0 4px 14px rgba(37,99,235,0.06)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span style={{ fontSize: '26px' }}>🎯</span>
+                <span className="badge badge-blue" style={{ fontSize: '10px' }}>5 Pilar STEAM</span>
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+                STEAM Radar Matrix
+              </h4>
+              <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Visualisasi interaktif keseimbangan 5 pilar riset (Science, Tech, Engineering, Art, Math). Deteksi pilar lemah dan dapatkan rekomendasi rekrutmen.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => setCurrentPage('radar')}
+              style={{ width: '100%', marginTop: '16px', justifyContent: 'center', fontSize: '12px', padding: '8px 12px' }}
+            >
+              <span>Ukur Radar Riset</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+
+          {/* Card 2: Logbook Riset & Ekspor PDF */}
+          <div
+            className="card"
+            style={{
+              padding: '20px',
+              borderRadius: '16px',
+              border: '1.5px solid #bbf7d0',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+              boxShadow: '0 4px 14px rgba(16,185,129,0.06)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span style={{ fontSize: '26px' }}>📝</span>
+                <span className="badge badge-teal" style={{ fontSize: '10px' }}>Standar PKM Dikti</span>
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+                Logbook Riset & PDF Resmi
+              </h4>
+              <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Pencatatan aktivitas riset harian/mingguan dengan verifikasi pembimbing (Dr. Belgis) serta fitur 1-klik cetak dokumen PDF resmi berkop surat universitas.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-success btn-sm"
+              onClick={() => setCurrentPage('logbook')}
+              style={{ width: '100%', marginTop: '16px', justifyContent: 'center', fontSize: '12px', padding: '8px 12px' }}
+            >
+              <span>Buka Logbook Riset</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+
+          {/* Card 3: Repository Data Empiris */}
+          <div
+            className="card"
+            style={{
+              padding: '20px',
+              borderRadius: '16px',
+              border: '1.5px solid #ddd6fe',
+              background: 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)',
+              boxShadow: '0 4px 14px rgba(124,58,237,0.06)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span style={{ fontSize: '26px' }}>🔬</span>
+                <span className="badge badge-purple" style={{ fontSize: '10px' }}>Reproducibility 100%</span>
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+                Repository Data & Replikasi
+              </h4>
+              <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Kelola dataset mentah, notebook Google Colab, protokol SOP, dan evaluasi 12 kriteria reproduktibilitas standar jurnal ilmiah internasional.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setCurrentPage('dataRepo')}
+              style={{ width: '100%', marginTop: '16px', justifyContent: 'center', fontSize: '12px', padding: '8px 12px' }}
+            >
+              <span>Buka Data Repository</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Dashboard Announcement Widget */}
       <div
         className="card dashboard-announcement-card"

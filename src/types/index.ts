@@ -17,7 +17,10 @@ export type PageName =
   | 'announcements'
   | 'maintenance'
   | 'adminDev'
-  | 'hub';
+  | 'hub'
+  | 'radar'
+  | 'logbook'
+  | 'dataRepo';
 
 export interface User {
   id: number;

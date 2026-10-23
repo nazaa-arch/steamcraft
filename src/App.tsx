@@ -19,6 +19,10 @@ import { TeamProjectHub } from './components/pages/TeamProjectHub';
 import { MemberPublicPortfolio } from './components/pages/MemberPublicPortfolio';
 import { MaintenancePage } from './components/pages/MaintenancePage';
 import { NotFoundPage } from './components/pages/NotFoundPage';
+import { SteamRadarMatrix } from './components/pages/SteamRadarMatrix';
+import { ResearchLogbook } from './components/pages/ResearchLogbook';
+import { SteamCoPilot } from './components/pages/SteamCoPilot';
+import { DataRepository } from './components/pages/DataRepository';
 import { Modals } from './components/modals/Modals';
 import { Toast } from './components/common/Toast';
 
@@ -311,12 +315,19 @@ export const App: React.FC = () => {
         {currentPage === 'admin' && <AdminConsolePage />}
         {currentPage === 'hub' && <TeamProjectHub />}
         {currentPage === 'maintenance' && <MaintenancePage />}
+        {currentPage === 'radar' && <SteamRadarMatrix />}
+        {currentPage === 'logbook' && <ResearchLogbook />}
+        {currentPage === 'dataRepo' && <DataRepository />}
         {![
           'dashboard', 'projects', 'workspace', 'recruitment', 'studentConsultations',
           'studentResources', 'studentPortfolio', 'mission', 'consultations', 'resources',
-          'analytics', 'announcements', 'admin', 'adminDev', 'hub', 'maintenance'
+          'analytics', 'announcements', 'admin', 'adminDev', 'hub', 'maintenance',
+          'radar', 'logbook', 'dataRepo'
         ].includes(currentPage) && <NotFoundPage />}
       </main>
+
+      {/* Floating Interactive STEAM Co-Pilot AI Assistant */}
+      <SteamCoPilot />
 
       <Modals />
       <Toast />

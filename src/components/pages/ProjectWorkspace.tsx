@@ -51,7 +51,8 @@ export const ProjectWorkspace: React.FC = () => {
     addPeerFeedback,
     currentUser,
     openModal,
-    showToast
+    showToast,
+    setCurrentPage
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'checkpoints' | 'journals' | 'versions' | 'team' | 'peerFeedback' | 'evaluation'>('checkpoints');
@@ -232,9 +233,39 @@ export const ProjectWorkspace: React.FC = () => {
           <button
             type="button"
             className="ws-btn-repo"
+            onClick={() => setCurrentPage('radar')}
+            title="Buka STEAM Radar Matrix untuk proyek ini"
+            style={{ background: '#eff6ff', borderColor: '#bfdbfe', color: '#1d4ed8' }}
+          >
+            <span>🎯 Radar STEAM</span>
+          </button>
+
+          <button
+            type="button"
+            className="ws-btn-repo"
+            onClick={() => setCurrentPage('logbook')}
+            title="Buka Logbook Riset Ilmiah & Ekspor PDF Standar PKM"
+            style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#15803d' }}
+          >
+            <span>📝 Logbook Riset</span>
+          </button>
+
+          <button
+            type="button"
+            className="ws-btn-repo"
+            onClick={() => setCurrentPage('dataRepo')}
+            title="Buka Repository Data Empiris & Reproducibility Checker"
+            style={{ background: '#faf5ff', borderColor: '#ddd6fe', color: '#7c3aed' }}
+          >
+            <span>🔬 Data Repo</span>
+          </button>
+
+          <button
+            type="button"
+            className="ws-btn-repo"
             onClick={() => openModal('inviteProject', currentProject)}
             title="Undang kolaborator baru lewat tautan atau kode unik"
-            style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#16a34a' }}
+            style={{ background: '#f8fafc', borderColor: '#e2e8f0', color: 'var(--navy)' }}
           >
             <UserPlus size={13} />
             <span>Undang Kolaborator</span>
