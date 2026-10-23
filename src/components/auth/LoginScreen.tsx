@@ -37,8 +37,15 @@ export const LoginScreen: React.FC = () => {
       <section className="login-showcase">
         <div className="login-topline-spacer" aria-hidden="true" />
 
-        <div className="login-brand-image">
-          <img src="/logo.jpg?v=20261021" alt="SteamCraft Logo" />
+        <div className="login-brand-wrapper">
+          <div className="login-welcome-badge">
+            <Sparkles size={14} className="welcome-sparkle" />
+            <span>Selamat datang di <strong>SteamCraft</strong></span>
+          </div>
+
+          <div className="login-brand-image">
+            <img src="/logo.jpg?v=20261021" alt="SteamCraft Logo" />
+          </div>
         </div>
 
         <div className="login-copy">

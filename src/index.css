@@ -1967,14 +1967,49 @@ html, body {
   }
 
   .login-topline-spacer {
-    height: clamp(28px, 5vh, 48px) !important;
+    height: clamp(14px, 2.5vh, 28px) !important;
     width: 100% !important;
     flex-shrink: 0 !important;
   }
 
-  .login-brand-image {
-    margin: clamp(12px, 2.5vh, 26px) auto clamp(8px, 1.8vh, 18px) auto !important;
+  .login-brand-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin: clamp(6px, 1.5vh, 16px) auto clamp(6px, 1.2vh, 14px) auto !important;
+    width: 100% !important;
     max-width: 440px !important;
+  }
+
+  .login-welcome-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(40, 120, 215, 0.22) !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+    padding: 5px 15px !important;
+    border-radius: 9999px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--navy) !important;
+    margin-bottom: 10px !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .login-welcome-badge strong {
+    color: var(--primary) !important;
+    font-weight: 800 !important;
+  }
+
+  .welcome-sparkle {
+    color: var(--primary) !important;
+  }
+
+  .login-brand-image {
+    margin: 0 auto !important;
+    max-width: 440px !important;
+    width: 100% !important;
     padding: 14px 18px !important;
     border-radius: 22px !important;
   }
