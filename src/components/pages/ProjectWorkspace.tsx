@@ -27,7 +27,15 @@ import {
   BookOpen,
   Sparkles,
   UserPlus,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Target,
+  Database,
+  GraduationCap,
+  Info,
+  Clock,
+  Lightbulb,
+  Trophy,
+  Leaf
 } from 'lucide-react';
 
 export const ProjectWorkspace: React.FC = () => {
@@ -240,8 +248,9 @@ export const ProjectWorkspace: React.FC = () => {
         <div className="ws-meta-bar">
           <span className="badge badge-blue">{currentProject.study}</span>
           <span className="badge badge-purple">{currentProject.steam}</span>
-          <span className={`badge ${currentProject.blocker ? 'badge-rose' : 'badge-teal'}`}>
-            {currentProject.blocker ? '⚠️ Memerlukan Bimbingan' : currentProject.status}
+          <span className={`badge ${currentProject.blocker ? 'badge-rose' : 'badge-teal'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            {currentProject.blocker ? <AlertTriangle size={11} /> : <CheckCircle2 size={11} />}
+            <span>{currentProject.blocker ? 'Memerlukan Bimbingan' : currentProject.status}</span>
           </span>
           <div className="ws-supervisor-chip">
             <UserCheck size={12} style={{ color: 'var(--primary)', flexShrink: 0 }} />
@@ -256,9 +265,10 @@ export const ProjectWorkspace: React.FC = () => {
             className="ws-btn-repo"
             onClick={() => setCurrentPage('radar')}
             title="Buka STEAM Radar Matrix untuk proyek ini"
-            style={{ background: '#eff6ff', borderColor: '#bfdbfe', color: '#1d4ed8' }}
+            style={{ background: '#eff6ff', borderColor: '#bfdbfe', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <span>🎯 Radar STEAM</span>
+            <Target size={13} />
+            <span>Radar STEAM</span>
           </button>
 
           <button
@@ -266,9 +276,10 @@ export const ProjectWorkspace: React.FC = () => {
             className="ws-btn-repo"
             onClick={() => setCurrentPage('logbook')}
             title="Buka Logbook Riset Ilmiah & Ekspor PDF Standar PKM"
-            style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#15803d' }}
+            style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#15803d', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <span>📝 Logbook Riset</span>
+            <FileText size={13} />
+            <span>Logbook Riset</span>
           </button>
 
           <button
@@ -276,9 +287,10 @@ export const ProjectWorkspace: React.FC = () => {
             className="ws-btn-repo"
             onClick={() => setCurrentPage('dataRepo')}
             title="Buka Repository Data Empiris & Reproducibility Checker"
-            style={{ background: '#faf5ff', borderColor: '#ddd6fe', color: '#7c3aed' }}
+            style={{ background: '#faf5ff', borderColor: '#ddd6fe', color: '#7c3aed', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <span>🔬 Data Repo</span>
+            <Database size={13} />
+            <span>Data Repo</span>
           </button>
 
           <button
@@ -462,7 +474,9 @@ export const ProjectWorkspace: React.FC = () => {
                   gap: '10px'
                 }}
               >
-                <span style={{ fontSize: '18px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👩‍🏫' : 'ℹ️'}</span>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isLecturerOrAdmin ? '#dcfce7' : '#dbeafe', color: isLecturerOrAdmin ? '#15803d' : '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {isLecturerOrAdmin ? <GraduationCap size={18} /> : <Info size={18} />}
+                </div>
                 <div style={{ color: isLecturerOrAdmin ? '#166534' : '#1e40af', lineHeight: 1.4 }}>
                   <strong>{isLecturerOrAdmin ? 'Otoritas Validasi Checkpoint (Dosen):' : 'Prosedur Validasi Checkpoint:'}</strong>{' '}
                   {isLecturerOrAdmin
@@ -528,7 +542,7 @@ export const ProjectWorkspace: React.FC = () => {
                       />
                     ) : (
                       <div
-                        onClick={() => showToast('⚠️ Validasi checkpoint ilmiah hanya dapat dilakukan oleh Dosen Pembimbing.')}
+                        onClick={() => showToast('Validasi checkpoint ilmiah hanya dapat dilakukan oleh Dosen Pembimbing.')}
                         title="Hanya Dosen Pembimbing yang berhak memvalidasi tahapan ini"
                         style={{ cursor: 'not-allowed', display: 'flex', alignItems: 'center' }}
                       >
@@ -545,8 +559,18 @@ export const ProjectWorkspace: React.FC = () => {
                         <span>
                           {idx + 1}. {cp.title}
                         </span>
-                        <span className={`checkpoint-status-pill ${cp.is_completed ? 'done' : 'pending'}`}>
-                          {cp.is_completed ? '✓ Divalidasi Dosen' : '⏳ Menunggu Verifikasi Dosen'}
+                        <span className={`checkpoint-status-pill ${cp.is_completed ? 'done' : 'pending'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          {cp.is_completed ? (
+                            <>
+                              <CheckCircle2 size={11} />
+                              <span>Divalidasi Dosen</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock size={11} />
+                              <span>Menunggu Verifikasi Dosen</span>
+                            </>
+                          )}
                         </span>
                       </h4>
                       <p>{cp.description}</p>
@@ -916,7 +940,8 @@ export const ProjectWorkspace: React.FC = () => {
                               gap: '3px'
                             }}
                           >
-                            ★ {mAvg} ({mReviews.length} ulasan)
+                            <Star size={11} style={{ fill: '#d97706', color: '#d97706' }} />
+                            <span>{mAvg} ({mReviews.length} ulasan)</span>
                           </span>
                         ) : (
                           <span style={{ fontSize: '10.5px', color: 'var(--muted)' }}>Belum ada ulasan</span>
@@ -939,11 +964,12 @@ export const ProjectWorkspace: React.FC = () => {
                             <button
                               type="button"
                               className="btn btn-primary btn-sm"
-                              style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                              style={{ fontSize: '10.5px', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
                               onClick={() => openModal('peerFeedback', { projectId: currentProject.id, revieweeName: m.name })}
                               title="Beri feedback sejawat untuk anggota ini"
                             >
-                              ⭐ Review
+                              <Star size={11} />
+                              <span>Review</span>
                             </button>
                           )}
                         </div>
@@ -974,7 +1000,8 @@ export const ProjectWorkspace: React.FC = () => {
                             style={{ fontSize: '11px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             title="Status keanggotaan Anda di proyek riset ini"
                           >
-                            ✓ {isLead ? 'Anda adalah Ketua Tim' : 'Anda Anggota Tim Aktif'}
+                            <CheckCircle2 size={12} />
+                            <span>{isLead ? 'Anda adalah Ketua Tim' : 'Anda Anggota Tim Aktif'}</span>
                           </span>
                           {isLead && (
                             <button
@@ -1264,8 +1291,9 @@ export const ProjectWorkspace: React.FC = () => {
                       <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginTop: '4px', marginBottom: '4px' }}>
                         {totalProjectFeedbacks} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>ulasan</span>
                       </div>
-                      <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
-                        ✓ Formatif aktif
+                      <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <CheckCircle2 size={11} />
+                        <span>Formatif aktif</span>
                       </span>
                     </div>
 
@@ -1274,7 +1302,9 @@ export const ProjectWorkspace: React.FC = () => {
                         Skor Rata-Rata Tim
                       </span>
                       <div style={{ fontSize: '22px', fontWeight: 900, color: '#b45309', marginTop: '4px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        ★ {avgTeamScore > 0 ? avgTeamScore : '0.0'} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>/ 5.0</span>
+                        <Star size={18} style={{ fill: '#d97706', color: '#d97706' }} />
+                        <span>{avgTeamScore > 0 ? avgTeamScore : '0.0'}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>/ 5.0</span>
                       </div>
                       <span style={{ fontSize: '11px', color: 'var(--ink-secondary)' }}>
                         {avgTeamScore >= 4.5 ? 'Predikat: Sangat Unggul' : avgTeamScore >= 4.0 ? 'Predikat: Baik' : 'Predikat: Cukup'}
@@ -1374,7 +1404,9 @@ export const ProjectWorkspace: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '18px' }}>✍️</span>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FileText size={15} />
+                        </div>
                         <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
                           Tulis Ulasan Sejawat Langsung (Inline Fast Review)
                         </h4>
@@ -1384,7 +1416,7 @@ export const ProjectWorkspace: React.FC = () => {
                         className="btn btn-ghost btn-sm"
                         onClick={() => setShowInlineFeedback(false)}
                       >
-                        ✕ Batal
+                        Batal
                       </button>
                     </div>
 
@@ -1520,9 +1552,12 @@ export const ProjectWorkspace: React.FC = () => {
                     </div>
 
                     {/* Qualitative Texts */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '16px' }}>
                       <div className="auth-field" style={{ margin: 0 }}>
-                        <label>💡 Kekuatan & Kontribusi Menonjol Rekan</label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <Lightbulb size={13} style={{ color: '#0d9488' }} />
+                          <span>Kekuatan &amp; Kontribusi Menonjol Rekan</span>
+                        </label>
                         <textarea
                           rows={2}
                           placeholder="Jelaskan kontribusi nyata rekan dalam riset..."
@@ -1533,7 +1568,10 @@ export const ProjectWorkspace: React.FC = () => {
                       </div>
 
                       <div className="auth-field" style={{ margin: 0 }}>
-                        <label>🌱 Saran Pengembangan Konstruktif</label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <Sparkles size={13} style={{ color: '#2563eb' }} />
+                          <span>Saran Pengembangan Konstruktif</span>
+                        </label>
                         <textarea
                           rows={2}
                           placeholder="Berikan masukan positif untuk checkpoint berikutnya..."
@@ -1636,7 +1674,8 @@ export const ProjectWorkspace: React.FC = () => {
                                     gap: '3px'
                                   }}
                                 >
-                                  ★ {avgMemberScore}
+                                  <Star size={11} style={{ fill: '#d97706', color: '#d97706' }} />
+                                  <span>{avgMemberScore}</span>
                                 </span>
                               ) : (
                                 <span style={{ fontSize: '10.5px', color: 'var(--muted)', background: 'white', padding: '2px 6px', borderRadius: '10px' }}>
@@ -1694,9 +1733,10 @@ export const ProjectWorkspace: React.FC = () => {
                                   <span
                                     key={idx}
                                     className="badge badge-teal"
-                                    style={{ fontSize: '9.5px', padding: '2px 7px' }}
+                                    style={{ fontSize: '9.5px', padding: '2px 7px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
                                   >
-                                    🏷️ {b}
+                                    <Tag size={10} />
+                                    <span>{b}</span>
                                   </span>
                                 ))}
                                 {memberBadges.length > 3 && (
@@ -1950,8 +1990,9 @@ export const ProjectWorkspace: React.FC = () => {
                         {fb.badges && fb.badges.length > 0 && (
                           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                             {fb.badges.map((b, idx) => (
-                              <span key={idx} className="badge badge-teal" style={{ fontSize: '11px', padding: '3px 8px' }}>
-                                🏆 {b}
+                              <span key={idx} className="badge badge-teal" style={{ fontSize: '11px', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <Trophy size={11} />
+                                {b}
                               </span>
                             ))}
                           </div>
@@ -1960,8 +2001,9 @@ export const ProjectWorkspace: React.FC = () => {
                         {/* Qualitative Comments */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div style={{ background: '#f0fdf4', padding: '12px 16px', borderRadius: '10px', borderLeft: '4px solid #0d9488' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', display: 'block', marginBottom: '4px', letterSpacing: '0.4px' }}>
-                              💡 Kekuatan & Kontribusi Menonjol
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '4px', letterSpacing: '0.4px' }}>
+                              <Lightbulb size={12} />
+                              Kekuatan & Kontribusi Menonjol
                             </span>
                             <p style={{ fontSize: '13px', color: 'var(--ink)', margin: 0, lineHeight: 1.6 }}>
                               "{fb.strengths}"
@@ -1969,8 +2011,9 @@ export const ProjectWorkspace: React.FC = () => {
                           </div>
 
                           <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '10px', borderLeft: '4px solid #3b82f6' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', display: 'block', marginBottom: '4px', letterSpacing: '0.4px' }}>
-                              🌱 Saran Pengembangan Ilmiah Konstruktif
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '4px', letterSpacing: '0.4px' }}>
+                              <Leaf size={12} />
+                              Saran Pengembangan Ilmiah Konstruktif
                             </span>
                             <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', margin: 0, lineHeight: 1.6 }}>
                               "{fb.improvements}"
@@ -2158,8 +2201,8 @@ export const ProjectWorkspace: React.FC = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-alt)', padding: '8px 12px', borderRadius: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Skor Rata-Rata:</span>
-              <strong style={{ fontSize: '13px', color: '#b45309' }}>
-                ★ {projectPeerFeedbacks.length > 0 ? (projectPeerFeedbacks.reduce((a, b) => a + b.overall_score, 0) / projectPeerFeedbacks.length).toFixed(1) : '0.0'} / 5.0
+              <strong style={{ fontSize: '13px', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Star size={13} style={{ fill: '#f59e0b', color: '#f59e0b' }} /> {projectPeerFeedbacks.length > 0 ? (projectPeerFeedbacks.reduce((a, b) => a + b.overall_score, 0) / projectPeerFeedbacks.length).toFixed(1) : '0.0'} / 5.0
               </strong>
             </div>
 

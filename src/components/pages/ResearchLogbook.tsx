@@ -1,6 +1,34 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Calendar, Download, Check, FileText, Plus, Clock, User, ChevronLeft, ChevronRight, Trash2, Paperclip, Link as LinkIcon, UploadCloud, X, Filter } from 'lucide-react';
+import {
+  Calendar,
+  Download,
+  Check,
+  FileText,
+  Plus,
+  Clock,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Paperclip,
+  Link as LinkIcon,
+  UploadCloud,
+  X,
+  Filter,
+  Globe,
+  BookOpen,
+  Wrench,
+  FlaskConical,
+  BarChart3,
+  Target,
+  CheckCircle2,
+  Clock3,
+  ClipboardList,
+  GraduationCap,
+  Info,
+  Zap
+} from 'lucide-react';
 
 /* ──────────────────────────────────────────────────────────
    FITUR 2 — GENERATOR LOGBOOK RISET & EKSPOR PDF RESMI
@@ -25,13 +53,25 @@ export interface LogbookEntry {
 }
 
 export const CHECKPOINT_CATEGORIES = [
-  { id: 'all', label: 'Semua Checkpoint', code: 'ALL', icon: '🌐' },
-  { id: 'cp1', label: 'CP-1: Studi Literatur & Hipotesis', code: 'CP-1', icon: '📚' },
-  { id: 'cp2', label: 'CP-2: Desain Metodologi & Kalibrasi', code: 'CP-2', icon: '⚙️' },
-  { id: 'cp3', label: 'CP-3: Eksperimen Lab & Data Empiris', code: 'CP-3', icon: '🔬' },
-  { id: 'cp4', label: 'CP-4: Analisis Data & Validasi Model', code: 'CP-4', icon: '📊' },
-  { id: 'cp5', label: 'CP-5: Pelaporan & Publikasi Manuskrip', code: 'CP-5', icon: '📝' },
+  { id: 'all', label: 'Semua Checkpoint', code: 'ALL' },
+  { id: 'cp1', label: 'CP-1: Studi Literatur & Hipotesis', code: 'CP-1' },
+  { id: 'cp2', label: 'CP-2: Desain Metodologi & Kalibrasi', code: 'CP-2' },
+  { id: 'cp3', label: 'CP-3: Eksperimen Lab & Data Empiris', code: 'CP-3' },
+  { id: 'cp4', label: 'CP-4: Analisis Data & Validasi Model', code: 'CP-4' },
+  { id: 'cp5', label: 'CP-5: Pelaporan & Publikasi Manuskrip', code: 'CP-5' },
 ];
+
+export const renderCheckpointIcon = (id: string, size = 14) => {
+  switch (id) {
+    case 'all': return <Globe size={size} />;
+    case 'cp1': return <BookOpen size={size} />;
+    case 'cp2': return <Wrench size={size} />;
+    case 'cp3': return <FlaskConical size={size} />;
+    case 'cp4': return <BarChart3 size={size} />;
+    case 'cp5': return <FileText size={size} />;
+    default: return <Target size={size} />;
+  }
+};
 
 const INITIAL_ENTRIES: LogbookEntry[] = [
   {
@@ -224,12 +264,12 @@ export const ResearchLogbook: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
     setShowAddForm(false);
     setPage(1);
-    showToast('✓ Entri logbook riset berhasil disimpan! Menunggu verifikasi Dosen Pembimbing.');
+    showToast('Entri logbook riset berhasil disimpan! Menunggu verifikasi Dosen Pembimbing.');
   };
 
   const handleOpenVerifyModal = (entry: LogbookEntry) => {
     if (!isLecturerOrAdmin) {
-      showToast('⚠️ Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi logbook riset.');
+      showToast('Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi logbook riset.');
       return;
     }
     setVerifyingEntry(entry);
@@ -250,13 +290,13 @@ export const ResearchLogbook: React.FC = () => {
           : e
       )
     );
-    showToast(`✓ Entri logbook #${verifyingEntry.id} berhasil diverifikasi dengan catatan pembimbing.`);
+    showToast(`Entri logbook #${verifyingEntry.id} berhasil diverifikasi dengan catatan pembimbing.`);
     setVerifyingEntry(null);
   };
 
   const handleQuickVerify = (id: number) => {
     if (!isLecturerOrAdmin) {
-      showToast('⚠️ Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi logbook riset.');
+      showToast('Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi logbook riset.');
       return;
     }
     setEntries(prev =>
@@ -271,7 +311,7 @@ export const ResearchLogbook: React.FC = () => {
           : e
       )
     );
-    showToast('✓ Entri logbook berhasil diverifikasi.');
+    showToast('Entri logbook berhasil diverifikasi.');
   };
 
   const handleDelete = (id: number) => {
@@ -425,7 +465,15 @@ export const ResearchLogbook: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 300px' }}>
-          <span style={{ fontSize: '24px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👩‍🏫' : 'ℹ️'}</span>
+          {isLecturerOrAdmin ? (
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <GraduationCap size={22} />
+            </div>
+          ) : (
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#dbeafe', color: '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Info size={22} />
+            </div>
+          )}
           <div style={{ color: isLecturerOrAdmin ? '#14532d' : '#1e40af', lineHeight: 1.45 }}>
             <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '2px' }}>
               {isLecturerOrAdmin ? 'Hak Validasi Penuh Dosen Pembimbing (Dr. Belgis Ainatul Iza, S.Si., M.Mat.):' : 'Alur Validasi Logbook & Checkpoint Mahasiswa:'}
@@ -452,10 +500,14 @@ export const ResearchLogbook: React.FC = () => {
               fontSize: '11.5px',
               fontWeight: 800,
               borderRadius: '20px',
-              boxShadow: '0 2px 8px rgba(234,88,12,0.25)'
+              boxShadow: '0 2px 8px rgba(234,88,12,0.25)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            <span>⏳ Tinjau {unverifiedCount} Entri Menunggu Validasi &rarr;</span>
+            <Clock size={13} />
+            <span>Tinjau {unverifiedCount} Entri Menunggu Validasi &rarr;</span>
           </button>
         )}
       </div>
@@ -463,10 +515,10 @@ export const ResearchLogbook: React.FC = () => {
       {/* Summary Statistics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
         {[
-          { label: 'Total Sesi Riset', value: entries.length, unit: 'Sesi', color: '#2563eb', icon: '📋', onClick: () => { setStatusFilter('all'); setPage(1); } },
-          { label: 'Jam Akumulatif', value: totalHours, unit: 'Jam', color: '#0d9488', icon: '⏱️' },
-          { label: 'Terverifikasi Dosen', value: verifiedCount, unit: `/ ${entries.length}`, color: '#16a34a', icon: '✅', onClick: () => { setStatusFilter('verified'); setPage(1); } },
-          { label: isLecturerOrAdmin ? 'Perlu Validasi Anda' : 'Menunggu Verifikasi', value: unverifiedCount, unit: 'Sesi', color: '#f59e0b', icon: '⏳', onClick: () => { setStatusFilter('unverified'); setPage(1); } },
+          { label: 'Total Sesi Riset', value: entries.length, unit: 'Sesi', color: '#2563eb', bg: '#eff6ff', icon: <ClipboardList size={20} />, onClick: () => { setStatusFilter('all'); setPage(1); } },
+          { label: 'Jam Akumulatif', value: totalHours, unit: 'Jam', color: '#0d9488', bg: '#f0fdfa', icon: <Clock3 size={20} /> },
+          { label: 'Terverifikasi Dosen', value: verifiedCount, unit: `/ ${entries.length}`, color: '#16a34a', bg: '#f0fdf4', icon: <CheckCircle2 size={20} />, onClick: () => { setStatusFilter('verified'); setPage(1); } },
+          { label: isLecturerOrAdmin ? 'Perlu Validasi Anda' : 'Menunggu Verifikasi', value: unverifiedCount, unit: 'Sesi', color: '#ea580c', bg: '#fff7ed', icon: <Clock size={20} />, onClick: () => { setStatusFilter('unverified'); setPage(1); } },
         ].map((stat, i) => (
           <div
             key={i}
@@ -482,7 +534,9 @@ export const ResearchLogbook: React.FC = () => {
               transition: 'transform 0.15s ease, box-shadow 0.15s ease'
             }}
           >
-            <span style={{ fontSize: '24px' }}>{stat.icon}</span>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: stat.bg, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {stat.icon}
+            </div>
             <div>
               <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>{stat.label}</div>
               <div style={{ fontSize: '22px', fontWeight: 900, color: stat.color }}>{stat.value} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>{stat.unit}</span></div>
@@ -496,7 +550,7 @@ export const ResearchLogbook: React.FC = () => {
         {/* Row 1: Filter Status Validasi */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '16px' }}>⚡</span>
+            <Zap size={15} style={{ color: 'var(--primary)' }} />
             <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>Status Validasi Dosen:</strong>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -525,10 +579,14 @@ export const ResearchLogbook: React.FC = () => {
                 background: statusFilter === 'unverified' ? '#f59e0b' : '#fffbeb',
                 color: statusFilter === 'unverified' ? '#ffffff' : '#b45309',
                 fontWeight: 700,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
               }}
             >
-              ⏳ Menunggu Validasi ({unverifiedCount})
+              <Clock size={12} />
+              <span>Menunggu Validasi ({unverifiedCount})</span>
             </button>
             <button
               type="button"
@@ -541,10 +599,14 @@ export const ResearchLogbook: React.FC = () => {
                 background: statusFilter === 'verified' ? '#16a34a' : '#f0fdf4',
                 color: statusFilter === 'verified' ? '#ffffff' : '#15803d',
                 fontWeight: 700,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
               }}
             >
-              ✓ Terverifikasi Dosen ({verifiedCount})
+              <CheckCircle2 size={12} />
+              <span>Terverifikasi Dosen ({verifiedCount})</span>
             </button>
           </div>
         </div>
@@ -584,7 +646,9 @@ export const ResearchLogbook: React.FC = () => {
                     fontWeight: isSelected ? 800 : 600
                   }}
                 >
-                  <span>{cat.icon}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    {renderCheckpointIcon(cat.id, 13)}
+                  </span>
                   <span>{cat.label}</span>
                   <span
                     style={{
@@ -608,8 +672,9 @@ export const ResearchLogbook: React.FC = () => {
       {showAddForm && (
         <div className="card" style={{ padding: '20px', borderRadius: '16px', marginBottom: '20px', borderLeft: '5px solid #2563eb' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
-              📝 Catat Kegiatan Riset Baru (Berbasis Checkpoint)
+            <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={16} style={{ color: 'var(--primary)' }} />
+              <span>Catat Kegiatan Riset Baru (Berbasis Checkpoint)</span>
             </h3>
             <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
               Akan ditandai "Menunggu Verifikasi Dosen" setelah disimpan
@@ -640,8 +705,9 @@ export const ResearchLogbook: React.FC = () => {
             </div>
 
             <div className="auth-field" style={{ margin: 0, gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary)' }}>
-                🎯 Kategori Checkpoint Mahasiswa Terkait:
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Target size={14} />
+                <span>Kategori Checkpoint Mahasiswa Terkait:</span>
               </label>
               <select
                 value={newCpCategory}
@@ -758,8 +824,9 @@ export const ResearchLogbook: React.FC = () => {
       <div className="card" style={{ padding: '20px 24px', borderRadius: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
-              📋 Riwayat Logbook — {selectedProject?.name}
+            <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', margin: 0, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <ClipboardList size={18} style={{ color: 'var(--primary)' }} />
+              <span>Riwayat Logbook — {selectedProject?.name}</span>
             </h3>
             {selectedCpFilter !== 'all' && (
               <span style={{ fontSize: '11.5px', color: 'var(--primary)', fontWeight: 700 }}>
@@ -897,7 +964,7 @@ export const ResearchLogbook: React.FC = () => {
                         {entry.verified ? (
                           <div>
                             <span className="badge badge-teal" style={{ fontSize: '10.5px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <span>✓</span>
+                              <CheckCircle2 size={12} />
                               <span>Terverifikasi Dosen</span>
                             </span>
                             <div style={{ fontSize: '10px', color: '#15803d', marginTop: '3px', fontWeight: 600 }}>
@@ -912,7 +979,7 @@ export const ResearchLogbook: React.FC = () => {
                         ) : (
                           <div>
                             <span className="badge badge-orange" style={{ fontSize: '10.5px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <span>⏳</span>
+                              <Clock size={12} />
                               <span>Menunggu Verifikasi</span>
                             </span>
                             <div style={{ fontSize: '9.5px', color: 'var(--muted)', marginTop: '2px' }}>
@@ -1061,7 +1128,8 @@ export const ResearchLogbook: React.FC = () => {
                       {entry.verified ? (
                         <div>
                           <span className="badge badge-teal" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            ✓ Terverifikasi Dosen
+                            <CheckCircle2 size={11} />
+                            <span>Terverifikasi Dosen</span>
                           </span>
                           <div style={{ fontSize: '10.5px', color: '#15803d', marginTop: '2px', fontWeight: 600 }}>
                             oleh {entry.verified_by.split(',')[0]}
@@ -1075,7 +1143,8 @@ export const ResearchLogbook: React.FC = () => {
                       ) : (
                         <div>
                           <span className="badge badge-orange" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            ⏳ Menunggu Verifikasi Dosen
+                            <Clock size={11} />
+                            <span>Menunggu Verifikasi Dosen</span>
                           </span>
                         </div>
                       )}
@@ -1309,8 +1378,9 @@ export const ResearchLogbook: React.FC = () => {
                 <strong>Capaian:</strong> {verifyingEntry.achievement}
               </div>
               {verifyingEntry.evidence_file_name && (
-                <div style={{ marginTop: '6px', fontSize: '11px', color: '#15803d' }}>
-                  📎 Berkas terlampir: {verifyingEntry.evidence_file_name} ({verifyingEntry.evidence_file_size || ''})
+                <div style={{ marginTop: '6px', fontSize: '11px', color: '#15803d', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Paperclip size={12} />
+                  <span>Berkas terlampir: {verifyingEntry.evidence_file_name} ({verifyingEntry.evidence_file_size || ''})</span>
                 </div>
               )}
             </div>

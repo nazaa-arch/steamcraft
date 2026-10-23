@@ -399,14 +399,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const mySessionId = sessionStorage.getItem('steamcraft_my_session_id');
         if (msg.data && msg.data.sessionId === mySessionId) {
           setCurrentUser(null);
-          showToast('⚠️ Sesi Anda telah diputus oleh Master Administrator.');
+          showToast('Sesi Anda telah diputus oleh Master Administrator.');
         }
       };
       const alertChannel = new BroadcastChannel('steamcraft_alert_channel');
       alertChannel.onmessage = (msg) => {
         const mySessionId = sessionStorage.getItem('steamcraft_my_session_id');
         if (msg.data && msg.data.sessionId === mySessionId) {
-          showToast(`💬 Pesan Administrator: ${msg.data.message}`);
+          showToast(`Pesan Administrator: ${msg.data.message}`);
         }
       };
       return () => {
@@ -421,7 +421,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     syncMaintenanceState(active);
     showToast(
       active
-        ? '⚠️ Mode Pemeliharaan Sistem DIAKTIFKAN. Akses dibatasi untuk Administrator.'
+        ? 'Mode Pemeliharaan Sistem DIAKTIFKAN. Akses dibatasi untuk Administrator.'
         : '✓ Mode Pemeliharaan Sistem DINONAKTIFKAN. Platform STEAM-Craft kembali beroperasi normal.'
     );
   };
@@ -499,7 +499,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const switchDemoUser = (roleOrUsername: string) => {
     // Keamanan: Akun Admin tidak dapat diakses melalui demo switcher 1-klik publik
     if (roleOrUsername.toLowerCase() === 'admin') {
-      showToast('⚠️ Akses Administrator hanya dapat dimasuki menggunakan username & kata sandi resmi.');
+      showToast('Akses Administrator hanya dapat dimasuki menggunakan username & kata sandi resmi.');
       return;
     }
     let target = users.find(u => u.username.toLowerCase() === roleOrUsername.toLowerCase());
@@ -687,7 +687,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Checkpoint validation must be conducted by Lecturer (or Admin)
     const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
     if (!isLecturerOrAdmin) {
-      showToast('⚠️ Validasi checkpoint ilmiah hanya dapat dilakukan oleh Dosen Pembimbing.');
+      showToast('Validasi checkpoint ilmiah hanya dapat dilakukan oleh Dosen Pembimbing.');
       return;
     }
 
@@ -876,7 +876,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setSelectedProjectId(found.id);
     setCurrentPage('workspace');
-    showToast(`🎉 Selamat bergabung di tim riset "${found.name}"!`);
+    showToast(`✓ Selamat bergabung di tim riset "${found.name}"!`);
     return { success: true, project: found, message: 'Berhasil bergabung ke tim riset.' };
   };
 

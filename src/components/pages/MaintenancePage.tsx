@@ -63,7 +63,7 @@ export const MaintenancePage: React.FC = () => {
 
     setTimeout(() => {
       setIsChecking(false);
-      setCheckResult('🟢 Server merespons (Latency 18ms). Deployment tahap akhir 88% berjalan.');
+      setCheckResult('Online: Server merespons (Latency 18ms). Deployment tahap akhir 88% berjalan.');
       showToast('Status server aktif: Sinkronisasi akhir sedang berlangsung.');
     }, 1200);
   };
@@ -103,7 +103,7 @@ export const MaintenancePage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '20px' }}>🛡️</span>
+            <Shield size={22} color="#fbbf24" />
             <div>
               <strong style={{ color: '#fbbf24', fontSize: '13px', display: 'block' }}>
                 PRATINJAU MODE ADMINISTRATOR: {maintenanceMode ? 'SISTEM MAINTENANCE AKTIF' : 'SISTEM NORMAL (HANYA PRATINJAU)'}
@@ -639,7 +639,7 @@ export const MaintenancePage: React.FC = () => {
 
               {adminError && (
                 <div style={{ fontSize: '11.5px', color: '#f87171' }}>
-                  ⚠️ {adminError}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={13} /> {adminError}</span>
                 </div>
               )}
 

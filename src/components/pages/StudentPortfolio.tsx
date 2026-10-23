@@ -1,3 +1,4 @@
+import { AvatarBadgeIcon } from '../common/AvatarBadge';
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
@@ -25,7 +26,14 @@ import {
   ThumbsUp,
   Code,
   Globe,
-  Edit3
+  Edit3,
+  GraduationCap,
+  Trophy,
+  Lightbulb,
+  Leaf,
+  MessageSquare,
+  Wrench,
+  FlaskConical
 } from 'lucide-react';
 import { Project } from '../../types';
 
@@ -264,7 +272,7 @@ export const StudentPortfolio: React.FC = () => {
                 }}
                 title="Lencana Disiplin STEAM"
               >
-                {currentUser?.avatar_icon || '🔬'}
+                <AvatarBadgeIcon iconKey={currentUser?.avatar_icon} size={14} color="#38bdf8" />
               </div>
             </div>
 
@@ -300,7 +308,7 @@ export const StudentPortfolio: React.FC = () => {
               </div>
 
               <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
-                🏛️ {currentUser?.faculty || 'Fakultas MIPA'} — {currentUser?.university || 'Universitas Indonesia'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><GraduationCap size={13} /> {currentUser?.faculty || 'Fakultas MIPA'} — {currentUser?.university || 'Universitas Indonesia'}</span>
               </div>
 
               {currentUser?.bio && (
@@ -354,7 +362,7 @@ export const StudentPortfolio: React.FC = () => {
                   </a>
                 )}
                 {currentUser?.academic_links && !currentUser.github_url && !currentUser.linkedin_url && (
-                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>🔗 {currentUser.academic_links}</span>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ExternalLink size={11} /> {currentUser.academic_links}</span></span>
                 )}
               </div>
             </div>
@@ -850,12 +858,12 @@ export const StudentPortfolio: React.FC = () => {
                   </p>
 
                   <div style={{ background: 'var(--surface-alt)', padding: '8px 12px', borderRadius: '8px', fontSize: '11.5px', color: 'var(--muted)', marginBottom: '14px' }}>
-                    🔬 <strong>Pilar STEAM:</strong> {proj.steam} · ⚙️ <strong>Alat:</strong> {proj.tools}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><FlaskConical size={12} /> <strong>Pilar STEAM:</strong> {proj.steam}</span> · <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Wrench size={12} /> <strong>Alat:</strong> {proj.tools}</span>
                   </div>
 
                   {proj.final_note && (
                     <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', borderRadius: '10px', fontSize: '11.5px', color: '#166534', marginBottom: '16px' }}>
-                      <strong>💬 Rekomendasi Dosen ({proj.lecturer}):</strong> "{proj.final_note}"
+                      <strong><MessageSquare size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Rekomendasi Dosen ({proj.lecturer}):</strong> "{proj.final_note}"
                     </div>
                   )}
                 </div>
@@ -953,7 +961,7 @@ export const StudentPortfolio: React.FC = () => {
                       className="badge badge-teal"
                       style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                     >
-                      🏆 {badge}
+                      <Trophy size={12} style={{ marginRight: '4px' }} />{badge}
                     </span>
                   ))}
                 </div>
@@ -995,11 +1003,11 @@ export const StudentPortfolio: React.FC = () => {
                     </div>
 
                     <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '10px 14px', borderRadius: '8px', fontSize: '12px', color: '#166534', marginBottom: '8px' }}>
-                      <strong>💡 Kekuatan Utama:</strong> "{fb.strengths}"
+                      <strong><Lightbulb size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Kekuatan Utama:</strong> "{fb.strengths}"
                     </div>
 
                     <div style={{ background: 'white', padding: '10px 14px', borderRadius: '8px', fontSize: '12px', color: 'var(--ink-secondary)', border: '1px solid var(--line)' }}>
-                      <strong>🌱 Saran Konstruktif:</strong> "{fb.improvements}"
+                      <strong><Leaf size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Saran Konstruktif:</strong> "{fb.improvements}"
                     </div>
                   </div>
                 ))}

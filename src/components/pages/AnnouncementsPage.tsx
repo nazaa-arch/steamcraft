@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Bookmark, BookmarkCheck, Search, Plus, Check } from 'lucide-react';
+import { Bell, Bookmark, BookmarkCheck, Search, Plus, Check, Pin } from 'lucide-react';
 
 export const AnnouncementsPage: React.FC = () => {
   const {
@@ -132,7 +132,7 @@ export const AnnouncementsPage: React.FC = () => {
                     </span>
                     {ann.pinned === 1 && (
                       <span className="badge badge-purple" style={{ fontSize: '10px' }}>
-                        📌 Disematkan
+                        <Pin size={10} style={{ marginRight: '3px' }} />Disematkan
                       </span>
                     )}
                     {!ann.is_read && (

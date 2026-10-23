@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { FlaskConical, Eye } from 'lucide-react';
 import { useApp } from './context/AppContext';
 import { Topbar } from './components/layout/Topbar';
 import { LoginScreen } from './components/auth/LoginScreen';
@@ -170,7 +171,7 @@ export const App: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>🧪</span>
+              <FlaskConical size={16} />
               <span>
                 <strong>LINGKUNGAN BETA STAGING</strong> &mdash; Uji Coba UI/UX Masukan Dosen (Dr. Belgis) Telah Aktif
               </span>
@@ -219,7 +220,7 @@ export const App: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>🧪</span>
+            <FlaskConical size={16} />
             <span>
               <strong>LINGKUNGAN BETA STAGING</strong> &mdash; Uji Coba UI/UX Masukan Dosen (Dr. Belgis) Telah Aktif
             </span>
@@ -279,10 +280,11 @@ export const App: React.FC = () => {
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               className="btn btn-sm btn-ghost"
-              style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)', padding: '4px 10px', fontSize: '11.5px' }}
+              style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)', padding: '4px 10px', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               onClick={() => setCurrentPage('maintenance')}
             >
-              👁️ Pratinjau Maintenance
+              <Eye size={13} />
+              Pratinjau Maintenance
             </button>
             <button
               className="btn btn-sm btn-primary"

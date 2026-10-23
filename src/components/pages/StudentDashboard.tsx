@@ -13,7 +13,16 @@ import {
   Rocket,
   UserCheck,
   Bot,
-  Award
+  Award,
+  Target,
+  FileText,
+  Database,
+  Zap,
+  Megaphone,
+  GraduationCap,
+  Star,
+  Globe,
+  FlaskConical
 } from 'lucide-react';
 
 export const StudentDashboard: React.FC = () => {
@@ -134,9 +143,15 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </div>
         <div className="orbit-box">
-          <span className="orbit-pill op1">🔬 Science + Tech</span>
+          <span className="orbit-pill op1" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <FlaskConical size={12} />
+            <span>Science + Tech</span>
+          </span>
           <div className="orbit-center">{isLecturer ? 'D' : 'S'}</div>
-          <span className="orbit-pill op2">📐 Math + Art</span>
+          <span className="orbit-pill op2" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <Compass size={12} />
+            <span>Math + Art</span>
+          </span>
         </div>
       </div>
 
@@ -507,7 +522,9 @@ export const StudentDashboard: React.FC = () => {
           <div>
             <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: '2px' }}>Instrumen Riset Baru</div>
             <h3 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--navy)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>⚡</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#eff6ff', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Zap size={14} />
+              </div>
               <span>Instrumen Unggulan Riset Ilmiah STEAM</span>
             </h3>
           </div>
@@ -533,7 +550,9 @@ export const StudentDashboard: React.FC = () => {
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '26px' }}>🎯</span>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Target size={20} />
+                </div>
                 <span className="badge badge-blue" style={{ fontSize: '10px' }}>5 Pilar STEAM</span>
               </div>
               <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
@@ -570,7 +589,9 @@ export const StudentDashboard: React.FC = () => {
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '26px' }}>📝</span>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={20} />
+                </div>
                 <span className="badge badge-teal" style={{ fontSize: '10px' }}>Standar PKM Dikti</span>
               </div>
               <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
@@ -609,7 +630,9 @@ export const StudentDashboard: React.FC = () => {
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '26px' }}>🔬</span>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Database size={20} />
+                </div>
                 <span className="badge badge-purple" style={{ fontSize: '10px' }}>Reproducibility 100%</span>
               </div>
               <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
@@ -658,7 +681,9 @@ export const StudentDashboard: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '18px' }}>📢</span>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Megaphone size={16} />
+            </div>
             <div>
               <strong style={{ fontSize: '14px', color: 'var(--navy)' }}>
                 Pemberitahuan & Pengumuman Kampus Terkini
@@ -748,7 +773,8 @@ export const StudentDashboard: React.FC = () => {
             gap: '6px'
           }}
         >
-          <span>{isLecturer ? '👨‍🏫 Proyek yang Anda Bimbing' : '⭐ Proyek yang Anda Ikuti'}</span>
+          {isLecturer ? <GraduationCap size={14} /> : <Star size={14} />}
+          <span>{isLecturer ? 'Proyek yang Anda Bimbing' : 'Proyek yang Anda Ikuti'}</span>
           <span
             style={{
               fontSize: '10px',
@@ -777,7 +803,8 @@ export const StudentDashboard: React.FC = () => {
             gap: '6px'
           }}
         >
-          <span>🌐 Semua Proyek Riset Aktif</span>
+          <Globe size={14} />
+          <span>Semua Proyek Riset Aktif</span>
           <span
             style={{
               fontSize: '10px',
@@ -805,7 +832,9 @@ export const StudentDashboard: React.FC = () => {
             marginBottom: '20px'
           }}
         >
-          <div style={{ fontSize: '36px', marginBottom: '12px' }}>📂</div>
+          <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#f8fafc', color: 'var(--primary)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+            <FolderGit2 size={28} />
+          </div>
           <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
             {projectTab === 'myProjects'
               ? (isLecturer ? 'Belum Ada Proyek Bimbingan Terdaftar' : 'Belum Ada Proyek yang Anda Ikuti')
@@ -848,12 +877,13 @@ export const StudentDashboard: React.FC = () => {
                   <span className="badge badge-blue">{proj.study}</span>
                   <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
                     {isUserMemberOfProject(proj.id) && (
-                      <span className="badge badge-purple" title="Proyek yang Anda ikuti/bimbing">
-                        {isLecturer ? '👨‍🏫 Bimbingan Anda' : '✓ Tim Saya'}
+                      <span className="badge badge-purple" title="Proyek yang Anda ikuti/bimbing" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        {isLecturer ? <GraduationCap size={11} /> : null}
+                        <span>{isLecturer ? 'Bimbingan Anda' : '✓ Tim Saya'}</span>
                       </span>
                     )}
                     <span className={`badge ${proj.blocker ? 'badge-rose' : proj.progress === 100 ? 'badge-teal' : 'badge-orange'}`}>
-                      {proj.blocker ? '⚠️ Ada Blocker' : proj.status}
+                      {proj.blocker ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><AlertTriangle size={11} /> Ada Blocker</span> : proj.status}
                     </span>
                   </div>
                 </div>
@@ -886,8 +916,9 @@ export const StudentDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px', wordBreak: 'break-word' }}>
-                  👨‍🏫 Pembimbing: <strong>{proj.lecturer}</strong>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px', wordBreak: 'break-word', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <GraduationCap size={13} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                  <span>Pembimbing: <strong>{proj.lecturer}</strong></span>
                 </div>
               </div>
 

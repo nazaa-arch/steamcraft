@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Eye, EyeOff, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Sparkles, ArrowRight, ShieldCheck, Target, FileText, Database, GraduationCap, UserCheck, Globe } from 'lucide-react';
 
 export const LoginScreen: React.FC = () => {
   const { login, switchDemoUser, openModal } = useApp();
@@ -37,14 +37,35 @@ export const LoginScreen: React.FC = () => {
       <section className="login-showcase">
         <div className="login-topline-spacer" aria-hidden="true" />
 
-        <div className="login-brand-wrapper">
+        <div className="login-brand-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px', marginBottom: '16px' }}>
           <div className="login-welcome-badge">
             <Sparkles size={14} className="welcome-sparkle" />
             <span>Selamat datang di <strong>SteamCraft</strong></span>
           </div>
 
-          <div className="login-brand-image">
-            <img src="/logo.jpg?v=20261021" alt="SteamCraft Logo" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '6px' }}>
+            <img
+              src="/logo.jpg?v=20261021"
+              alt="SteamCraft Logo"
+              style={{
+                width: '58px',
+                height: '58px',
+                borderRadius: '14px',
+                objectFit: 'contain',
+                background: 'white',
+                padding: '4px',
+                boxShadow: '0 4px 14px rgba(37,99,235,0.12)',
+                border: '1.5px solid #dbeafe'
+              }}
+            />
+            <div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', letterSpacing: '-0.5px' }}>
+                SteamCraft
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                Platform Kolaborasi Riset Ilmiah Multidisiplin
+              </div>
+            </div>
           </div>
         </div>
 
@@ -53,8 +74,7 @@ export const LoginScreen: React.FC = () => {
             Ruang untuk Rasa Ingin Tahu <span>Lintas Disiplin.</span>
           </h1>
           <p>
-            Integrasikan eksplorasi sains, implementasi teknologi, rancang bangun rekayasa, ekspresi estetika seni,
-            dan ketelitian matematika dalam satu alur kerja riset civitas akademika.
+            Platform terpadu untuk inkubasi proyek riset civitas akademika: rancang hipotesis, catat logbook berbasis checkpoint, kelola repositori data empiris, dan dapatkan validasi dosen pembimbing berstandar PKM Dikti.
           </p>
 
           <div className="login-discipline">
@@ -73,6 +93,49 @@ export const LoginScreen: React.FC = () => {
             <span className="disc-pill disc-indicator" title="Pilar Matematika & Komputasi">
               <span className="dot dot-purple"></span> Mathematics
             </span>
+          </div>
+
+          {/* Informative Value Proposition Grid for New Users */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginTop: '20px', marginBottom: '14px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)', border: '1px solid #dbeafe', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', boxShadow: '0 2px 8px rgba(37,99,235,0.04)' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Target size={16} />
+              </div>
+              <div>
+                <strong style={{ fontSize: '12px', color: 'var(--navy)', display: 'block', marginBottom: '2px' }}>5 Checkpoint Ilmiah</strong>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.35, display: 'block' }}>Alur riset terstruktur tervalidasi dosen dari studi hingga publikasi.</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)', border: '1px solid #ccfbf1', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', boxShadow: '0 2px 8px rgba(13,148,136,0.04)' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <FileText size={16} />
+              </div>
+              <div>
+                <strong style={{ fontSize: '12px', color: 'var(--navy)', display: 'block', marginBottom: '2px' }}>Logbook PKM & Cetak PDF</strong>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.35, display: 'block' }}>Dokumentasi aktivitas lab harian siap cetak berkop resmi universitas.</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)', border: '1px solid #f3e8ff', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', boxShadow: '0 2px 8px rgba(124,58,237,0.04)' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Database size={16} />
+              </div>
+              <div>
+                <strong style={{ fontSize: '12px', color: 'var(--navy)', display: 'block', marginBottom: '2px' }}>Data & Reproducibility</strong>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.35, display: 'block' }}>Repositori dataset mentah, script, dan evaluasi replikasi jurnal.</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)', border: '1px solid #ffedd5', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', boxShadow: '0 2px 8px rgba(234,88,12,0.04)' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <GraduationCap size={16} />
+              </div>
+              <div>
+                <strong style={{ fontSize: '12px', color: 'var(--navy)', display: 'block', marginBottom: '2px' }}>Bimbingan & Kolaborasi</strong>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.35, display: 'block' }}>Klinik kendala (blocker), fasilitasi lab, dan open recruitment tim.</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -197,7 +260,9 @@ export const LoginScreen: React.FC = () => {
                   onClick={() => switchDemoUser('budi')}
                   title="Masuk sebagai Mahasiswa Peneliti Budi Santoso"
                 >
-                  <span className="demo-icon">🎓</span>
+                  <span className="demo-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                    <UserCheck size={18} />
+                  </span>
                   <div className="demo-text">
                     <strong>Budi Santoso</strong>
                     <small>Mahasiswa Sains Data</small>
@@ -209,7 +274,9 @@ export const LoginScreen: React.FC = () => {
                   onClick={() => switchDemoUser('dosen')}
                   title="Masuk sebagai Dosen Pembimbing Dr. Belgis Ainatul Iza"
                 >
-                  <span className="demo-icon">👩‍🏫</span>
+                  <span className="demo-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a' }}>
+                    <GraduationCap size={18} />
+                  </span>
                   <div className="demo-text">
                     <strong>Dr. Belgis A. Iza</strong>
                     <small>Dosen FMIPA UNESA</small>
@@ -232,8 +299,9 @@ export const LoginScreen: React.FC = () => {
 
             {/* Hub Portofolio Projek Tim */}
             <div className="auth-hub-footer">
-              <a href="https://steamcraft.online" target="_blank" rel="noopener noreferrer">
-                🌐 Hub Portofolio Projek Tim (steamcraft.online) &rarr;
+              <a href="https://steamcraft.online" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Globe size={13} />
+                <span>Hub Portofolio Projek Tim (steamcraft.online) &rarr;</span>
               </a>
             </div>
           </form>

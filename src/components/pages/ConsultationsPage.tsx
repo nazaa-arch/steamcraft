@@ -6,6 +6,7 @@ import {
   MapPin,
   Plus,
   CheckCircle,
+  CheckCircle2,
   MessageSquare,
   FileEdit,
   X,
@@ -16,7 +17,8 @@ import {
   AlertTriangle,
   Info,
   RotateCcw,
-  BookOpen
+  BookOpen,
+  Lightbulb
 } from 'lucide-react';
 
 export const ConsultationsPage: React.FC = () => {
@@ -152,19 +154,24 @@ export const ConsultationsPage: React.FC = () => {
             fontSize: '12.5px',
             whiteSpace: 'nowrap',
             borderColor: pendingCount > 0 ? '#f59e0b' : undefined,
-            color: consultFilter !== 'pending' && pendingCount > 0 ? '#d97706' : undefined
+            color: consultFilter !== 'pending' && pendingCount > 0 ? '#d97706' : undefined,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px'
           }}
         >
-          ⏳ Menunggu Respons ({pendingCount})
+          <Clock size={13} />
+          <span>Menunggu Respons ({pendingCount})</span>
         </button>
 
         <button
           type="button"
           className={`btn ${consultFilter === 'scheduled' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
           onClick={() => setConsultFilter('scheduled')}
-          style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '12.5px', whiteSpace: 'nowrap' }}
+          style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '12.5px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
         >
-          📅 Terjadwal ({scheduledCount})
+          <Calendar size={13} />
+          <span>Terjadwal ({scheduledCount})</span>
         </button>
 
         <button
@@ -357,23 +364,27 @@ export const ConsultationsPage: React.FC = () => {
 
                       {/* Status Badges */}
                       {isPending && (
-                        <span className="badge badge-orange" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
-                          ⏳ Menunggu Respons Dosen
+                        <span className="badge badge-orange" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <Clock size={11} />
+                          <span>Menunggu Respons Dosen</span>
                         </span>
                       )}
                       {isScheduled && (
-                        <span className="badge badge-blue">
-                          📅 Terjadwal
+                        <span className="badge badge-blue" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <Calendar size={11} />
+                          <span>Terjadwal</span>
                         </span>
                       )}
                       {isCompleted && (
-                        <span className="badge badge-teal" style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #86efac' }}>
-                          ✓ Selesai Dilaksanakan
+                        <span className="badge badge-teal" style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #86efac', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={11} />
+                          <span>Selesai Dilaksanakan</span>
                         </span>
                       )}
                       {isRejected && (
-                        <span className="badge badge-red" style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5' }}>
-                          ✕ Pengajuan Ditolak
+                        <span className="badge badge-red" style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <XCircle size={11} />
+                          <span>Pengajuan Ditolak</span>
                         </span>
                       )}
                       {c.status === 'Dibatalkan' && (
@@ -459,8 +470,9 @@ export const ConsultationsPage: React.FC = () => {
                               {c.rejection_reason || c.feedback || 'Permohonan bimbingan belum disetujui. Silakan periksa kembali kelengkapan riset Anda.'}
                             </div>
                             {!isLecturer && (
-                              <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#b91c1c' }}>
-                                💡 <em>Saran: Lengkapi catatan perbaikan di atas, kemudian klik "Ajukan Bimbingan Baru" untuk memilih slot waktu baru.</em>
+                              <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <Lightbulb size={13} style={{ flexShrink: 0 }} />
+                                <em>Saran: Lengkapi catatan perbaikan di atas, kemudian klik "Ajukan Bimbingan Baru" untuk memilih slot waktu baru.</em>
                               </div>
                             )}
                           </div>
@@ -499,8 +511,11 @@ export const ConsultationsPage: React.FC = () => {
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
                           <div style={{ flex: '1 1 240px', minWidth: 0 }}>
-                            <strong>✓ Arahan & Umpan Balik Dosen:</strong>
-                            <div style={{ marginTop: '4px', lineHeight: 1.5, color: '#14532d' }}>{c.feedback}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
+                              <CheckCircle2 size={13} style={{ color: '#16a34a' }} />
+                              <strong>Arahan &amp; Umpan Balik Dosen:</strong>
+                            </div>
+                            <div style={{ lineHeight: 1.5, color: '#14532d' }}>{c.feedback}</div>
                           </div>
                           {isLecturer && openNoteId !== c.id && (
                             <button
@@ -743,10 +758,10 @@ export const ConsultationsPage: React.FC = () => {
                     {/* Quick Rejection Preset Chips */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {[
-                        { label: '📅 Jadwal Bentrok', text: 'Jadwal bentrok dengan agenda akademik lain. Silakan ajukan di jam bimbingan hari berikutnya.' },
-                        { label: '📊 Logbook Belum Lengkap', text: 'Mohon lengkapi catatan logbook eksperimen dan lampirkan dataset primer terlebih dahulu.' },
-                        { label: '🎯 Perjelas Rumusan Masalah', text: 'Topik terlalu umum. Harap perjelas rumusan masalah dan hipotesis sebelum review.' },
-                        { label: '📑 Siapkan Manuskrip Terkini', text: 'Silakan unggah draf manuskrip revisi ke repositori sebelum sesi review.' }
+                        { label: 'Jadwal Bentrok', text: 'Jadwal bentrok dengan agenda akademik lain. Silakan ajukan di jam bimbingan hari berikutnya.' },
+                        { label: 'Logbook Belum Lengkap', text: 'Mohon lengkapi catatan logbook eksperimen dan lampirkan dataset primer terlebih dahulu.' },
+                        { label: 'Perjelas Rumusan Masalah', text: 'Topik terlalu umum. Harap perjelas rumusan masalah dan hipotesis sebelum review.' },
+                        { label: 'Siapkan Manuskrip Terkini', text: 'Silakan unggah draf manuskrip revisi ke repositori sebelum sesi review.' }
                       ].map((preset, idx) => (
                         <button
                           key={idx}
@@ -845,10 +860,10 @@ export const ConsultationsPage: React.FC = () => {
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {[
-                          { label: '✓ Metodologi Disetujui', text: 'Metodologi & hipotesis disetujui. Lanjutkan ke tahap pengambilan data empiris.' },
-                          { label: '⚠️ Perbaiki Metodologi', text: 'Perbaiki bab metodologi riset dan parameter kontrol replikasi.' },
-                          { label: '📊 Lengkapi Dataset', text: 'Unggah dataset primer ke repositori dan verifikasi logbook STEAM.' },
-                          { label: '🎯 Siapkan Manuskrip', text: 'Hasil validasi memuaskan. Mulai penyusunan naskah artikel ilmiah.' }
+                          { label: 'Metodologi Disetujui', text: 'Metodologi & hipotesis disetujui. Lanjutkan ke tahap pengambilan data empiris.' },
+                          { label: 'Perbaiki Metodologi', text: 'Perbaiki bab metodologi riset dan parameter kontrol replikasi.' },
+                          { label: 'Lengkapi Dataset', text: 'Unggah dataset primer ke repositori dan verifikasi logbook STEAM.' },
+                          { label: 'Siapkan Manuskrip', text: 'Hasil validasi memuaskan. Mulai penyusunan naskah artikel ilmiah.' }
                         ].map((chip, idx) => (
                           <button
                             key={idx}

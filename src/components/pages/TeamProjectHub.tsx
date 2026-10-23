@@ -662,11 +662,11 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
             {/* Category Filter */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '24px' }}>
               {[
-                { id: 'all', label: 'Semua Projek' },
-                { id: 'software', label: '💻 Platform Perangkat Lunak' },
-                { id: 'hardware', label: '📡 IoT & Hardware Laut' },
-                { id: 'bio', label: '🌱 Bioteknologi & Baterai' },
-                { id: 'pipeline', label: '⚡ Riset Lanjutan (Pipeline)' }
+                { id: 'all', label: 'Semua Projek', icon: null },
+                { id: 'software', label: 'Platform Perangkat Lunak', icon: Code2 },
+                { id: 'hardware', label: 'IoT & Hardware Laut', icon: Radio },
+                { id: 'bio', label: 'Bioteknologi & Baterai', icon: Leaf },
+                { id: 'pipeline', label: 'Riset Lanjutan (Pipeline)', icon: Zap }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -682,7 +682,7 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                     color: activeCategory === tab.id ? '#1e40af' : '#64748b'
                   }}
                 >
-                  {tab.label}
+                  {tab.icon && React.createElement(tab.icon, { size: 14, style: { marginRight: '6px', display: 'inline', verticalAlign: '-2px' } })}{tab.icon && React.createElement(tab.icon, { size: 14, style: { marginRight: '6px', display: 'inline', verticalAlign: '-2px' } })}{tab.icon && React.createElement(tab.icon, { size: 14, style: { marginRight: '6px', display: 'inline', verticalAlign: '-2px' } })}{tab.icon && React.createElement(tab.icon, { size: 14, style: { marginRight: '6px', display: 'inline', verticalAlign: '-2px' } })}{tab.icon && React.createElement(tab.icon, { size: 14, style: { marginRight: '6px', display: 'inline', verticalAlign: '-2px' } })}{tab.icon && React.createElement(tab.icon, { size: 14, style: { marginRight: '6px', display: 'inline', verticalAlign: '-2px' } })}{tab.label}
                 </button>
               ))}
             </div>

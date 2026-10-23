@@ -122,9 +122,11 @@ export const ResourcesPage: React.FC = () => {
 
       {/* Facilities Showcase Cards with Enhanced Spec Hierarchy */}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--navy)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>🏛️</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#eff6ff', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <FlaskConical size={16} />
+            </div>
             <span>Katalog Fasilitas Laboratorium Terpadu</span>
           </h3>
           <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
@@ -132,13 +134,13 @@ export const ResourcesPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="projects-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
           {campusFacilities.map((fac, i) => (
             <div
               key={i}
               className="card facility-showcase-card"
               style={{
-                padding: '20px',
+                padding: '18px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -146,20 +148,27 @@ export const ResourcesPage: React.FC = () => {
                 borderRadius: '16px',
                 background: 'var(--surface)',
                 boxShadow: 'var(--shadow-sm)',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                minWidth: 0,
+                boxSizing: 'border-box',
+                overflow: 'hidden'
               }}
             >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <span className={`badge ${fac.badgeColor}`} style={{ fontSize: '10.5px' }}>{fac.category}</span>
-                  <span className="badge badge-teal" style={{ fontSize: '10px' }}>{fac.status}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <span className={`badge ${fac.badgeColor}`} style={{ fontSize: '10px', lineHeight: 1.3, whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: '100%' }}>
+                    {fac.category}
+                  </span>
+                  <span className="badge badge-teal" style={{ fontSize: '9.5px', lineHeight: 1.3, whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: '100%' }}>
+                    {fac.status}
+                  </span>
                 </div>
 
-                <h4 style={{ fontSize: '15.5px', fontWeight: 800, color: 'var(--navy)', marginBottom: '8px', lineHeight: 1.3 }}>
+                <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--navy)', marginBottom: '8px', lineHeight: 1.35, wordBreak: 'break-word' }}>
                   {fac.name}
                 </h4>
 
-                <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', lineHeight: 1.5, marginBottom: '14px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.45, marginBottom: '14px', wordBreak: 'break-word', flex: '1 1 auto' }}>
                   {fac.desc}
                 </p>
 
@@ -173,21 +182,24 @@ export const ResourcesPage: React.FC = () => {
                     marginBottom: '16px'
                   }}
                 >
-                  <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--navy)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-                    ⚙️ Spesifikasi Teknis:
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 800, color: 'var(--navy)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                    <Cpu size={12} style={{ color: 'var(--primary)' }} />
+                    <span>Spesifikasi Teknis:</span>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                     {fac.specs.map((sp, idx) => (
                       <span
                         key={idx}
                         style={{
-                          fontSize: '11px',
+                          fontSize: '10.5px',
                           fontWeight: 700,
                           color: '#0f172a',
                           background: 'white',
                           border: '1px solid #cbd5e1',
-                          padding: '2px 8px',
-                          borderRadius: '6px'
+                          padding: '2px 7px',
+                          borderRadius: '6px',
+                          wordBreak: 'break-word',
+                          maxWidth: '100%'
                         }}
                       >
                         {sp}
@@ -202,7 +214,7 @@ export const ResourcesPage: React.FC = () => {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => openModal('resource')}
-                style={{ width: '100%', justifyContent: 'center', fontSize: '12px', padding: '8px 12px', fontWeight: 700 }}
+                style={{ width: '100%', marginTop: 'auto', justifyContent: 'center', fontSize: '12px', padding: '8px 12px', fontWeight: 700 }}
               >
                 <span>Ajukan Peminjaman Fasilitas Ini</span>
                 <span style={{ fontSize: '13px' }}>&rarr;</span>

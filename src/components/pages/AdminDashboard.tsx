@@ -107,7 +107,7 @@ Klinik riset berjalan efektif. Seluruh tahapan metodologi berada dalam koridor e
       <div className="section-head">
         <div>
           <div className="eyebrow" style={{ color: '#0284c7' }}>
-            🛠️ Pusat Pengawasan &amp; Tata Kelola Sistem
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Wrench size={14} /> Pusat Pengawasan &amp; Tata Kelola Sistem</span>
           </div>
           <h2 className="h1">Dashboard Eksekutif Administrator</h2>
           <p className="sub">
@@ -135,7 +135,7 @@ Klinik riset berjalan efektif. Seluruh tahapan metodologi berada dalam koridor e
             }}
           >
             <Server size={16} />
-            <span>⚡ Master Portal (adm.steamcraft.online)</span>
+            <span>Master Portal (adm.steamcraft.online)</span>
           </button>
 
           <button
@@ -146,7 +146,7 @@ Klinik riset berjalan efektif. Seluruh tahapan metodologi berada dalam koridor e
             }}
           >
             <FileText size={16} />
-            <span>{showSummaryGenerator ? 'Tutup Ringkasan' : '📊 Ringkasan Eksekutif'}</span>
+            <span>{showSummaryGenerator ? 'Tutup Ringkasan' : 'Ringkasan Eksekutif'}</span>
           </button>
 
           <button

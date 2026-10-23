@@ -1,3 +1,4 @@
+import { AvatarBadgeIcon, AVATAR_ICON_KEYS } from '../common/AvatarBadge';
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
@@ -42,7 +43,16 @@ import {
   Users,
   Copy,
   UploadCloud,
-  Paperclip
+  Paperclip,
+  Target,
+  Wrench,
+  Megaphone,
+  AlertTriangle,
+  Lightbulb,
+  Pin,
+  Leaf,
+  FlaskConical,
+  Settings
 } from 'lucide-react';
 import { User, Project, UserRole } from '../../types';
 
@@ -126,7 +136,7 @@ const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }>
         {project.name}
       </h3>
       <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '16px' }}>
-        👨‍🏫 Dosen Pembimbing: <strong>{project.lecturer}</strong> • 👥 {project.members_count} Peneliti
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><GraduationCap size={13} /> Dosen Pembimbing: <strong>{project.lecturer}</strong></span> • <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Users size={13} /> {project.members_count} Peneliti</span>
       </div>
 
       <div style={{ marginBottom: '16px' }}>
@@ -140,7 +150,7 @@ const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }>
 
       <div style={{ marginBottom: '16px' }}>
         <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
-          🎯 Fokus & Target Penelitian:
+          <Target size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '5px' }} />Fokus & Target Penelitian:
         </h4>
         <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', margin: 0 }}>
           {project.goal}
@@ -149,7 +159,7 @@ const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }>
 
       <div style={{ marginBottom: '20px' }}>
         <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
-          🛠️ Perangkat / Metodologi Riset:
+          <Wrench size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '5px' }} />Perangkat / Metodologi Riset:
         </h4>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           {project.tools?.split(',').map((tool: string, idx: number) => (
@@ -163,7 +173,7 @@ const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }>
       {project.open_recruitment === 1 && (
         <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '12px 14px', borderRadius: '10px', marginBottom: '20px' }}>
           <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#047857', marginBottom: '4px' }}>
-            📢 LOWONGAN KOLABORATOR TERBUKA:
+            <Megaphone size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '5px' }} />LOWONGAN KOLABORATOR TERBUKA:
           </div>
           <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#064e3b' }}>
             Posisi yang dicari: {project.recruitment_roles || 'Terbuka untuk kolaborator lintas prodi'}
@@ -202,7 +212,7 @@ const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }>
           </button>
         ) : (
           <div style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
-            🔒 Tim riset ini telah terisi penuh.
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Lock size={12} /> Tim riset ini telah terisi penuh.</span>
           </div>
         )}
       </div>
@@ -556,7 +566,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
   // Avatar & Security
   const [avatarColor, setAvatarColor] = useState(user.avatar_color || '#2878d7');
   const [avatarIcon, setAvatarIcon] = useState(
-    user.avatar_icon || (role === 'student' ? '🔬' : role === 'lecturer' ? '👩‍🏫' : '🛠️')
+    user.avatar_icon || (role === 'student' ? 'science' : role === 'lecturer' ? 'lecturer' : 'engineering')
   );
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -580,7 +590,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
   ];
 
   // 10 STEAM Icons
-  const avatarIcons = ['🔬', '💻', '⚙️', '🎨', '📐', '🧬', '🚀', '💡', '🛡️', '👨‍🏫'];
+  const avatarIcons = AVATAR_ICON_KEYS;
 
   // Fast Tag Suggestions
   const suggestedTags = [
@@ -600,11 +610,11 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
 
   // STEAM Pillars definitions
   const steamPillars = [
-    { key: 'Science', label: '🔬 Science (Sains)', code: 's' },
-    { key: 'Technology', label: '💻 Technology (Teknologi)', code: 't' },
-    { key: 'Engineering', label: '⚙️ Engineering (Rekayasa)', code: 'e' },
-    { key: 'Art', label: '🎨 Art (Desain & Humaniora)', code: 'a' },
-    { key: 'Mathematics', label: '📐 Mathematics (Matematika)', code: 'm' }
+    { key: 'Science', label: 'Science (Sains)', code: 's' },
+    { key: 'Technology', label: 'Technology (Teknologi)', code: 't' },
+    { key: 'Engineering', label: 'Engineering (Rekayasa)', code: 'e' },
+    { key: 'Art', label: 'Art (Desain & Humaniora)', code: 'a' },
+    { key: 'Mathematics', label: 'Mathematics (Matematika)', code: 'm' }
   ];
 
   const togglePillar = (pillarKey: string) => {
@@ -665,7 +675,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
       setLinkedinUrl('https://linkedin.com/in/budisantoso-sd');
       setAcademicLinks('GitHub: github.com/budisantoso · LinkedIn: /in/budisantoso-sd');
       setAvatarColor('#2878d7');
-      setAvatarIcon('🔬');
+      setAvatarIcon('science');
     } else if (role === 'lecturer') {
       setName('Dr. Belgis Ainatul Iza, S.Si., M.Mat.');
       setTitlePrefix('');
@@ -684,7 +694,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
       setOrcidId('0009-0002-4182-9281');
       setAcademicLinks('NIP: 202509237 · Email: belgisiza@unesa.ac.id · SINTA ID: 6718290');
       setAvatarColor('#0d9488');
-      setAvatarIcon('👩‍🏫');
+      setAvatarIcon('lecturer');
     } else {
       setName('Administrator Sistem (Lead Dev & Architect)');
       setTitlePrefix('');
@@ -702,7 +712,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
       setGithubUrl('https://github.com/steamcraft-admin');
       setAcademicLinks('GitHub: github.com/steamcraft-admin · Docs: steamcraft.online/docs');
       setAvatarColor('#0f172a');
-      setAvatarIcon('🛠️');
+      setAvatarIcon('engineering');
     }
   };
 
@@ -838,7 +848,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
             color: '#b91c1c'
           }}
         >
-          ⚠️ {errorMsg}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={13} /> {errorMsg}</span>
         </div>
       )}
 
@@ -869,7 +879,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
               {name ? name.charAt(0).toUpperCase() : 'P'}
             </div>
             <div className="passport-avatar-icon" title="Ikon Disiplin STEAM">
-              {avatarIcon}
+              <AvatarBadgeIcon iconKey={avatarIcon} size={14} />
             </div>
           </div>
 
@@ -901,8 +911,8 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
             </div>
 
             <div className="passport-meta">
-              🏛️ {faculty || 'Fakultas Riset'} — {university || 'Universitas'}
-              {officeRoom && <span> · 📍 {officeRoom}</span>}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><GraduationCap size={12} /> {faculty || 'Fakultas Riset'} — {university || 'Universitas'}</span>
+              {officeRoom && <span> · <MapPin size={11} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '3px' }} />{officeRoom}</span>}
             </div>
 
             {bio && (
@@ -1005,9 +1015,9 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
             <div className="auth-field" style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid var(--line)' }}>
               <label style={{ color: '#0f172a', fontWeight: 800 }}>Otoritas Peran Sistem (Hak Akses Akun)</label>
               <select value={role} onChange={e => setRole(e.target.value as UserRole)} style={{ marginTop: '4px' }}>
-                <option value="student">🎓 Mahasiswa Peneliti (Student)</option>
-                <option value="lecturer">👨‍🏫 Dosen Pembimbing & Reviewer Rubrik (Lecturer)</option>
-                <option value="admin">🛠️ Administrator Sistem & Lead Dev (Admin)</option>
+                <option value="student">Mahasiswa Peneliti (Student)</option>
+                <option value="lecturer">Dosen Pembimbing & Reviewer Rubrik (Lecturer)</option>
+                <option value="admin">Administrator Sistem & Lead Dev (Admin)</option>
               </select>
             </div>
           )}
@@ -1196,7 +1206,7 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
             {/* Quick Suggestion Chips */}
             <div style={{ marginTop: '8px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>
-                💡 Rekomendasi Kata Kunci Riset Populer (Klik untuk tambah/hapus):
+                <Lightbulb size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Rekomendasi Kata Kunci Riset Populer (Klik untuk tambah/hapus):
               </span>
               <div className="tag-chips-wrapper">
                 {suggestedTags.map(tag => {
@@ -1364,8 +1374,9 @@ const ProfileModalContent: React.FC<{ user: User; onClose: () => void }> = ({ us
                   className={`icon-selector-btn ${avatarIcon === icon ? 'active' : ''}`}
                   onClick={() => setAvatarIcon(icon)}
                   title={`Gunakan lencana ${icon}`}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {icon}
+                  <AvatarBadgeIcon iconKey={icon} size={16} />
                 </button>
               ))}
             </div>
@@ -1732,7 +1743,7 @@ const AnnouncementDetailContent: React.FC<{ ann: any; onClose: () => void }> = (
         >
           {ann.category}
         </span>
-        {ann.pinned === 1 && <span className="badge badge-purple">📌 Disematkan</span>}
+        {ann.pinned === 1 && <span className="badge badge-purple" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Pin size={10} /> Disematkan</span>}
       </div>
 
       <h2 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy)', marginBottom: '8px' }}>
@@ -2154,7 +2165,7 @@ const PeerFeedbackModalContent: React.FC<{ data?: any; onClose: () => void }> = 
 
       {isSelfReview && (
         <div style={{ background: '#fff1f2', border: '1px solid #fecdd3', padding: '10px 14px', borderRadius: '10px', color: '#9f1239', fontSize: '12px', marginBottom: '14px' }}>
-          ⚠️ Evaluasi sejawat dirancang untuk menilai kontribusi rekan tim. Silakan pilih rekan kolaborator lainnya pada daftar di atas.
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={13} /> Evaluasi sejawat dirancang untuk menilai kontribusi rekan tim. Silakan pilih rekan kolaborator lainnya pada daftar di atas.</span>
         </div>
       )}
 
@@ -2308,7 +2319,7 @@ const PeerFeedbackModalContent: React.FC<{ data?: any; onClose: () => void }> = 
       {/* Qualitative Strengths */}
       <div className="auth-field">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-          <label style={{ margin: 0 }}>💡 Kekuatan & Kontribusi Menonjol Rekan</label>
+          <label style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Lightbulb size={12} /> Kekuatan & Kontribusi Menonjol Rekan</label>
           <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Deskripsikan kontribusi nyata</span>
         </div>
         <textarea
@@ -2338,7 +2349,7 @@ const PeerFeedbackModalContent: React.FC<{ data?: any; onClose: () => void }> = 
       {/* Constructive Improvements */}
       <div className="auth-field" style={{ marginTop: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-          <label style={{ margin: 0 }}>🌱 Saran Pengembangan Ilmiah Konstruktif</label>
+          <label style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Leaf size={12} /> Saran Pengembangan Ilmiah Konstruktif</label>
           <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Rekomendasi pengembangan diri</span>
         </div>
         <textarea
@@ -2401,23 +2412,23 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '8px' }}>
             <div style={{ background: '#eff6ff', padding: '10px 12px', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
-              <strong style={{ fontSize: '12px', color: '#1d4ed8' }}>🔬 Science</strong>
+              <strong style={{ fontSize: '12px', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><FlaskConical size={13} /> Science</strong>
               <div style={{ fontSize: '11px', color: '#1e40af' }}>Hipotesis & Observasi</div>
             </div>
             <div style={{ background: '#f0fdfa', padding: '10px 12px', borderRadius: '10px', border: '1px solid #99f6e4' }}>
-              <strong style={{ fontSize: '12px', color: '#0f766e' }}>💻 Technology</strong>
+              <strong style={{ fontSize: '12px', color: '#0f766e', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Code size={13} /> Technology</strong>
               <div style={{ fontSize: '11px', color: '#115e59' }}>Algoritma & Komputasi</div>
             </div>
             <div style={{ background: '#fff7ed', padding: '10px 12px', borderRadius: '10px', border: '1px solid #fed7aa' }}>
-              <strong style={{ fontSize: '12px', color: '#c2410c' }}>⚙️ Engineering</strong>
+              <strong style={{ fontSize: '12px', color: '#c2410c', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Settings size={13} /> Engineering</strong>
               <div style={{ fontSize: '11px', color: '#9a3412' }}>Rekayasa & Purwarupa</div>
             </div>
             <div style={{ background: '#fff1f2', padding: '10px 12px', borderRadius: '10px', border: '1px solid #fecdd3' }}>
-              <strong style={{ fontSize: '12px', color: '#be123c' }}>🎨 Art</strong>
+              <strong style={{ fontSize: '12px', color: '#be123c', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Palette size={13} /> Art</strong>
               <div style={{ fontSize: '11px', color: '#9f1239' }}>Estetika & Desain UI</div>
             </div>
             <div style={{ background: '#f5f3ff', padding: '10px 12px', borderRadius: '10px', border: '1px solid #ddd6fe' }}>
-              <strong style={{ fontSize: '12px', color: '#6d28d9' }}>📐 Mathematics</strong>
+              <strong style={{ fontSize: '12px', color: '#6d28d9', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Compass size={13} /> Mathematics</strong>
               <div style={{ fontSize: '11px', color: '#5b21b6' }}>Statistik & Model</div>
             </div>
           </div>
@@ -2475,15 +2486,15 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Alur checkpoint terstruktur dari perumusan hipotesis hingga rilis artefak.</p>
             </div>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ fontSize: '12px', color: '#0d9488' }}>📖 Jurnal Logbook Lab</strong>
+              <strong style={{ fontSize: '12px', color: '#0d9488', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><BookOpen size={13} /> Jurnal Logbook Lab</strong>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Catat anomali ukur, parameter sensor, dan lampiran berkas data empiris.</p>
             </div>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ fontSize: '12px', color: '#7c3aed' }}>🤖 Asisten Ilmiah STEAM</strong>
+              <strong style={{ fontSize: '12px', color: '#7c3aed', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Bot size={13} /> Asisten Ilmiah STEAM</strong>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>AI copilot untuk validasi rumus statistik, pembagian dataset, dan uji RMSE.</p>
             </div>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ fontSize: '12px', color: '#ea580c' }}>📦 Versi & Artefak Build</strong>
+              <strong style={{ fontSize: '12px', color: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><FolderGit2 size={13} /> Versi & Artefak Build</strong>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Catat commit repositori GitHub dan file luaran riset yang teruji.</p>
             </div>
           </div>
@@ -2505,14 +2516,14 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#fff1f2', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fecdd3' }}>
-              <span style={{ fontSize: '20px' }}>⚠️</span>
+              <AlertTriangle size={24} color="#e11d48" />
               <div>
                 <strong style={{ fontSize: '12.5px', color: '#9f1239' }}>Tombol "Laporkan Kendala" (Blocker Alert)</strong>
                 <p style={{ fontSize: '11.5px', color: '#881337', margin: '2px 0 0 0' }}>Tandai kendala reagen, galat alat, atau bias statistik agar dosen segera menjadwalkan intervensi.</p>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#f0fdf4', padding: '12px 14px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-              <span style={{ fontSize: '20px' }}>🏛️</span>
+              <GraduationCap size={24} color="#059669" />
               <div>
                 <strong style={{ fontSize: '12.5px', color: '#166534' }}>Peminjaman Fasilitas & Sensor Laboratorium</strong>
                 <p style={{ fontSize: '11.5px', color: '#14532d', margin: '2px 0 0 0' }}>Ajukan peminjaman modul mikrokontroler, server komputasi awan, atau ruang uji kampus secara resmi.</p>
@@ -2537,7 +2548,7 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ fontSize: '12px', color: '#7c3aed' }}>📐 Radar Segi Lima STEAM</strong>
+              <strong style={{ fontSize: '12px', color: '#7c3aed', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Compass size={13} /> Radar Segi Lima STEAM</strong>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Pemetaan visual poligon segi lima S-T-E-A-M terstandarisasi.</p>
             </div>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
@@ -2545,11 +2556,11 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Evaluasi formatif antar anggota tim lengkap dengan lencana penghargaan.</p>
             </div>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ fontSize: '12px', color: '#0d9488' }}>📜 Sertifikat Kelayakan Riset</strong>
+              <strong style={{ fontSize: '12px', color: '#0d9488', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Award size={13} /> Sertifikat Kelayakan Riset</strong>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Sertifikat resmi cetak A4 dengan segel emas dan tanda tangan dosen.</p>
             </div>
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ fontSize: '12px', color: '#ea580c' }}>💾 Ekspor Paket Reproducibility</strong>
+              <strong style={{ fontSize: '12px', color: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><FileText size={13} /> Ekspor Paket Reproducibility</strong>
               <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Unduh berkas JSON berisi metadata riset lengkap dan hash verifikasi SHA-256.</p>
             </div>
           </div>
@@ -2671,7 +2682,7 @@ const QuickTourModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
                 className="btn btn-primary btn-sm"
                 onClick={handleFinish}
               >
-                <span>Mulai Eksplorasi 🚀</span>
+                <span>Mulai Eksplorasi &rarr;</span>
               </button>
             </div>
           )}
@@ -2935,7 +2946,7 @@ const InviteProjectModalContent: React.FC<{ project: any; onClose: () => void }>
         {/* Unique Join Code Box */}
         <div style={{ background: '#0f172a', color: 'white', padding: '16px', borderRadius: '14px', border: '1px solid #334155' }}>
           <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
-            🔑 Kode Undangan Proyek
+            <Key size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Kode Undangan Proyek
           </span>
           <div style={{ fontSize: '22px', fontWeight: 900, fontFamily: 'monospace', color: '#38bdf8', letterSpacing: '2px', marginBottom: '12px' }}>
             {inviteCode}
@@ -2955,7 +2966,7 @@ const InviteProjectModalContent: React.FC<{ project: any; onClose: () => void }>
         <div style={{ background: 'white', padding: '16px', borderRadius: '14px', border: '1px solid var(--line)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
-              🔗 Tautan Undangan Langsung
+              <LinkIcon size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Tautan Undangan Langsung
             </span>
             <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', background: 'var(--surface-alt)', padding: '8px 10px', borderRadius: '8px', wordBreak: 'break-all', fontFamily: 'monospace', marginBottom: '12px' }}>
               {inviteUrl}

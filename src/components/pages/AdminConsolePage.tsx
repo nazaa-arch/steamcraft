@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Shield, Database, RefreshCw, Download, UserCheck, Settings, AlertOctagon } from 'lucide-react';
+import { Shield, Database, RefreshCw, Download, UserCheck, Settings, AlertOctagon, Wrench } from 'lucide-react';
 
 export const AdminConsolePage: React.FC = () => {
   const { appMode, setAppMode, users, projects, resetAllData, exportDataJson, openModal } = useApp();
@@ -36,7 +36,7 @@ export const AdminConsolePage: React.FC = () => {
       <div className="section-head">
         <div>
           <div className="eyebrow" style={{ color: '#0284c7' }}>
-            🛠️ Administrator & Lead Developer Control
+            <Wrench size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '5px' }} /> Administrator & Lead Developer Control
           </div>
           <h2 className="h1">Konsol Administrasi Sistem</h2>
           <p className="sub">

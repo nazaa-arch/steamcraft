@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ExternalLink } from 'lucide-react';
+import { Sparkles, ExternalLink, Lightbulb } from 'lucide-react';
 
 export interface SteamMemberData {
   id: string;
@@ -375,7 +375,7 @@ export const SteamTeamCardSection: React.FC = () => {
           Tiga inovator multidisiplin yang memimpin perancangan platform perangkat lunak, instrumen IoT, dan metodologi ilmiah.
         </p>
         <p style={{ fontSize: '13px', color: '#2563eb', fontWeight: 700, margin: 0 }}>
-          💡 Klik pada kartu anggota mana pun untuk langsung mengunjungi website portofolio resmi masing-masing.
+          <Lightbulb size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '5px' }} />Klik pada kartu anggota mana pun untuk langsung mengunjungi website portofolio resmi masing-masing.
         </p>
       </div>
 

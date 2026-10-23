@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { AlertTriangle, CheckCircle, Award, FileText, ChevronRight, ChevronLeft, Save } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Award, FileText, ChevronRight, ChevronLeft, Save, FolderOpen } from 'lucide-react';
 
 export const MissionControlPage: React.FC = () => {
   const { projects, rubrics, saveRubric, toggleBlocker, setSelectedProjectId, setCurrentPage } = useApp();
@@ -210,7 +210,7 @@ export const MissionControlPage: React.FC = () => {
                   minHeight: '220px'
                 }}
               >
-                <span style={{ fontSize: '26px', marginBottom: '8px' }}>📂</span>
+                <FolderOpen size={32} style={{ marginBottom: '8px', color: '#94a3b8' }} />
                 <strong style={{ fontSize: '13px', color: 'var(--navy)', marginBottom: '4px' }}>
                   Tidak Ada Proyek
                 </strong>
@@ -284,7 +284,7 @@ export const MissionControlPage: React.FC = () => {
                     <span className="badge badge-blue">{activeProject.study}</span>
                     <span className="badge badge-purple">{activeProject.steam}</span>
                     <span className={`badge ${activeProject.blocker ? 'badge-rose' : 'badge-teal'}`}>
-                      {activeProject.blocker ? '⚠️ Memerlukan Bimbingan' : activeProject.status}
+                      {activeProject.blocker ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={11} /> Memerlukan Bimbingan</span> : activeProject.status}
                     </span>
                   </div>
                   <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy)', lineHeight: 1.25, wordBreak: 'break-word' }}>

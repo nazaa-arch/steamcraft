@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Plus, Search, Filter, Users, ArrowRight, UserPlus, CheckCircle, AlertCircle, Link as LinkIcon, KeyRound, Sparkles, FolderGit2 } from 'lucide-react';
+import { Plus, Search, Filter, Users, ArrowRight, UserPlus, CheckCircle, AlertCircle, Link as LinkIcon, KeyRound, Sparkles, FolderGit2, Target, GraduationCap, Lock } from 'lucide-react';
 
 export const ProjectCatalog: React.FC = () => {
   const {
@@ -215,7 +215,7 @@ export const ProjectCatalog: React.FC = () => {
                             : 'badge-orange'
                         }`}
                       >
-                        {proj.blocker ? '⚠️ Blocker' : proj.status}
+                        {proj.blocker ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><AlertCircle size={11} /> Blocker</span> : proj.status}
                       </span>
                     </div>
                   </div>
@@ -254,10 +254,10 @@ export const ProjectCatalog: React.FC = () => {
                   </div>
 
                   <div style={{ fontSize: '11px', color: 'var(--ink-secondary)', marginBottom: '6px' }}>
-                    🎯 <strong>Fokus:</strong> {proj.goal.slice(0, 90)}...
+                    <Target size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} /><strong>Fokus:</strong> {proj.goal.slice(0, 90)}...
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px' }}>
-                    👨‍🏫 Pembimbing: <strong>{proj.lecturer}</strong>
+                    <GraduationCap size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />Pembimbing: <strong>{proj.lecturer}</strong>
                   </div>
                 </div>
 
@@ -317,7 +317,7 @@ export const ProjectCatalog: React.FC = () => {
                             style={{ background: '#f1f5f9', color: '#64748b', fontSize: '11px', display: 'inline-flex', alignItems: 'center' }}
                             title="Tim telah terisi penuh"
                           >
-                            🔒 Tim Penuh
+                            <Lock size={11} style={{ marginRight: '4px' }} />Tim Penuh
                           </span>
                         )}
                       </>

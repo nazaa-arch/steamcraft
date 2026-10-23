@@ -33,7 +33,8 @@ import {
   Sparkles,
   Info,
   Check,
-  Rocket
+  Rocket,
+  Trash2
 } from 'lucide-react';
 import {
   ActiveSession,
@@ -162,10 +163,10 @@ export const AdminDevPortal: React.FC = () => {
       const duration = Math.round(performance.now() - start);
       const measured = Math.max(12, duration);
       setPingLatency(measured);
-      showToast(`⚡ Ping Server AnymHost: ${measured} ms (Koneksi Optimal)`);
+      showToast(`Ping Server AnymHost: ${measured} ms (Koneksi Optimal)`);
     } catch (e) {
       setPingLatency(20);
-      showToast('⚡ Ping Server AnymHost: 20 ms (Koneksi Stabil)');
+      showToast('Ping Server AnymHost: 20 ms (Koneksi Stabil)');
     } finally {
       setIsPinging(false);
       setServerSyncTime(new Date().toLocaleTimeString('id-ID'));
@@ -183,11 +184,11 @@ export const AdminDevPortal: React.FC = () => {
       setServerSyncTime(new Date().toLocaleTimeString('id-ID'));
       showToast(
         nextState
-          ? '🔒 Mode Pemeliharaan DIAKTIFKAN di seluruh server AnymHost!'
-          : '✅ Mode Pemeliharaan DINONAKTIFKAN. Seluruh website kembali online!'
+          ? 'Mode Pemeliharaan DIAKTIFKAN di seluruh server AnymHost!'
+          : '✓ Mode Pemeliharaan DINONAKTIFKAN. Seluruh website kembali online!'
       );
     } catch (err) {
-      showToast('⚠️ Gagal menyinkronkan status pemeliharaan.');
+      showToast('Gagal menyinkronkan status pemeliharaan.');
     } finally {
       setIsSyncingMaintenance(false);
     }
@@ -198,7 +199,7 @@ export const AdminDevPortal: React.FC = () => {
     const nextMode = appMode === 'demo' ? 'production' : 'demo';
     setAppMode(nextMode);
     trackEvent('toggle_app_mode', 'DevOps', nextMode);
-    showToast(`🔄 Mode Platform beralih ke: ${nextMode === 'production' ? 'PRODUKSI RIIL' : 'DEMO SANDBOX'}`);
+    showToast(`Mode Platform beralih ke: ${nextMode === 'production' ? 'PRODUKSI RIIL' : 'DEMO SANDBOX'}`);
   };
 
   // 1-Click Full Backup Download
@@ -216,16 +217,16 @@ export const AdminDevPortal: React.FC = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       trackEvent('backup_download', 'DevOps', 'full_json');
-      showToast('💾 Berkas cadangan database penuh berhasil diunduh (JSON).');
+      showToast('✓ Berkas cadangan database penuh berhasil diunduh (JSON).');
     } catch (e) {
-      showToast('❌ Gagal menghasilkan berkas cadangan data.');
+      showToast('Gagal menghasilkan berkas cadangan data.');
     }
   };
 
   // 1-Click Cache Purge
   const handlePurgeCache = () => {
     trackEvent('purge_cache', 'DevOps');
-    showToast('🧹 Cache telemetri browser & buffer sesi berhasil dibersihkan.');
+    showToast('✓ Cache telemetri browser & buffer sesi berhasil dibersihkan.');
   };
 
   // Real-Time Send Direct Message to Session
@@ -233,7 +234,7 @@ export const AdminDevPortal: React.FC = () => {
     if (!selectedSessionForMessage || !messageText.trim()) return;
     sendAlertToSession(selectedSessionForMessage.sessionId, messageText.trim());
     trackEvent('send_user_alert', 'DevOps', selectedSessionForMessage.userName);
-    showToast(`✉️ Pesan langsung berhasil dikirim ke layar ${selectedSessionForMessage.userName}`);
+    showToast(`✓ Pesan langsung berhasil dikirim ke layar ${selectedSessionForMessage.userName}`);
     setMessageText('');
     setSelectedSessionForMessage(null);
   };
@@ -243,18 +244,18 @@ export const AdminDevPortal: React.FC = () => {
     const updated = terminateActiveSession(session.sessionId);
     setSessions(updated);
     trackEvent('terminate_session', 'DevOps', session.userName);
-    showToast(`🚪 Sesi pengguna ${session.userName} berhasil diputus (Force Logout).`);
+    showToast(`Sesi pengguna ${session.userName} berhasil diputus (Force Logout).`);
   };
 
   // Emergency Global Broadcast
   const handleSendBroadcast = () => {
     if (!broadcastTitle.trim() || !broadcastMessage.trim()) {
-      showToast('⚠️ Silakan isi judul dan pesan siaran darurat.');
+      showToast('Silakan isi judul dan pesan siaran darurat.');
       return;
     }
 
     addAnnouncement({
-      title: `🚨 [SIARAN MASTER ADMIN] ${broadcastTitle.trim()}`,
+      title: `[SIARAN MASTER ADMIN] ${broadcastTitle.trim()}`,
       body: broadcastMessage.trim(),
       category: 'Akademik',
       author_name: 'Master DevOps Administrator',
@@ -263,7 +264,7 @@ export const AdminDevPortal: React.FC = () => {
     });
 
     trackEvent('emergency_broadcast', 'DevOps', broadcastTitle);
-    showToast('📢 Siaran darurat berhasil dikirim ke seluruh civitas akademika!');
+    showToast('✓ Siaran darurat berhasil dikirim ke seluruh civitas akademika!');
     setShowBroadcastModal(false);
     setBroadcastTitle('');
     setBroadcastMessage('');
@@ -282,7 +283,7 @@ export const AdminDevPortal: React.FC = () => {
     if (code === 'admin123' || code === 'admin2026!' || code === 'steamcraft2026') {
       const ok = login('admin', 'admin2026!') || login('admin', 'admin123');
       if (ok) {
-        showToast('🔓 Otorisasi Master Administrator berhasil.');
+        showToast('✓ Otorisasi Master Administrator berhasil.');
         setAuthError(null);
       } else {
         setAuthError('Otorisasi gagal. Silakan coba kembali.');
@@ -647,7 +648,7 @@ export const AdminDevPortal: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
               <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.8px', color: '#38bdf8', textTransform: 'uppercase' }}>
-                ⚡ KONTROL OPERASIONAL RIIL
+                KONTROL OPERASIONAL RIIL
               </span>
               <h2 style={{ fontSize: '18px', fontWeight: 900, margin: '2px 0 0 0', color: '#fff' }}>
                 Tindakan Instan Master Administrator
@@ -991,9 +992,7 @@ export const AdminDevPortal: React.FC = () => {
                     color: '#fff',
                     cursor: 'pointer'
                   }}
-                >
-                  🧹
-                </button>
+                ><Trash2 size={13} /></button>
               </div>
             </div>
 

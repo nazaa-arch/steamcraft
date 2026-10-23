@@ -16,7 +16,10 @@ import {
   Palette,
   Type,
   Eye,
-  X
+  X,
+  Users,
+  Globe,
+  AlertTriangle
 } from 'lucide-react';
 import { SteamLogoVector, SparkleIcon } from './SteamIdCard';
 
@@ -647,9 +650,7 @@ export const SteamBrandGuidelineSection: React.FC = () => {
                     fontWeight: 800,
                     fontSize: '11px'
                   }}
-                >
-                  👥
-                </div>
+                ><Users size={18} /></div>
                 <div>
                   <strong style={{ fontSize: '14px', color: '#1e3a8a', display: 'block' }}>Kolaborasi</strong>
                   <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.45 }}>
@@ -673,9 +674,7 @@ export const SteamBrandGuidelineSection: React.FC = () => {
                     fontWeight: 800,
                     fontSize: '11px'
                   }}
-                >
-                  ✦
-                </div>
+                ><Sparkles size={18} /></div>
                 <div>
                   <strong style={{ fontSize: '14px', color: '#1e3a8a', display: 'block' }}>Inovasi</strong>
                   <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.45 }}>
@@ -699,9 +698,7 @@ export const SteamBrandGuidelineSection: React.FC = () => {
                     fontWeight: 800,
                     fontSize: '11px'
                   }}
-                >
-                  🌐
-                </div>
+                ><Globe size={18} /></div>
                 <div>
                   <strong style={{ fontSize: '14px', color: '#1e3a8a', display: 'block' }}>Dampak</strong>
                   <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.45 }}>
@@ -1004,7 +1001,7 @@ export const SteamBrandGuidelineSection: React.FC = () => {
               gap: '6px'
             }}
           >
-            <span>⚠️ Pelanggaran proporsi logo mengurangi standar audit identitas ilmiah.</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><AlertTriangle size={13} /> Pelanggaran proporsi logo mengurangi standar audit identitas ilmiah.</span>
           </div>
         </div>
 

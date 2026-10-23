@@ -1,6 +1,34 @@
+import { AvatarBadgeIcon } from '../common/AvatarBadge';
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronDown, UserCheck, Menu, ChevronRight } from 'lucide-react';
+import {
+  Bell,
+  Edit3,
+  Shield,
+  LogOut,
+  Check,
+  X,
+  Sparkles,
+  ChevronDown,
+  UserCheck,
+  Menu,
+  ChevronRight,
+  Home,
+  Laptop,
+  FolderGit2,
+  Globe,
+  MessageSquare,
+  FlaskConical,
+  Trophy,
+  Target,
+  BarChart3,
+  Wrench,
+  FileText,
+  Database,
+  User,
+  Megaphone,
+  GraduationCap
+} from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -148,7 +176,9 @@ export const Topbar: React.FC = () => {
               closeMobileMenu();
             }}
           >
-            <span style={{ fontSize: '15px' }}>💻</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Laptop size={15} />
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>Ruang Kerja Tim (Workspace)</div>
               <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Kanban, Editor Naskah, & Logbook aktif</small>
@@ -165,7 +195,9 @@ export const Topbar: React.FC = () => {
               closeMobileMenu();
             }}
           >
-            <span style={{ fontSize: '15px' }}>🗂️</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <FolderGit2 size={15} />
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>
                 {role === 'lecturer' ? 'Proyek Bimbingan' : role === 'admin' ? 'Semua Proyek' : 'Proyek Saya'} ({myProjectsCount})
@@ -184,7 +216,9 @@ export const Topbar: React.FC = () => {
               closeMobileMenu();
             }}
           >
-            <span style={{ fontSize: '15px' }}>🌐</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Globe size={15} />
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>Katalog & Rekrutmen Riset</div>
               <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Eksplorasi riset & lowongan kolaborasi</small>
@@ -346,10 +380,14 @@ export const Topbar: React.FC = () => {
                 background: '#0f172a',
                 color: '#38bdf8',
                 fontWeight: 800,
-                border: '1px solid #38bdf8'
+                border: '1px solid #38bdf8',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              <span>🛠️ Admin Console</span>
+              <Wrench size={14} />
+              <span>Admin Console</span>
             </button>
           </>
         )}
@@ -385,7 +423,9 @@ export const Topbar: React.FC = () => {
                   closeMobileMenu();
                 }}
               >
-                <span style={{ fontSize: '15px' }}>🎯</span>
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#fff1f2', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Target size={15} />
+                </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>STEAM Radar Matrix</div>
                   <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Keseimbangan 5 pilar riset</small>
@@ -401,7 +441,9 @@ export const Topbar: React.FC = () => {
                   closeMobileMenu();
                 }}
               >
-                <span style={{ fontSize: '15px' }}>📝</span>
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileText size={15} />
+                </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>Logbook Riset Ilmiah</div>
                   <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Catatan & Ekspor PDF PKM</small>
@@ -417,7 +459,9 @@ export const Topbar: React.FC = () => {
                   closeMobileMenu();
                 }}
               >
-                <span style={{ fontSize: '15px' }}>🔬</span>
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Database size={15} />
+                </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>Repository Data Empiris</div>
                   <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Dataset & Reproducibility</small>
@@ -532,7 +576,9 @@ export const Topbar: React.FC = () => {
             >
               <div className="notif-dropdown-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '16px' }}>📢</span>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Megaphone size={15} />
+                  </div>
                   <strong style={{ fontSize: '13.5px', color: 'var(--navy)' }}>
                     Pemberitahuan & Pengumuman
                   </strong>
@@ -630,7 +676,7 @@ export const Topbar: React.FC = () => {
               style={{ backgroundColor: currentUser.avatar_color || '#2878d7', position: 'relative' }}
             >
               {currentUser.avatar_icon ? (
-                <span style={{ fontSize: '15px' }}>{currentUser.avatar_icon}</span>
+                <AvatarBadgeIcon iconKey={currentUser.avatar_icon} size={15} />
               ) : (
                 currentUser.name.charAt(0).toUpperCase()
               )}
@@ -662,7 +708,7 @@ export const Topbar: React.FC = () => {
                   className="dropdown-avatar"
                   style={{ backgroundColor: currentUser.avatar_color || '#2878d7' }}
                 >
-                  {currentUser.avatar_icon || currentUser.name.charAt(0).toUpperCase()}
+                  {currentUser.avatar_icon ? <AvatarBadgeIcon iconKey={currentUser.avatar_icon} size={16} /> : currentUser.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="dropdown-user-main">
                   <strong>
@@ -779,9 +825,9 @@ export const Topbar: React.FC = () => {
           <div className="mobile-drawer-user-info">
             <strong>{currentUser?.name}</strong>
             <small>
-              {role === 'student' && '🎓 Mahasiswa Peneliti'}
-              {role === 'lecturer' && '👩‍🏫 Dosen Pembimbing'}
-              {role === 'admin' && '🛡️ Administrator'}
+              {role === 'student' && 'Mahasiswa Peneliti'}
+              {role === 'lecturer' && 'Dosen Pembimbing'}
+              {role === 'admin' && 'Administrator'}
               {' • '}{currentUser?.study_program || 'STEAM'}
             </small>
           </div>
@@ -813,7 +859,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🏠</span>
+                  <span className="mobile-drawer-item-icon"><Home size={16} /></span>
                   <span className="mobile-drawer-item-label">Dashboard Peneliti</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -828,7 +874,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">💻</span>
+                  <span className="mobile-drawer-item-icon"><Laptop size={16} /></span>
                   <span className="mobile-drawer-item-label">Ruang Kerja Tim (Workspace)</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -844,7 +890,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🗂️</span>
+                  <span className="mobile-drawer-item-icon"><FolderGit2 size={16} /></span>
                   <span className="mobile-drawer-item-label">Proyek Riset Saya</span>
                 </div>
                 {myProjectsCount > 0 && (
@@ -864,7 +910,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🌐</span>
+                  <span className="mobile-drawer-item-icon"><Globe size={16} /></span>
                   <span className="mobile-drawer-item-label">Katalog Riset & Rekrutmen</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -880,7 +926,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">💬</span>
+                  <span className="mobile-drawer-item-icon"><MessageSquare size={16} /></span>
                   <span className="mobile-drawer-item-label">Bimbingan Dosen</span>
                 </div>
                 {pendingStudentConsults > 0 && (
@@ -897,7 +943,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🔬</span>
+                  <span className="mobile-drawer-item-icon"><FlaskConical size={16} /></span>
                   <span className="mobile-drawer-item-label">Fasilitas Laboratorium</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -912,7 +958,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🏆</span>
+                  <span className="mobile-drawer-item-icon"><Trophy size={16} /></span>
                   <span className="mobile-drawer-item-label">Portofolio Ilmiah STEAM</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -931,7 +977,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🎯</span>
+                  <span className="mobile-drawer-item-icon"><Target size={16} /></span>
                   <span className="mobile-drawer-item-label">Supervisi Riset Tim</span>
                 </div>
                 {blockerProjectsCount > 0 && (
@@ -948,7 +994,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">💻</span>
+                  <span className="mobile-drawer-item-icon"><Laptop size={16} /></span>
                   <span className="mobile-drawer-item-label">Ruang Kerja Tim (Workspace)</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -964,7 +1010,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🗂️</span>
+                  <span className="mobile-drawer-item-icon"><FolderGit2 size={16} /></span>
                   <span className="mobile-drawer-item-label">Daftar Proyek Bimbingan</span>
                 </div>
                 {myProjectsCount > 0 && (
@@ -984,7 +1030,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🌐</span>
+                  <span className="mobile-drawer-item-icon"><Globe size={16} /></span>
                   <span className="mobile-drawer-item-label">Katalog & Rekrutmen Riset</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1000,7 +1046,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">💬</span>
+                  <span className="mobile-drawer-item-icon"><MessageSquare size={16} /></span>
                   <span className="mobile-drawer-item-label">Bimbingan & Konsultasi</span>
                 </div>
                 {pendingLecturerConsults > 0 && (
@@ -1017,7 +1063,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🔬</span>
+                  <span className="mobile-drawer-item-icon"><FlaskConical size={16} /></span>
                   <span className="mobile-drawer-item-label">Fasilitas Laboratorium</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1032,7 +1078,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">📊</span>
+                  <span className="mobile-drawer-item-icon"><BarChart3 size={16} /></span>
                   <span className="mobile-drawer-item-label">Analitik & Evaluasi STEAM</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1051,7 +1097,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🏠</span>
+                  <span className="mobile-drawer-item-icon"><Home size={16} /></span>
                   <span className="mobile-drawer-item-label">Dashboard Sistem</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1066,7 +1112,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🎯</span>
+                  <span className="mobile-drawer-item-icon"><Target size={16} /></span>
                   <span className="mobile-drawer-item-label">Supervisi Riset</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1082,7 +1128,7 @@ export const Topbar: React.FC = () => {
                 style={{ background: '#0f172a', color: '#38bdf8', border: '1px solid #0284c7' }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🛠️</span>
+                  <span className="mobile-drawer-item-icon"><Wrench size={16} /></span>
                   <span className="mobile-drawer-item-label" style={{ fontWeight: 800 }}>Admin Console</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.7 }} />
@@ -1097,7 +1143,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">💻</span>
+                  <span className="mobile-drawer-item-icon"><Laptop size={16} /></span>
                   <span className="mobile-drawer-item-label">Ruang Kerja Tim</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1113,7 +1159,7 @@ export const Topbar: React.FC = () => {
                 }}
               >
                 <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon">🌐</span>
+                  <span className="mobile-drawer-item-icon"><Globe size={16} /></span>
                   <span className="mobile-drawer-item-label">Katalog Riset</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1135,7 +1181,7 @@ export const Topbar: React.FC = () => {
             }}
           >
             <div className="mobile-drawer-item-left">
-              <span className="mobile-drawer-item-icon">🎯</span>
+              <span className="mobile-drawer-item-icon"><Target size={16} /></span>
               <div>
                 <div className="mobile-drawer-item-label">STEAM Radar Matrix</div>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Keseimbangan 5 pilar riset</small>
@@ -1153,7 +1199,7 @@ export const Topbar: React.FC = () => {
             }}
           >
             <div className="mobile-drawer-item-left">
-              <span className="mobile-drawer-item-icon">📝</span>
+              <span className="mobile-drawer-item-icon"><FileText size={16} /></span>
               <div>
                 <div className="mobile-drawer-item-label">Logbook Riset Ilmiah</div>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Catatan harian &amp; ekspor PDF</small>
@@ -1171,7 +1217,7 @@ export const Topbar: React.FC = () => {
             }}
           >
             <div className="mobile-drawer-item-left">
-              <span className="mobile-drawer-item-icon">🔬</span>
+              <span className="mobile-drawer-item-icon"><Database size={16} /></span>
               <div>
                 <div className="mobile-drawer-item-label">Repository Data Empiris</div>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Dataset &amp; Reproducibility</small>
@@ -1194,7 +1240,7 @@ export const Topbar: React.FC = () => {
             }}
           >
             <div className="mobile-drawer-item-left">
-              <span className="mobile-drawer-item-icon">👤</span>
+              <span className="mobile-drawer-item-icon"><User size={16} /></span>
               <span className="mobile-drawer-item-label">Profil Peneliti</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.4 }} />
@@ -1209,7 +1255,7 @@ export const Topbar: React.FC = () => {
             }}
           >
             <div className="mobile-drawer-item-left">
-              <span className="mobile-drawer-item-icon">✨</span>
+              <span className="mobile-drawer-item-icon"><Sparkles size={16} /></span>
               <span className="mobile-drawer-item-label">Panduan Cepat (Quick Tour)</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.4 }} />

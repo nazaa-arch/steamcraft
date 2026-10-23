@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { AlertTriangle, Trophy } from 'lucide-react';
 
 /* ──────────────────────────────────────────────────────────
    FITUR 1 — STEAM RADAR MATRIX
@@ -254,7 +255,7 @@ export const SteamRadarMatrix: React.FC = () => {
               borderLeft: '5px solid #f59e0b', background: '#fffbeb'
             }}>
               <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#92400e', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>⚠️</span> Smart Warning — Pilar Lemah Terdeteksi
+                <AlertTriangle size={16} color="#d97706" /> Smart Warning — Pilar Lemah Terdeteksi
               </h4>
               {weakPillars.map(p => (
                 <div key={p.key} style={{ fontSize: '12px', color: '#78350f', marginBottom: '6px', lineHeight: 1.5 }}>
@@ -275,7 +276,7 @@ export const SteamRadarMatrix: React.FC = () => {
               borderLeft: '5px solid #16a34a', background: '#f0fdf4'
             }}>
               <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>🏆</span> Proyek ini memiliki integrasi STEAM yang sangat kuat!
+                <Trophy size={16} color="#16a34a" /> Proyek ini memiliki integrasi STEAM yang sangat kuat!
               </h4>
               <p style={{ fontSize: '12px', color: '#15803d', margin: '4px 0 0 0' }}>
                 {strongPillars.length} dari 5 pilar berada di atas 80%. Proyek ini layak diajukan ke kompetisi ilmiah nasional.

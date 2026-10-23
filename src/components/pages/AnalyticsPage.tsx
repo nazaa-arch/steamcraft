@@ -101,7 +101,7 @@ export const AnalyticsPage: React.FC = () => {
               onClick={() => setFilterBelgisOnly(true)}
               style={{ fontSize: '11.5px', padding: '4px 10px', height: '28px' }}
             >
-              ⭐ Bimbingan Dr. Belgis ({belgisProjectsCount})
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Star size={13} style={{ fill: '#f59e0b', color: '#f59e0b' }} /> Bimbingan Dr. Belgis ({belgisProjectsCount})</span>
             </button>
           </div>
         </div>
@@ -134,7 +134,7 @@ export const AnalyticsPage: React.FC = () => {
                 fontSize: '18px'
               }}
             >
-              👩‍🏫
+              <GraduationCap size={20} />
             </div>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>

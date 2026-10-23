@@ -1,6 +1,35 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Database, FileText, ExternalLink, Check, AlertCircle, Upload, Link2, Plus, ChevronRight, Shield, Eye, UploadCloud, X } from 'lucide-react';
+import {
+  Database,
+  FileText,
+  ExternalLink,
+  Check,
+  AlertCircle,
+  Upload,
+  Link2,
+  Plus,
+  ChevronRight,
+  Shield,
+  Eye,
+  UploadCloud,
+  X,
+  BarChart3,
+  Code2,
+  FileCheck,
+  BookOpen,
+  Cpu,
+  Award,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  Zap,
+  GraduationCap,
+  FolderGit2,
+  Terminal,
+  Search
+} from 'lucide-react';
 
 /* ──────────────────────────────────────────────────────────
    FITUR 4 — REPOSITORY DATA EMPIRIS & REPRODUCIBILITY CHECKER
@@ -78,12 +107,23 @@ const REPRODUCIBILITY_CHECKS: ReproducibilityCheck[] = [
   { key: 'results_log', label: 'Hasil eksperimen tercatat di logbook', description: 'Metrik evaluasi, screenshot output, dan analisis error', checked: true, category: 'docs' },
 ];
 
-const TYPE_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
-  dataset: { icon: '📊', color: '#2563eb', label: 'Dataset' },
-  code: { icon: '💻', color: '#16a34a', label: 'Source Code' },
-  protocol: { icon: '📋', color: '#ea580c', label: 'Protokol SOP' },
-  notebook: { icon: '📓', color: '#7c3aed', label: 'Notebook' },
-  model: { icon: '🧠', color: '#0d9488', label: 'Trained Model' },
+const TYPE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+  dataset: { color: '#2563eb', bg: '#eff6ff', label: 'Dataset' },
+  code: { color: '#16a34a', bg: '#f0fdf4', label: 'Source Code' },
+  protocol: { color: '#ea580c', bg: '#fff7ed', label: 'Protokol SOP' },
+  notebook: { color: '#7c3aed', bg: '#faf5ff', label: 'Notebook' },
+  model: { color: '#0d9488', bg: '#f0fdfa', label: 'Trained Model' },
+};
+
+const renderTypeIcon = (type: string, size = 15) => {
+  switch (type) {
+    case 'dataset': return <BarChart3 size={size} />;
+    case 'code': return <Code2 size={size} />;
+    case 'protocol': return <FileCheck size={size} />;
+    case 'notebook': return <BookOpen size={size} />;
+    case 'model': return <Cpu size={size} />;
+    default: return <Database size={size} />;
+  }
 };
 
 export const DataRepository: React.FC = () => {
@@ -113,10 +153,10 @@ export const DataRepository: React.FC = () => {
   const reproScore = Math.round((totalChecked / checks.length) * 100);
 
   const getReproGrade = (score: number) => {
-    if (score >= 85) return { label: 'Sangat Reprodusibel', color: '#16a34a', emoji: '🏆' };
-    if (score >= 65) return { label: 'Cukup Reprodusibel', color: '#0284c7', emoji: '✅' };
-    if (score >= 40) return { label: 'Perlu Peningkatan', color: '#f59e0b', emoji: '⚠️' };
-    return { label: 'Belum Reprodusibel', color: '#e11d48', emoji: '❌' };
+    if (score >= 85) return { label: 'Sangat Reprodusibel', color: '#16a34a', bg: '#f0fdf4', icon: Award };
+    if (score >= 65) return { label: 'Cukup Reprodusibel', color: '#0284c7', bg: '#eff6ff', icon: CheckCircle2 };
+    if (score >= 40) return { label: 'Perlu Peningkatan', color: '#f59e0b', bg: '#fffbeb', icon: AlertTriangle };
+    return { label: 'Belum Reprodusibel', color: '#e11d48', bg: '#fff1f2', icon: XCircle };
   };
 
   const reproGrade = getReproGrade(reproScore);
@@ -139,12 +179,12 @@ export const DataRepository: React.FC = () => {
     setNewArtifact({ name: '', type: 'dataset', format: '', url: '', description: '', license: 'CC BY 4.0' });
     setUploadedFileSize('');
     setShowAddForm(false);
-    showToast('✓ Artefak baru berhasil diunggah ke repositori! Menunggu verifikasi Dosen Pembimbing.');
+    showToast('Artefak baru berhasil diunggah ke repositori! Menunggu verifikasi Dosen Pembimbing.');
   };
 
   const handleOpenVerifyModal = (artifact: DataArtifact) => {
     if (!isLecturerOrAdmin) {
-      showToast('⚠️ Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi artefak data.');
+      showToast('Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi artefak data.');
       return;
     }
     setVerifyingArtifact(artifact);
@@ -160,7 +200,7 @@ export const DataRepository: React.FC = () => {
           : a
       )
     );
-    showToast(`✓ Artefak "${verifyingArtifact.name}" berhasil divalidasi oleh Dosen Pembimbing.`);
+    showToast(`Artefak "${verifyingArtifact.name}" berhasil divalidasi oleh Dosen Pembimbing.`);
     setVerifyingArtifact(null);
   };
 
@@ -173,10 +213,10 @@ export const DataRepository: React.FC = () => {
   });
 
   const categories = [
-    { key: 'data', label: '📊 Data & Dataset', color: '#2563eb' },
-    { key: 'code', label: '💻 Kode & Algoritma', color: '#16a34a' },
-    { key: 'env', label: '⚙️ Environment & Runtime', color: '#ea580c' },
-    { key: 'docs', label: '📋 Dokumentasi & SOP', color: '#7c3aed' },
+    { key: 'data', label: 'Data & Dataset', icon: Database, color: '#2563eb' },
+    { key: 'code', label: 'Kode & Algoritma', icon: Code2, color: '#16a34a' },
+    { key: 'env', label: 'Environment & Runtime', icon: Terminal, color: '#ea580c' },
+    { key: 'docs', label: 'Dokumentasi & SOP', icon: FileText, color: '#7c3aed' },
   ];
 
   return (
@@ -218,7 +258,15 @@ export const DataRepository: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 300px' }}>
-          <span style={{ fontSize: '24px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👨‍🏫' : '🔬'}</span>
+          {isLecturerOrAdmin ? (
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <GraduationCap size={22} />
+            </div>
+          ) : (
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#dbeafe', color: '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Database size={22} />
+            </div>
+          )}
           <div style={{ color: isLecturerOrAdmin ? '#14532d' : '#1e40af', lineHeight: 1.45 }}>
             <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '2px' }}>
               {isLecturerOrAdmin ? 'Mode Tinjauan Dosen Pembimbing (Validasi FAIR Data & Replikasi):' : 'Standar Keterbukaan Sains & Reproduktibilitas (PKM Dikti):'}
@@ -245,10 +293,14 @@ export const DataRepository: React.FC = () => {
               fontSize: '11.5px',
               fontWeight: 800,
               borderRadius: '20px',
-              boxShadow: '0 2px 8px rgba(234,88,12,0.25)'
+              boxShadow: '0 2px 8px rgba(234,88,12,0.25)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            <span>⏳ Tinjau {unverifiedArtifactsCount} Artefak Belum Terverifikasi &rarr;</span>
+            <Clock size={13} />
+            <span>Tinjau {unverifiedArtifactsCount} Artefak Belum Terverifikasi &rarr;</span>
           </button>
         )}
       </div>
@@ -256,11 +308,11 @@ export const DataRepository: React.FC = () => {
       {/* Summary Statistics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
         {[
-          { label: 'Total Artefak Riset', value: artifacts.length, unit: 'Berkas', color: '#2563eb', icon: '📦', onClick: () => { setActiveTab('artifacts'); setTypeFilter('all'); setStatusFilter('all'); } },
-          { label: 'Dataset Primer/Sekunder', value: artifacts.filter(a => a.type === 'dataset').length, unit: 'Data', color: '#0d9488', icon: '📊', onClick: () => { setActiveTab('artifacts'); setTypeFilter('dataset'); } },
-          { label: 'Kode & Notebook', value: artifacts.filter(a => a.type === 'code' || a.type === 'notebook').length, unit: 'Skrip', color: '#7c3aed', icon: '💻', onClick: () => { setActiveTab('artifacts'); setTypeFilter('code'); } },
-          { label: 'Terverifikasi Dosen', value: verifiedArtifactsCount, unit: `/ ${artifacts.length}`, color: '#16a34a', icon: '✅', onClick: () => { setActiveTab('artifacts'); setStatusFilter('verified'); } },
-          { label: isLecturerOrAdmin ? 'Perlu Validasi Anda' : 'Menunggu Validasi', value: unverifiedArtifactsCount, unit: 'Berkas', color: '#f59e0b', icon: '⏳', onClick: () => { setActiveTab('artifacts'); setStatusFilter('unverified'); } },
+          { label: 'Total Artefak Riset', value: artifacts.length, unit: 'Berkas', color: '#2563eb', bg: '#eff6ff', icon: <FolderGit2 size={20} />, onClick: () => { setActiveTab('artifacts'); setTypeFilter('all'); setStatusFilter('all'); } },
+          { label: 'Dataset Primer/Sekunder', value: artifacts.filter(a => a.type === 'dataset').length, unit: 'Data', color: '#0d9488', bg: '#f0fdfa', icon: <BarChart3 size={20} />, onClick: () => { setActiveTab('artifacts'); setTypeFilter('dataset'); } },
+          { label: 'Kode & Notebook', value: artifacts.filter(a => a.type === 'code' || a.type === 'notebook').length, unit: 'Skrip', color: '#7c3aed', bg: '#faf5ff', icon: <Code2 size={20} />, onClick: () => { setActiveTab('artifacts'); setTypeFilter('code'); } },
+          { label: 'Terverifikasi Dosen', value: verifiedArtifactsCount, unit: `/ ${artifacts.length}`, color: '#16a34a', bg: '#f0fdf4', icon: <CheckCircle2 size={20} />, onClick: () => { setActiveTab('artifacts'); setStatusFilter('verified'); } },
+          { label: isLecturerOrAdmin ? 'Perlu Validasi Anda' : 'Menunggu Validasi', value: unverifiedArtifactsCount, unit: 'Berkas', color: '#ea580c', bg: '#fff7ed', icon: <Clock size={20} />, onClick: () => { setActiveTab('artifacts'); setStatusFilter('unverified'); } },
         ].map((stat, i) => (
           <div
             key={i}
@@ -272,10 +324,13 @@ export const DataRepository: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              cursor: stat.onClick ? 'pointer' : 'default'
+              cursor: stat.onClick ? 'pointer' : 'default',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
             }}
           >
-            <span style={{ fontSize: '24px' }}>{stat.icon}</span>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: stat.bg, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {stat.icon}
+            </div>
             <div>
               <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>{stat.label}</div>
               <div style={{ fontSize: '22px', fontWeight: 900, color: stat.color }}>{stat.value} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>{stat.unit}</span></div>
@@ -476,11 +531,11 @@ export const DataRepository: React.FC = () => {
                   <div className="auth-field" style={{ margin: 0 }}>
                     <label style={{ fontSize: '12px', fontWeight: 700 }}>Jenis Artefak</label>
                     <select value={newArtifact.type} onChange={e => setNewArtifact(p => ({ ...p, type: e.target.value as any }))}>
-                      <option value="dataset">📊 Dataset Primer / Sekunder</option>
-                      <option value="code">💻 Source Code / Script</option>
-                      <option value="protocol">📋 Protokol SOP &amp; Eksperimen</option>
-                      <option value="notebook">📓 Jupyter / Colab Notebook</option>
-                      <option value="model">🧠 Model Weights / Checkpoint</option>
+                      <option value="dataset">Dataset Primer / Sekunder</option>
+                      <option value="code">Source Code / Script</option>
+                      <option value="protocol">Protokol SOP &amp; Eksperimen</option>
+                      <option value="notebook">Jupyter / Colab Notebook</option>
+                      <option value="model">Model Weights / Checkpoint</option>
                     </select>
                   </div>
 
@@ -538,7 +593,7 @@ export const DataRepository: React.FC = () => {
           <div className="card" style={{ padding: '16px 18px', borderRadius: '14px', marginBottom: '18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #f1f5f9' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '15px' }}>⚡</span>
+                <Zap size={14} style={{ color: 'var(--primary)' }} />
                 <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>Status Validasi Artefak:</strong>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -561,10 +616,14 @@ export const DataRepository: React.FC = () => {
                     background: statusFilter === 'unverified' ? '#f59e0b' : '#fffbeb',
                     color: statusFilter === 'unverified' ? '#ffffff' : '#b45309',
                     fontWeight: 700,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
                   }}
                 >
-                  ⏳ Menunggu Validasi ({unverifiedArtifactsCount})
+                  <Clock size={12} />
+                  <span>Menunggu Validasi ({unverifiedArtifactsCount})</span>
                 </button>
                 <button
                   type="button"
@@ -577,10 +636,14 @@ export const DataRepository: React.FC = () => {
                     background: statusFilter === 'verified' ? '#16a34a' : '#f0fdf4',
                     color: statusFilter === 'verified' ? '#ffffff' : '#15803d',
                     fontWeight: 700,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
                   }}
                 >
-                  ✓ Terverifikasi Dosen ({verifiedArtifactsCount})
+                  <CheckCircle2 size={12} />
+                  <span>Terverifikasi Dosen ({verifiedArtifactsCount})</span>
                 </button>
               </div>
             </div>
@@ -607,7 +670,7 @@ export const DataRepository: React.FC = () => {
                     className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
                     style={{ fontSize: '11.5px', padding: '4px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    <span>{cfg.icon}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>{renderTypeIcon(key, 12)}</span>
                     <span>{cfg.label}</span>
                     <span style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '999px', background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--line)', color: isSelected ? '#fff' : 'var(--navy)' }}>
                       {count}
@@ -631,7 +694,9 @@ export const DataRepository: React.FC = () => {
                   border: '1.5px dashed var(--line)'
                 }}
               >
-                <div style={{ fontSize: '32px', marginBottom: '10px' }}>🔍</div>
+                <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#f8fafc', color: 'var(--primary)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                  <Search size={26} />
+                </div>
                 <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', marginBottom: '4px' }}>
                   Tidak Ada Artefak yang Sesuai Filter
                 </h4>
@@ -654,18 +719,22 @@ export const DataRepository: React.FC = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                       <div style={{ flex: '1 1 300px', minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '18px' }}>{cfg.icon}</span>
+                          <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: cfg.bg, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {renderTypeIcon(artifact.type, 15)}
+                          </div>
                           <strong style={{ fontSize: '14px', color: 'var(--navy)', wordBreak: 'break-all' }}>{artifact.name}</strong>
                           <span className={`badge badge-${artifact.type === 'dataset' ? 'blue' : artifact.type === 'code' ? 'teal' : artifact.type === 'protocol' ? 'orange' : artifact.type === 'notebook' ? 'purple' : 'teal'}`} style={{ fontSize: '10px' }}>
                             {cfg.label}
                           </span>
                           {artifact.verified ? (
                             <span className="badge badge-teal" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                              ✓ Terverifikasi Dosen
+                              <CheckCircle2 size={11} />
+                              <span>Terverifikasi Dosen</span>
                             </span>
                           ) : (
                             <span className="badge badge-orange" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                              ⏳ Menunggu Validasi
+                              <Clock size={11} />
+                              <span>Menunggu Validasi</span>
                             </span>
                           )}
                         </div>
@@ -729,7 +798,9 @@ export const DataRepository: React.FC = () => {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>👨‍🏫</span>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#dcfce7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <GraduationCap size={18} />
+                  </div>
                   <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#166534', margin: 0 }}>
                     Panel Evaluasi Dosen Pembimbing &mdash; Kesiapan Publikasi Ilmiah
                   </h4>
@@ -741,10 +812,14 @@ export const DataRepository: React.FC = () => {
                     padding: '3px 10px',
                     borderRadius: '20px',
                     background: reproScore >= 75 ? '#16a34a' : '#f59e0b',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}
                 >
-                  {reproScore >= 75 ? '✓ Lolos Standar SINTA/Scopus (>=75%)' : '⚠️ Perlu Kelengkapan Replikasi (<75%)'}
+                  {reproScore >= 75 ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+                  <span>{reproScore >= 75 ? 'Lolos Standar SINTA/Scopus (>=75%)' : 'Perlu Kelengkapan Replikasi (<75%)'}</span>
                 </span>
               </div>
               <p style={{ fontSize: '12px', color: '#166534', lineHeight: 1.5, margin: '0 0 12px 0' }}>
@@ -775,8 +850,9 @@ export const DataRepository: React.FC = () => {
                 <div style={{ fontSize: '48px', fontWeight: 900, lineHeight: 1, marginTop: '4px' }}>
                   {reproScore}<span style={{ fontSize: '20px', color: '#94a3b8' }}>%</span>
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: reproGrade.color, marginTop: '4px' }}>
-                  {reproGrade.emoji} {reproGrade.label}
+                <div style={{ fontSize: '13px', fontWeight: 700, color: reproGrade.color, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <reproGrade.icon size={16} />
+                  <span>{reproGrade.label}</span>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -802,7 +878,8 @@ export const DataRepository: React.FC = () => {
                 <div key={cat.key} className="card" style={{ padding: '18px 20px', borderRadius: '16px', borderLeft: `4px solid ${cat.color}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--navy)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {cat.label}
+                      <cat.icon size={16} style={{ color: cat.color }} />
+                      <span>{cat.label}</span>
                     </h4>
                     <span style={{ fontSize: '12px', fontWeight: 800, color: catChecked === catChecks.length ? '#16a34a' : '#f59e0b', padding: '3px 8px', borderRadius: '6px', background: catChecked === catChecks.length ? '#f0fdf4' : '#fffbeb' }}>
                       {catChecked}/{catChecks.length} terpenuhi
@@ -825,8 +902,9 @@ export const DataRepository: React.FC = () => {
                           style={{ marginTop: '2px', accentColor: '#16a34a', width: '16px', height: '16px' }}
                         />
                         <div>
-                          <strong style={{ fontSize: '12.5px', color: check.checked ? '#166534' : 'var(--navy)', display: 'block' }}>
-                            {check.checked ? '✓ ' : ''}{check.label}
+                          <strong style={{ fontSize: '12.5px', color: check.checked ? '#166534' : 'var(--navy)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            {check.checked && <CheckCircle2 size={13} style={{ color: '#16a34a', flexShrink: 0 }} />}
+                            <span>{check.label}</span>
                           </strong>
                           <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{check.description}</span>
                         </div>

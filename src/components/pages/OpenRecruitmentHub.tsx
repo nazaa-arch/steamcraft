@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { UserPlus, Sparkles, Search, Users, ArrowRight, Info } from 'lucide-react';
+import { UserPlus, Sparkles, Search, Users, ArrowRight, Info, GraduationCap } from 'lucide-react';
 
 export const OpenRecruitmentHub: React.FC = () => {
   const {
@@ -90,8 +90,9 @@ export const OpenRecruitmentHub: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginBottom: '12px' }}>
-                  👨‍🏫 Dosen Pembimbing: <strong>{proj.lecturer}</strong>
+                <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <GraduationCap size={13} />
+                  <span>Dosen Pembimbing: <strong>{proj.lecturer}</strong></span>
                 </div>
               </div>
 
