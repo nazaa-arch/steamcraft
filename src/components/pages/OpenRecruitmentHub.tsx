@@ -58,9 +58,9 @@ export const OpenRecruitmentHub: React.FC = () => {
           return (
             <div key={proj.id} className="project-card" style={{ borderTop: isMember ? '4px solid var(--primary)' : '4px solid var(--accent-teal)' }}>
               <div>
-                <div className="project-card-top">
+                <div className="project-card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                   <span className="badge badge-teal">Mencari Anggota Baru</span>
-                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
                     {isMember && (
                       <span className="badge badge-purple" title="Proyek yang Anda ikuti">
                         ✓ Tim Saya
@@ -102,14 +102,15 @@ export const OpenRecruitmentHub: React.FC = () => {
                   alignItems: 'center',
                   borderTop: '1px solid var(--line)',
                   paddingTop: '12px',
-                  gap: '8px'
+                  gap: '8px',
+                  flexWrap: 'wrap'
                 }}
               >
                 <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Users size={13} />
                   <span>{proj.members_count} anggota saat ini</span>
                 </div>
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"

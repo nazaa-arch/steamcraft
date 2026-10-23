@@ -191,9 +191,9 @@ export const ProjectCatalog: React.FC = () => {
                 }}
               >
                 <div>
-                  <div className="project-card-top">
+                  <div className="project-card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                     <span className="badge badge-blue">{proj.study}</span>
-                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
                       {isMember && (
                         <span className="badge badge-purple" title="Proyek yang Anda ikuti">
                           ✓ Tim Saya
@@ -277,7 +277,7 @@ export const ProjectCatalog: React.FC = () => {
                     <span>{proj.members_count} Peneliti</span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                     {isMember ? (
                       <button
                         type="button"

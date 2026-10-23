@@ -801,6 +801,10 @@ button {
   flex-direction: column;
   justify-content: space-between;
   transition: all 0.2s ease;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .project-card:hover {
@@ -813,7 +817,11 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 12px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .project-icon-badge {
@@ -1931,11 +1939,43 @@ html, body {
   .projects-grid {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .project-card {
-    padding: 18px 16px !important;
+    padding: 16px 14px !important;
     border-radius: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .project-card-top {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .project-card-top > div {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+  }
+
+  .project-card h3 {
+    font-size: 15px !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.35 !important;
+  }
+
+  .project-card p {
+    font-size: 12px !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
   }
 
   /* Modals Mobile Sizing */

@@ -244,7 +244,7 @@ export const StudentDashboard: React.FC = () => {
           </div>
 
           {/* 4 Task Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '12px' }}>
             {/* Task 1: Profile */}
             <div
               style={{
@@ -509,7 +509,7 @@ export const StudentDashboard: React.FC = () => {
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '16px' }}>
           {/* Card 1: STEAM Radar Matrix */}
           <div
             className="card"
@@ -721,9 +721,9 @@ export const StudentDashboard: React.FC = () => {
         {displayProjects.map(proj => (
           <div key={proj.id} className="project-card">
             <div>
-              <div className="project-card-top">
+              <div className="project-card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                 <span className="badge badge-blue">{proj.study}</span>
-                <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexShrink: 0 }}>
+                <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
                   {isUserMemberOfProject(proj.id) && (
                     <span className="badge badge-purple" title="Proyek yang Anda ikuti">
                       ✓ Tim Saya
@@ -739,15 +739,15 @@ export const StudentDashboard: React.FC = () => {
               <p>{proj.desc}</p>
 
               {isUserMemberOfProject(proj.id) && getUserProjectRole(proj.id) && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>Peran Anda:</span>
-                  <span className="badge badge-purple" style={{ fontSize: '10.5px', padding: '2px 8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>Peran Anda:</span>
+                  <span className="badge badge-purple" style={{ fontSize: '10.5px', padding: '2px 8px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {getUserProjectRole(proj.id)}
                   </span>
                 </div>
               )}
 
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 <span className="badge badge-purple" style={{ fontSize: '10px' }}>
                   {proj.steam}
                 </span>
@@ -763,12 +763,12 @@ export const StudentDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px', wordBreak: 'break-word' }}>
                 👨‍🏫 Pembimbing: <strong>{proj.lecturer}</strong>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--line)', paddingTop: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--line)', paddingTop: '12px', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Users size={13} />
                 <span>{proj.members_count} Peneliti</span>
@@ -779,6 +779,7 @@ export const StudentDashboard: React.FC = () => {
                   setSelectedProjectId(proj.id);
                   setCurrentPage('workspace');
                 }}
+                style={{ flexShrink: 0 }}
               >
                 <span>Buka Ruang Kerja</span>
                 <ArrowRight size={13} />
