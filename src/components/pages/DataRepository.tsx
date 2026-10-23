@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Database, FileText, ExternalLink, Check, AlertCircle, Upload, Link2, Plus, ChevronRight, Shield, Eye } from 'lucide-react';
+import { Database, FileText, ExternalLink, Check, AlertCircle, Upload, Link2, Plus, ChevronRight, Shield, Eye, UploadCloud, X } from 'lucide-react';
 
 /* ──────────────────────────────────────────────────────────
    FITUR 4 — REPOSITORY DATA EMPIRIS & REPRODUCIBILITY CHECKER
@@ -94,6 +94,8 @@ export const DataRepository: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'artifacts' | 'reproducibility'>('artifacts');
   const [newArtifact, setNewArtifact] = useState({ name: '', type: 'dataset', format: '', url: '', description: '', license: 'CC BY 4.0' });
+  const [uploadedFileSize, setUploadedFileSize] = useState('');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
   const selectedProject = projects.find(p => p.id === selectedProjectId) || projects[0];
@@ -198,43 +200,214 @@ export const DataRepository: React.FC = () => {
       {/* TAB 1: ARTEFAK DIGITAL */}
       {activeTab === 'artifacts' && (
         <>
+          {/* Kotak Modal Unggah Artefak Riset (seperti Kotak Ajukan) */}
           {showAddForm && (
-            <div className="card" style={{ padding: '20px', borderRadius: '16px', marginBottom: '20px', borderLeft: '5px solid #2563eb' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--navy)', marginBottom: '14px' }}>📦 Unggah / Tautkan Artefak Riset Baru</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="auth-field">
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Nama File / Artefak</label>
-                  <input type="text" placeholder="weather_data_clean.csv" value={newArtifact.name} onChange={e => setNewArtifact(p => ({ ...p, name: e.target.value }))} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px' }} />
+            <div className="modal-overlay active" onClick={() => setShowAddForm(false)}>
+              <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '580px' }}>
+                <button className="modal-close" onClick={() => setShowAddForm(false)}>
+                  &times;
+                </button>
+
+                <div className="eyebrow">Data Repository &amp; Open Science</div>
+                <h2 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+                  Unggah &amp; Publikasikan Artefak Riset
+                </h2>
+                <p style={{ fontSize: '12.5px', color: 'var(--muted)', marginBottom: '18px' }}>
+                  Tambahkan dataset mentah, notebook analisis, protokol SOP, atau bobot model ke repositori riset untuk verifikasi reproduktibilitas.
+                </p>
+
+                {/* Target Project Card */}
+                <div
+                  style={{
+                    background: 'var(--surface-alt)',
+                    border: '1px solid var(--line)',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}
+                >
+                  <div>
+                    <span style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Proyek Riset
+                    </span>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--navy)' }}>
+                      {projects.find(p => p.id === selectedProjectId)?.name || 'Proyek Riset'}
+                    </div>
+                  </div>
+                  <span className="badge badge-blue" style={{ fontSize: '11px' }}>
+                    Open Science
+                  </span>
                 </div>
-                <div className="auth-field">
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Jenis Artefak</label>
-                  <select value={newArtifact.type} onChange={e => setNewArtifact(p => ({ ...p, type: e.target.value }))} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px' }}>
-                    <option value="dataset">📊 Dataset</option>
-                    <option value="code">💻 Source Code</option>
-                    <option value="protocol">📋 Protokol SOP</option>
-                    <option value="notebook">📓 Notebook</option>
-                    <option value="model">🧠 Trained Model</option>
-                  </select>
+
+                {/* Upload File Zone */}
+                <div className="auth-field" style={{ marginBottom: '14px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Unggah Berkas File Langsung (Opsional)</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,.json,.ipynb,.pdf,.zip,.xlsx,.png,.jpg,.docx,.py,.pt,.h5"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const ext = file.name.split('.').pop()?.toUpperCase() || 'DATA';
+                        const sizeStr = file.size > 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`;
+                        setNewArtifact(p => ({ ...p, name: file.name, format: ext }));
+                        setUploadedFileSize(sizeStr);
+                      }
+                    }}
+                    style={{ display: 'none' }}
+                  />
+
+                  {!newArtifact.name ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        border: '2px dashed #93c5fd',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        textAlign: 'center',
+                        background: '#f8fbff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseOver={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
+                      onMouseOut={e => (e.currentTarget.style.borderColor = '#93c5fd')}
+                    >
+                      <UploadCloud size={28} style={{ color: 'var(--primary)' }} />
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)' }}>
+                        Klik tombol ini untuk memilih berkas dari komputer / HP
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                        Format didukung: CSV, JSON, IPYNB, PDF, ZIP, H5, PT, DOCX
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        background: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        color: '#166534',
+                        flexWrap: 'wrap',
+                        gap: '8px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FileText size={18} style={{ color: '#15803d', flexShrink: 0 }} />
+                        <div>
+                          <strong style={{ fontSize: '13px', display: 'block', wordBreak: 'break-all' }}>{newArtifact.name}</strong>
+                          <span style={{ fontSize: '11px', color: '#166534', opacity: 0.85 }}>Format: {newArtifact.format || 'FILE'} &middot; {uploadedFileSize || 'Siap Unggah'}</span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-xs"
+                          onClick={() => fileInputRef.current?.click()}
+                          style={{ fontSize: '11px', color: '#15803d', border: '1px solid #86efac', background: 'white' }}
+                        >
+                          Ganti
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-xs"
+                          onClick={() => {
+                            setNewArtifact(p => ({ ...p, name: '' }));
+                            setUploadedFileSize('');
+                            if (fileInputRef.current) fileInputRef.current.value = '';
+                          }}
+                          style={{ fontSize: '11px', color: '#ef4444', border: '1px solid #fecaca', background: 'white' }}
+                          title="Hapus berkas"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="auth-field">
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>URL / Tautan (opsional)</label>
-                  <input type="url" placeholder="https://github.com/..." value={newArtifact.url} onChange={e => setNewArtifact(p => ({ ...p, url: e.target.value }))} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px' }} />
+
+                {/* Form Fields Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                  <div className="auth-field" style={{ margin: 0 }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700 }}>Nama File / Artefak *</label>
+                    <input
+                      type="text"
+                      placeholder="weather_data_clean.csv"
+                      value={newArtifact.name}
+                      onChange={e => setNewArtifact(p => ({ ...p, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  <div className="auth-field" style={{ margin: 0 }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700 }}>Jenis Artefak</label>
+                    <select value={newArtifact.type} onChange={e => setNewArtifact(p => ({ ...p, type: e.target.value as any }))}>
+                      <option value="dataset">📊 Dataset Primer / Sekunder</option>
+                      <option value="code">💻 Source Code / Script</option>
+                      <option value="protocol">📋 Protokol SOP &amp; Eksperimen</option>
+                      <option value="notebook">📓 Jupyter / Colab Notebook</option>
+                      <option value="model">🧠 Model Weights / Checkpoint</option>
+                    </select>
+                  </div>
+
+                  <div className="auth-field" style={{ margin: 0 }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700 }}>URL / Tautan (GitHub/Colab/Zenodo)</label>
+                    <input
+                      type="url"
+                      placeholder="https://github.com/..."
+                      value={newArtifact.url}
+                      onChange={e => setNewArtifact(p => ({ ...p, url: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="auth-field" style={{ margin: 0 }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700 }}>Lisensi Distribusi Data</label>
+                    <select value={newArtifact.license} onChange={e => setNewArtifact(p => ({ ...p, license: e.target.value }))}>
+                      <option>CC BY 4.0</option>
+                      <option>CC BY-SA 4.0</option>
+                      <option>MIT License</option>
+                      <option>Apache 2.0</option>
+                      <option>Internal STEAM-Craft</option>
+                    </select>
+                  </div>
                 </div>
-                <div className="auth-field">
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Lisensi</label>
-                  <select value={newArtifact.license} onChange={e => setNewArtifact(p => ({ ...p, license: e.target.value }))} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px' }}>
-                    <option>CC BY 4.0</option><option>CC BY-SA 4.0</option><option>MIT License</option><option>Apache 2.0</option><option>Internal Only</option>
-                  </select>
+
+                <div className="auth-field" style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Deskripsi &amp; Catatan Reproducibility</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Tuliskan deskripsi struktur kolom, parameter sampling, atau cara mereplikasi..."
+                    value={newArtifact.description}
+                    onChange={e => setNewArtifact(p => ({ ...p, description: e.target.value }))}
+                  />
                 </div>
-                <div className="auth-field" style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Deskripsi</label>
-                  <textarea rows={2} placeholder="Deskripsi artefak..." value={newArtifact.description} onChange={e => setNewArtifact(p => ({ ...p, description: e.target.value }))} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px', resize: 'vertical' }} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-                  <button type="button" className="btn btn-primary btn-sm" onClick={handleAddArtifact} style={{ padding: '8px 16px' }}>
-                    <Check size={14} /> <span>Simpan</span>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button type="button" className="btn btn-ghost" onClick={() => setShowAddForm(false)}>
+                    Batal
                   </button>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowAddForm(false)} style={{ padding: '8px 12px' }}>Batal</button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleAddArtifact}
+                    disabled={!newArtifact.name.trim()}
+                  >
+                    <Check size={14} style={{ marginRight: '4px' }} />
+                    <span>Simpan &amp; Publikasikan Artefak</span>
+                  </button>
                 </div>
               </div>
             </div>

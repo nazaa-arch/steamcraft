@@ -132,6 +132,7 @@ export const ResearchLogbook: React.FC = () => {
   const [newFileName, setNewFileName] = useState('');
   const [newFileSize, setNewFileSize] = useState('');
   const [newFileData, setNewFileData] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
@@ -536,64 +537,61 @@ export const ResearchLogbook: React.FC = () => {
               />
             </div>
 
-            {/* Evidence & Attachment Section (Link URL & File Upload) */}
-            <div style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '4px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--navy)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Paperclip size={14} style={{ color: 'var(--primary)' }} />
-                <span>Bukti Lampiran (Opsional — Tautan Digital &amp; Unggah File):</span>
-              </div>
-              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 10px 0' }}>
-                Lampirkan tautan URL (Google Drive, Colab, GitHub, Figma) atau unggah berkas dokumen/gambar langsung.
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '8px' }}>
-                {/* Link URL Input */}
-                <div className="auth-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: '11px', fontWeight: 700 }}>Tautan Bukti Digital (Link URL)</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type="url"
-                      placeholder="https://colab.research.google.com/..."
-                      value={newLink}
-                      onChange={e => setNewLink(e.target.value)}
-                      style={{ padding: '7px 10px 7px 30px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '12px', width: '100%', boxSizing: 'border-box' }}
-                    />
-                    <LinkIcon size={13} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--muted)' }} />
+            {/* Evidence & Attachment Trigger Section */}
+            <div style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginTop: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--navy)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Paperclip size={14} style={{ color: 'var(--primary)' }} />
+                    <span>Lampiran Bukti Ilmiah (Opsional)</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>
+                    {newFileName || newLink
+                      ? 'Berkas atau tautan bukti telah terpasang dan siap disertakan pada logbook.'
+                      : 'Unggah file dokumen/gambar hasil observasi atau sematkan tautan URL digital.'}
                   </div>
                 </div>
 
-                {/* File Upload Input */}
-                <div className="auth-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: '11px', fontWeight: 700 }}>Unggah Berkas File Bukti</label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx,.docx,.zip"
-                    onChange={handleFileUpload}
-                    style={{ fontSize: '11.5px', padding: '5px 0' }}
-                  />
-                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setShowUploadModal(true)}
+                  style={{
+                    fontSize: '12px',
+                    padding: '7px 14px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 700,
+                    background: '#ffffff',
+                    border: '1.5px solid var(--primary)',
+                    color: 'var(--primary)'
+                  }}
+                >
+                  <UploadCloud size={14} />
+                  <span>{newFileName || newLink ? 'Kelola / Ganti Lampiran' : 'Unggah File / Tautkan Bukti'}</span>
+                </button>
               </div>
 
               {/* Instant Attachment Preview Chips */}
               {(newLink || newFileName) && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #cbd5e1' }}>
-                  {newLink && (
-                    <span style={{ fontSize: '11px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <LinkIcon size={12} />
-                      <span style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{newLink}</span>
-                      <button type="button" onClick={() => setNewLink('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', padding: 0 }}>
-                        <X size={12} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #cbd5e1' }}>
+                  {newFileName && (
+                    <span style={{ fontSize: '11.5px', background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', padding: '5px 12px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <FileText size={13} />
+                      <strong>{newFileName}</strong>
+                      <small style={{ opacity: 0.75 }}>({newFileSize})</small>
+                      <button type="button" onClick={handleRemoveFile} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', padding: 0 }} title="Hapus berkas">
+                        <X size={13} />
                       </button>
                     </span>
                   )}
-                  {newFileName && (
-                    <span style={{ fontSize: '11px', background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <FileText size={12} />
-                      <span>{newFileName}</span>
-                      <small style={{ opacity: 0.7 }}>({newFileSize})</small>
-                      <button type="button" onClick={handleRemoveFile} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', padding: 0 }}>
-                        <X size={12} />
+                  {newLink && (
+                    <span style={{ fontSize: '11.5px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '5px 12px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <LinkIcon size={13} />
+                      <span style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{newLink}</span>
+                      <button type="button" onClick={() => setNewLink('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', padding: 0 }} title="Hapus tautan">
+                        <X size={13} />
                       </button>
                     </span>
                   )}
@@ -843,6 +841,148 @@ export const ResearchLogbook: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Kotak Modal Unggah Lampiran & Bukti Riset */}
+      {showUploadModal && (
+        <div className="modal-overlay active" onClick={() => setShowUploadModal(false)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '540px' }}>
+            <button className="modal-close" onClick={() => setShowUploadModal(false)}>
+              &times;
+            </button>
+
+            <div className="eyebrow">Lampiran Bukti Ilmiah</div>
+            <h2 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+              Unggah Berkas &amp; Tautkan Bukti Riset
+            </h2>
+            <p style={{ fontSize: '12.5px', color: 'var(--muted)', marginBottom: '18px' }}>
+              Sertakan berkas observasi laboratorium atau tautan repositori digital untuk memperkuat validitas pencapaian checkpoint Anda.
+            </p>
+
+            {/* Upload File Zone */}
+            <div className="auth-field" style={{ marginBottom: '18px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700 }}>1. Unggah Berkas File (Komputer / HP)</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx,.docx,.zip,.ipynb,.txt"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+
+              {!newFileName ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed #93c5fd',
+                    borderRadius: '12px',
+                    padding: '22px',
+                    textAlign: 'center',
+                    background: '#f8fbff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
+                  onMouseOut={e => (e.currentTarget.style.borderColor = '#93c5fd')}
+                >
+                  <UploadCloud size={30} style={{ color: 'var(--primary)' }} />
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)' }}>
+                    Klik tombol ini untuk memilih berkas dari perangkat Anda
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    Format didukung: PDF, PNG, JPG, CSV, XLSX, DOCX, ZIP (Maks. 50 MB)
+                  </div>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    color: '#166534',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={18} style={{ color: '#15803d', flexShrink: 0 }} />
+                    <div>
+                      <strong style={{ fontSize: '13px', display: 'block', wordBreak: 'break-all' }}>{newFileName}</strong>
+                      <span style={{ fontSize: '11px', color: '#166534', opacity: 0.85 }}>Ukuran: {newFileSize} &middot; Terpilih</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{ fontSize: '11px', color: '#15803d', border: '1px solid #86efac', background: 'white' }}
+                    >
+                      Ganti Berkas
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs"
+                      onClick={handleRemoveFile}
+                      style={{ fontSize: '11px', color: '#ef4444', border: '1px solid #fecaca', background: 'white' }}
+                      title="Hapus berkas"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Link URL Input */}
+            <div className="auth-field" style={{ marginBottom: '22px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700 }}>2. Atau Sematkan Tautan Bukti Digital (URL)</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="url"
+                  placeholder="https://colab.research.google.com/... atau Google Drive / GitHub"
+                  value={newLink}
+                  onChange={e => setNewLink(e.target.value)}
+                  style={{ paddingLeft: '32px' }}
+                />
+                <LinkIcon size={14} style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--muted)' }} />
+              </div>
+              <span style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px', display: 'block' }}>
+                Dapat berupa tautan Google Colab, repositori GitHub, folder Google Drive, atau prototipe Figma.
+              </span>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setShowUploadModal(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setShowUploadModal(false);
+                  showToast('Lampiran bukti riset berhasil dipasang!');
+                }}
+              >
+                <Check size={14} style={{ marginRight: '4px' }} />
+                <span>Terapkan Lampiran</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

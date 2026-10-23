@@ -83,6 +83,7 @@ export const ProjectWorkspace: React.FC = () => {
   const [journalTag, setJournalTag] = useState('Eksperimen');
   const [journalContent, setJournalContent] = useState('');
   const [journalFileName, setJournalFileName] = useState('');
+  const journalFileInputRef = useRef<HTMLInputElement>(null);
 
   const [versionNote, setVersionNote] = useState('');
   const [versionUrl, setVersionUrl] = useState('');
@@ -605,13 +606,63 @@ export const ProjectWorkspace: React.FC = () => {
                     </select>
                   </div>
                   <div className="auth-field" style={{ margin: 0 }}>
-                    <label>Lampiran File (Opsional)</label>
+                    <label>Lampiran Berkas (Opsional)</label>
                     <input
-                      type="text"
-                      placeholder="Contoh: telemetri_sensor_bme.csv"
-                      value={journalFileName}
-                      onChange={e => setJournalFileName(e.target.value)}
+                      ref={journalFileInputRef}
+                      type="file"
+                      accept=".csv,.pdf,.png,.jpg,.jpeg,.xlsx,.docx,.zip,.ipynb,.txt"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setJournalFileName(file.name);
+                          showToast(`Berkas "${file.name}" terlampir.`);
+                        }
+                      }}
+                      style={{ display: 'none' }}
                     />
+                    {!journalFileName ? (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => journalFileInputRef.current?.click()}
+                        style={{ width: '100%', height: '38px', justifyContent: 'center', fontSize: '12px' }}
+                      >
+                        <Paperclip size={13} />
+                        <span>Unggah Berkas Lampiran</span>
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          background: '#f0fdf4',
+                          border: '1px solid #bbf7d0',
+                          color: '#166534',
+                          fontSize: '12px',
+                          height: '38px',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                          <FileText size={14} style={{ flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{journalFileName}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setJournalFileName('');
+                            if (journalFileInputRef.current) journalFileInputRef.current.value = '';
+                          }}
+                          style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', padding: 0 }}
+                          title="Hapus berkas"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -696,65 +747,13 @@ export const ProjectWorkspace: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setShowAddVer(!showAddVer)}
+                  className="btn btn-primary btn-sm"
+                  onClick={() => openModal('registerBuild', { project: currentProject, nextVersion: projectVersions.length + 1 })}
                 >
                   <Plus size={13} />
                   <span>Daftarkan Build / Rilis</span>
                 </button>
               </div>
-
-              {showAddVer && (
-                <form
-                  onSubmit={handleCreateVersion}
-                  style={{
-                    background: 'var(--surface-alt)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--line)',
-                    marginBottom: '16px'
-                  }}
-                >
-                  <div className="auth-field">
-                    <label>Catatan Rilis / Iterasi Pengembangan</label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: Implementasi kalibrasi sensor dan pipeline pra-pemrosesan data"
-                      value={versionNote}
-                      onChange={e => setVersionNote(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="ws-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                    <div className="auth-field" style={{ margin: 0 }}>
-                      <label>URL Artefak / Commit Repositori</label>
-                      <input
-                        type="url"
-                        placeholder="https://github.com/.../tree/vX.0"
-                        value={versionUrl}
-                        onChange={e => setVersionUrl(e.target.value)}
-                      />
-                    </div>
-                    <div className="auth-field" style={{ margin: 0 }}>
-                      <label>Nama File Artefak / Dataset</label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: dataset_hasil_pengujian.csv"
-                        value={versionFileName}
-                        onChange={e => setVersionFileName(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowAddVer(false)}>
-                      Batal
-                    </button>
-                    <button type="submit" className="btn btn-primary btn-sm">
-                      Daftarkan Versi
-                    </button>
-                  </div>
-                </form>
-              )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {projectVersions.map(v => (

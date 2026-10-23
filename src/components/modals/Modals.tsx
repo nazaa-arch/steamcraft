@@ -40,7 +40,9 @@ import {
   ArrowRight,
   UserPlus,
   Users,
-  Copy
+  Copy,
+  UploadCloud,
+  Paperclip
 } from 'lucide-react';
 import { User, Project, UserRole } from '../../types';
 
@@ -98,6 +100,7 @@ export const Modals: React.FC = () => {
         {activeModal === 'joinProject' && <JoinProjectModalContent initialCode={typeof modalData === 'string' ? modalData : ''} onClose={closeModal} />}
         {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
         {activeModal === 'projectDetail' && <ProjectDetailModalContent project={modalData} onClose={closeModal} />}
+        {activeModal === 'registerBuild' && <RegisterBuildModalContent data={modalData} onClose={closeModal} />}
       </div>
     </div>
   );
@@ -3136,6 +3139,205 @@ const JoinProjectModalContent: React.FC<{ initialCode?: string; onClose: () => v
     </div>
   );
 };
+
+/* ==================== 14. REGISTER BUILD / RELEASE MODAL (SEPERTI KOTAK AJUKAN) ==================== */
+const RegisterBuildModalContent: React.FC<{ data: any; onClose: () => void }> = ({ data, onClose }) => {
+  const { addVersion, showToast } = useApp();
+  const project: Project | undefined = data?.project;
+  const nextVer = data?.nextVersion || 1;
+  const [note, setNote] = useState('');
+  const [artifactUrl, setArtifactUrl] = useState(project?.repo_url || '');
+  const [fileName, setFileName] = useState('');
+  const [fileSize, setFileSize] = useState('');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formattedSize = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.round(file.size / 1024)} KB`;
+    setFileName(file.name);
+    setFileSize(formattedSize);
+    showToast(`Berkas "${file.name}" berhasil dipilih dan siap dilampirkan.`);
+  };
+
+  const handleRemoveFile = () => {
+    setFileName('');
+    setFileSize('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!note.trim()) return;
+    if (!project?.id) return;
+    addVersion(project.id, note.trim(), artifactUrl.trim() || undefined, fileName.trim() || undefined);
+    onClose();
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="eyebrow">Reproducibility &amp; Version Control</div>
+      <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--navy)', marginBottom: '8px' }}>
+        Daftarkan Build &amp; Rilis Riset Baru
+      </h2>
+      <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
+        Dokumentasikan rilis versi riset terverifikasi, skrip simulasi, data primer, atau manuskrip siap replikasi ke repositori internal tim.
+      </p>
+
+      {/* Target Project Info Card (matching Kotak Ajukan) */}
+      <div
+        style={{
+          background: 'var(--surface-alt)',
+          border: '1px solid var(--line)',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          marginBottom: '18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}
+      >
+        <div>
+          <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+            Proyek Target
+          </div>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--navy)' }}>
+            #{project?.id} &mdash; {project?.name}
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--ink-secondary)', marginTop: '2px' }}>
+            {project?.study} &middot; Pembimbing: {project?.lecturer}
+          </div>
+        </div>
+        <span className="badge badge-purple" style={{ fontSize: '12px', padding: '5px 12px', fontWeight: 800 }}>
+          Target Rilis: v{nextVer}.0
+        </span>
+      </div>
+
+      <div className="auth-field">
+        <label>Catatan Rilis / Iterasi Pengembangan *</label>
+        <textarea
+          rows={3}
+          placeholder="Contoh: Implementasi kalibrasi sensor BME280, pembersihan outlier dataset BMKG, dan pipeline training model LSTM..."
+          value={note}
+          onChange={e => setNote(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="auth-field">
+        <label>Tautan Repositori / Commit GitHub / Colab (Opsional)</label>
+        <div style={{ position: 'relative' }}>
+          <input
+            type="url"
+            placeholder="https://github.com/org/repo/tree/vX.0 atau https://colab.research.google.com/..."
+            value={artifactUrl}
+            onChange={e => setArtifactUrl(e.target.value)}
+            style={{ paddingLeft: '32px' }}
+          />
+          <LinkIcon size={14} style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--muted)' }} />
+        </div>
+      </div>
+
+      {/* Upload File Section with Button / Dropzone */}
+      <div className="auth-field">
+        <label>Unggah Berkas Artefak / Dataset Riset (Opsional)</label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.json,.ipynb,.pdf,.zip,.xlsx,.png,.jpg,.docx,.py,.pt,.h5"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+
+        {!fileName ? (
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              border: '2px dashed #93c5fd',
+              borderRadius: '12px',
+              padding: '18px',
+              textAlign: 'center',
+              background: '#f8fbff',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            onMouseOver={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
+            onMouseOut={e => (e.currentTarget.style.borderColor = '#93c5fd')}
+          >
+            <UploadCloud size={26} style={{ color: 'var(--primary)' }} />
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)' }}>
+              Klik tombol ini untuk memilih berkas dari komputer / HP
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+              Format didukung: CSV, JSON, IPYNB, PDF, ZIP, H5, PT, DOCX (Maks. 100 MB)
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 14px',
+              borderRadius: '10px',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#166534',
+              flexWrap: 'wrap',
+              gap: '8px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={18} style={{ color: '#15803d', flexShrink: 0 }} />
+              <div>
+                <strong style={{ fontSize: '13px', display: 'block', wordBreak: 'break-all' }}>{fileName}</strong>
+                <span style={{ fontSize: '11px', color: '#166534', opacity: 0.85 }}>Ukuran: {fileSize} &middot; Terlampir</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs"
+                onClick={() => fileInputRef.current?.click()}
+                style={{ fontSize: '11px', color: '#15803d', border: '1px solid #86efac', background: 'white' }}
+              >
+                Ganti Berkas
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs"
+                onClick={handleRemoveFile}
+                style={{ fontSize: '11px', color: '#ef4444', border: '1px solid #fecaca', background: 'white' }}
+                title="Hapus berkas"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '24px' }}>
+        <button type="button" className="btn btn-ghost" onClick={onClose}>
+          Batal
+        </button>
+        <button type="submit" className="btn btn-primary">
+          <Check size={14} style={{ marginRight: '4px' }} />
+          <span>Daftarkan Versi Rilis</span>
+        </button>
+      </div>
+    </form>
+  );
+};
+
 
 
 
