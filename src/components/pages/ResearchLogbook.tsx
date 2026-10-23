@@ -716,7 +716,7 @@ export const ResearchLogbook: React.FC = () => {
               >
                 {CHECKPOINT_CATEGORIES.filter(c => c.id !== 'all').map(c => (
                   <option key={c.id} value={c.label}>
-                    {c.icon} {c.label}
+                    {c.label}
                   </option>
                 ))}
               </select>
