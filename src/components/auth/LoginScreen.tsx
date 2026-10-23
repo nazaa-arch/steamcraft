@@ -35,6 +35,8 @@ export const LoginScreen: React.FC = () => {
     <div className="login-screen">
       {/* Left Showcase */}
       <section className="login-showcase">
+        <div className="login-topline-spacer" aria-hidden="true" />
+
         <div className="login-brand-image">
           <img src="/logo.jpg?v=20261021" alt="SteamCraft Logo" />
         </div>

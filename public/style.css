@@ -84,6 +84,12 @@ button {
   pointer-events: none;
 }
 
+.login-topline-spacer {
+  height: 36px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
 .login-topline {
   display: flex;
   align-items: center;

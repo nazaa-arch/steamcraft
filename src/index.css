@@ -1966,8 +1966,14 @@ html, body {
     justify-content: space-between !important;
   }
 
+  .login-topline-spacer {
+    height: clamp(28px, 5vh, 48px) !important;
+    width: 100% !important;
+    flex-shrink: 0 !important;
+  }
+
   .login-brand-image {
-    margin: clamp(10px, 2.2vh, 22px) auto !important;
+    margin: clamp(12px, 2.5vh, 26px) auto clamp(8px, 1.8vh, 18px) auto !important;
     max-width: 440px !important;
     padding: 14px 18px !important;
     border-radius: 22px !important;
