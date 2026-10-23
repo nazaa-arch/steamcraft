@@ -24,6 +24,7 @@ export const Topbar: React.FC = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const notifWrapperRef = useRef<HTMLDivElement>(null);
   const profileWrapperRef = useRef<HTMLDivElement>(null);
   const toolsWrapperRef = useRef<HTMLDivElement>(null);
@@ -53,6 +54,7 @@ export const Topbar: React.FC = () => {
         setProfileDropdownOpen(false);
         setToolsDropdownOpen(false);
         setProjectDropdownOpen(false);
+        setMobileMenuOpen(false);
       }
     };
 
@@ -70,6 +72,7 @@ export const Topbar: React.FC = () => {
   if (!currentUser) return null;
 
   const role = currentUser.role;
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   // Unread announcements
   const unreadAnnouncements = announcements.filter(a => !a.is_read);
@@ -118,6 +121,7 @@ export const Topbar: React.FC = () => {
             onClick={() => {
               setCurrentPage('workspace');
               setProjectDropdownOpen(false);
+              closeMobileMenu();
             }}
           >
             <span style={{ fontSize: '15px' }}>💻</span>
@@ -134,6 +138,7 @@ export const Topbar: React.FC = () => {
               setProjectCatalogTab('myProjects');
               setCurrentPage('projects');
               setProjectDropdownOpen(false);
+              closeMobileMenu();
             }}
           >
             <span style={{ fontSize: '15px' }}>🗂️</span>
@@ -152,6 +157,7 @@ export const Topbar: React.FC = () => {
               setProjectCatalogTab('all');
               setCurrentPage('projects');
               setProjectDropdownOpen(false);
+              closeMobileMenu();
             }}
           >
             <span style={{ fontSize: '15px' }}>🌐</span>
@@ -173,6 +179,7 @@ export const Topbar: React.FC = () => {
         onClick={e => {
           e.preventDefault();
           setCurrentPage('dashboard');
+          closeMobileMenu();
         }}
       >
         <img src="/logo.jpg?v=20261021" alt="Logo" className="brand-logo-img" />
@@ -182,15 +189,30 @@ export const Topbar: React.FC = () => {
         </div>
       </a>
 
+      <button
+        type="button"
+        className={`mobile-menu-toggle ${mobileMenuOpen ? 'open' : ''}`}
+        aria-label="Buka menu navigasi"
+        aria-expanded={mobileMenuOpen}
+        onClick={() => setMobileMenuOpen(prev => !prev)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
       {/* Role-Separated Primary Navigation */}
-      <div className="nav-container">
+      <div className={`nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <nav className="nav" id="mainNav">
         {/* Student Navigation */}
         {role === 'student' && (
           <>
             <button
               className={currentPage === 'dashboard' ? 'active' : ''}
-              onClick={() => setCurrentPage('dashboard')}
+              onClick={() => {
+                setCurrentPage('dashboard');
+                closeMobileMenu();
+              }}
             >
               Dashboard
             </button>
@@ -200,6 +222,7 @@ export const Topbar: React.FC = () => {
               onClick={() => {
                 setCurrentPage('studentConsultations');
                 markConsultationsRead();
+                closeMobileMenu();
               }}
             >
               <span>Bimbingan</span>
@@ -209,13 +232,19 @@ export const Topbar: React.FC = () => {
             </button>
             <button
               className={currentPage === 'studentResources' ? 'active' : ''}
-              onClick={() => setCurrentPage('studentResources')}
+              onClick={() => {
+                setCurrentPage('studentResources');
+                closeMobileMenu();
+              }}
             >
               Fasilitas
             </button>
             <button
               className={currentPage === 'studentPortfolio' ? 'active' : ''}
-              onClick={() => setCurrentPage('studentPortfolio')}
+              onClick={() => {
+                setCurrentPage('studentPortfolio');
+                closeMobileMenu();
+              }}
             >
               Portofolio
             </button>
@@ -227,7 +256,10 @@ export const Topbar: React.FC = () => {
           <>
             <button
               className={currentPage === 'mission' ? 'active' : ''}
-              onClick={() => setCurrentPage('mission')}
+              onClick={() => {
+                setCurrentPage('mission');
+                closeMobileMenu();
+              }}
             >
               <span>Supervisi</span>
               {blockerProjectsCount > 0 && (
@@ -240,6 +272,7 @@ export const Topbar: React.FC = () => {
               onClick={() => {
                 setCurrentPage('consultations');
                 markConsultationsRead();
+                closeMobileMenu();
               }}
             >
               <span>Bimbingan</span>
@@ -249,13 +282,19 @@ export const Topbar: React.FC = () => {
             </button>
             <button
               className={currentPage === 'resources' ? 'active' : ''}
-              onClick={() => setCurrentPage('resources')}
+              onClick={() => {
+                setCurrentPage('resources');
+                closeMobileMenu();
+              }}
             >
               Fasilitas
             </button>
             <button
               className={currentPage === 'analytics' ? 'active' : ''}
-              onClick={() => setCurrentPage('analytics')}
+              onClick={() => {
+                setCurrentPage('analytics');
+                closeMobileMenu();
+              }}
             >
               Analitik
             </button>
@@ -267,20 +306,29 @@ export const Topbar: React.FC = () => {
           <>
             <button
               className={currentPage === 'dashboard' ? 'active' : ''}
-              onClick={() => setCurrentPage('dashboard')}
+              onClick={() => {
+                setCurrentPage('dashboard');
+                closeMobileMenu();
+              }}
             >
               Dashboard
             </button>
             {renderProjectDropdown()}
             <button
               className={currentPage === 'mission' ? 'active' : ''}
-              onClick={() => setCurrentPage('mission')}
+              onClick={() => {
+                setCurrentPage('mission');
+                closeMobileMenu();
+              }}
             >
               Supervisi
             </button>
             <button
               className={currentPage === 'admin' ? 'active' : ''}
-              onClick={() => setCurrentPage('admin')}
+              onClick={() => {
+                setCurrentPage('admin');
+                closeMobileMenu();
+              }}
               style={{
                 background: '#0f172a',
                 color: '#38bdf8',
@@ -321,6 +369,7 @@ export const Topbar: React.FC = () => {
                 onClick={() => {
                   setCurrentPage('radar');
                   setToolsDropdownOpen(false);
+                  closeMobileMenu();
                 }}
               >
                 <span style={{ fontSize: '15px' }}>🎯</span>
@@ -336,6 +385,7 @@ export const Topbar: React.FC = () => {
                 onClick={() => {
                   setCurrentPage('logbook');
                   setToolsDropdownOpen(false);
+                  closeMobileMenu();
                 }}
               >
                 <span style={{ fontSize: '15px' }}>📝</span>
@@ -351,6 +401,7 @@ export const Topbar: React.FC = () => {
                 onClick={() => {
                   setCurrentPage('dataRepo');
                   setToolsDropdownOpen(false);
+                  closeMobileMenu();
                 }}
               >
                 <span style={{ fontSize: '15px' }}>🔬</span>
