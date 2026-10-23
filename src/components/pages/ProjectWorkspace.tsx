@@ -184,25 +184,28 @@ export const ProjectWorkspace: React.FC = () => {
             </span>
           </div>
 
-          {/* Styled Project Switcher Dropdown */}
-          <div className="ws-switcher-container">
-            <div className="ws-switcher-wrapper">
-              <Layers size={14} className="ws-switcher-icon-left" />
-              <select
-                value={selectedProjectId}
-                onChange={e => setSelectedProjectId(Number(e.target.value))}
-                className="ws-switcher-select"
-                aria-label="Pilih Proyek Riset"
-              >
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>
-                    #{p.id} • {p.name} ({p.study})
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="ws-switcher-chevron-right" />
-            </div>
-          </div>
+          {/* Dedicated Project Selector Button (Navigates to Full Catalog Directory) */}
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage('projects')}
+            title="Buka direktori lengkap katalog proyek untuk memilih atau berganti ruang kerja"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11.5px',
+              fontWeight: 700,
+              padding: '6px 12px',
+              borderRadius: '10px',
+              background: 'white',
+              border: '1.5px solid #cbd5e1',
+              color: 'var(--navy)'
+            }}
+          >
+            <Layers size={13} style={{ color: 'var(--primary)' }} />
+            <span>Ganti Proyek ({projects.length} Tersedia) &rarr;</span>
+          </button>
         </div>
 
         {/* Project Title & Description */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronLeft, ChevronRight, ChevronDown, UserCheck } from 'lucide-react';
+import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronDown, UserCheck } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -23,40 +23,6 @@ export const Topbar: React.FC = () => {
   const notifWrapperRef = useRef<HTMLDivElement>(null);
   const profileWrapperRef = useRef<HTMLDivElement>(null);
   const toolsWrapperRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const checkNavScroll = () => {
-    if (navRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = navRef.current;
-      setCanScrollLeft(scrollLeft > 6);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
-    }
-  };
-
-  useEffect(() => {
-    checkNavScroll();
-    window.addEventListener('resize', checkNavScroll);
-    return () => window.removeEventListener('resize', checkNavScroll);
-  }, [currentPage, currentUser]);
-
-  const scrollNav = (direction: 'left' | 'right') => {
-    if (navRef.current) {
-      navRef.current.scrollBy({
-        left: direction === 'left' ? -220 : 220,
-        behavior: 'smooth'
-      });
-      setTimeout(checkNavScroll, 300);
-    }
-  };
-
-  const handleNavWheel = (e: React.WheelEvent) => {
-    if (navRef.current && e.deltaY !== 0) {
-      navRef.current.scrollLeft += e.deltaY;
-      checkNavScroll();
-    }
-  };
 
   // Close dropdowns when clicking outside or pressing Escape
   useEffect(() => {
@@ -131,27 +97,9 @@ export const Topbar: React.FC = () => {
         </div>
       </a>
 
-      {/* Role-Separated Navigation with Laptop Horizontal Scroll Support */}
+      {/* Role-Separated Primary Navigation */}
       <div className="nav-container">
-        {canScrollLeft && (
-          <button
-            type="button"
-            className="nav-scroll-btn nav-scroll-left"
-            onClick={() => scrollNav('left')}
-            title="Geser menu ke kiri"
-            aria-label="Geser navigasi ke kiri"
-          >
-            <ChevronLeft size={15} />
-          </button>
-        )}
-
-        <nav
-          className="nav"
-          id="mainNav"
-          ref={navRef}
-          onScroll={checkNavScroll}
-          onWheel={handleNavWheel}
-        >
+        <nav className="nav" id="mainNav">
         {/* Student Navigation */}
         {role === 'student' && (
           <>
@@ -300,12 +248,16 @@ export const Topbar: React.FC = () => {
         )}
 
         {/* Dropdown Menu: Instrumen Riset STEAM (Available for Student, Lecturer, & Admin) */}
-        <div className="nav-dropdown-wrapper" ref={toolsWrapperRef} style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+        <div className="nav-dropdown-wrapper" ref={toolsWrapperRef}>
           <button
             type="button"
-            className={`nav-btn ${['radar', 'logbook', 'dataRepo'].includes(currentPage) ? 'active' : ''}`}
-            onClick={() => setToolsDropdownOpen(!toolsDropdownOpen)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            className={`nav-btn nav-dropdown-btn ${['radar', 'logbook', 'dataRepo'].includes(currentPage) ? 'active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setToolsDropdownOpen(prev => !prev);
+            }}
+            aria-expanded={toolsDropdownOpen}
+            title="Instrumen Riset Ilmiah STEAM"
           >
             <Sparkles size={13} style={{ color: 'var(--primary)' }} />
             <span>Instrumen STEAM</span>
@@ -315,21 +267,7 @@ export const Topbar: React.FC = () => {
           {toolsDropdownOpen && (
             <div
               className="nav-dropdown-menu"
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 6px)',
-                right: 0,
-                width: '240px',
-                background: 'white',
-                borderRadius: '12px',
-                border: '1px solid var(--line)',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
-                padding: '6px',
-                zIndex: 1000,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2px'
-              }}
+              onClick={e => e.stopPropagation()}
             >
               <button
                 type="button"
@@ -338,26 +276,11 @@ export const Topbar: React.FC = () => {
                   setCurrentPage('radar');
                   setToolsDropdownOpen(false);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: currentPage === 'radar' ? '#eff6ff' : 'transparent',
-                  color: currentPage === 'radar' ? 'var(--primary)' : 'var(--navy)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  width: '100%'
-                }}
               >
-                <span>🎯</span>
+                <span style={{ fontSize: '15px' }}>🎯</span>
                 <div style={{ flex: 1 }}>
-                  <div>STEAM Radar Matrix</div>
-                  <small style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 500 }}>Keseimbangan 5 pilar riset</small>
+                  <div style={{ fontWeight: 700 }}>STEAM Radar Matrix</div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Keseimbangan 5 pilar riset</small>
                 </div>
               </button>
 
@@ -368,26 +291,11 @@ export const Topbar: React.FC = () => {
                   setCurrentPage('logbook');
                   setToolsDropdownOpen(false);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: currentPage === 'logbook' ? '#eff6ff' : 'transparent',
-                  color: currentPage === 'logbook' ? 'var(--primary)' : 'var(--navy)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  width: '100%'
-                }}
               >
-                <span>📝</span>
+                <span style={{ fontSize: '15px' }}>📝</span>
                 <div style={{ flex: 1 }}>
-                  <div>Logbook Riset Ilmiah</div>
-                  <small style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 500 }}>Catatan & Ekspor PDF PKM</small>
+                  <div style={{ fontWeight: 700 }}>Logbook Riset Ilmiah</div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Catatan & Ekspor PDF PKM</small>
                 </div>
               </button>
 
@@ -398,44 +306,17 @@ export const Topbar: React.FC = () => {
                   setCurrentPage('dataRepo');
                   setToolsDropdownOpen(false);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: currentPage === 'dataRepo' ? '#eff6ff' : 'transparent',
-                  color: currentPage === 'dataRepo' ? 'var(--primary)' : 'var(--navy)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  width: '100%'
-                }}
               >
-                <span>🔬</span>
+                <span style={{ fontSize: '15px' }}>🔬</span>
                 <div style={{ flex: 1 }}>
-                  <div>Repository Data Empiris</div>
-                  <small style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 500 }}>Dataset & Reproducibility</small>
+                  <div style={{ fontWeight: 700 }}>Repository Data Empiris</div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Dataset & Reproducibility</small>
                 </div>
               </button>
             </div>
           )}
         </div>
         </nav>
-
-        {canScrollRight && (
-          <button
-            type="button"
-            className="nav-scroll-btn nav-scroll-right"
-            onClick={() => scrollNav('right')}
-            title="Geser menu ke kanan"
-            aria-label="Geser navigasi ke kanan"
-          >
-            <ChevronRight size={15} />
-          </button>
-        )}
       </div>
 
       {/* User Controls */}

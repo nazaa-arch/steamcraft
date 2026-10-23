@@ -1611,7 +1611,7 @@ html, body {
   }
 }
 
-/* ==================== LAPTOP & RESPONSIVE TOPBAR NAVIGATION ==================== */
+/* ==================== CLEAN TOPBAR NAVIGATION (NO HORIZONTAL SCROLL) ==================== */
 .nav-container {
   display: flex;
   align-items: center;
@@ -1619,59 +1619,145 @@ html, body {
   min-width: 0;
   max-width: 100%;
   flex: 1 1 auto;
+  overflow: visible !important;
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: thin;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  padding: 4px 6px;
+  gap: 5px;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  padding: 4px 0;
   min-width: 0;
   flex: 1 1 auto;
 }
 
-.nav button {
+.nav button,
+.nav-btn {
   flex-shrink: 0;
   white-space: nowrap;
-}
-
-.nav-scroll-btn {
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid var(--line);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  padding: 6px 11px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 9px;
+  color: var(--ink-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  flex-shrink: 0;
-  color: var(--navy);
-  transition: all 0.2s ease;
-  padding: 0;
+  gap: 5px;
+  transition: all 0.18s ease;
 }
 
-.nav-scroll-btn:hover {
+.nav button:hover,
+.nav-btn:hover {
   background: var(--primary-light);
   color: var(--primary);
-  border-color: var(--primary);
-  transform: scale(1.08);
 }
 
-.nav-scroll-left {
-  margin-right: 4px;
+.nav button.active,
+.nav-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
 }
 
-.nav-scroll-right {
-  margin-left: 4px;
+.nav-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  z-index: 1010;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.05);
+  padding: 6px;
+  z-index: 10000 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: dropdownSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  width: 100%;
+  transition: all 0.15s ease;
+}
+
+.dropdown-menu-item:hover {
+  background: var(--surface-alt);
+  color: var(--primary);
+}
+
+.dropdown-menu-item.active {
+  background: #eff6ff;
+  color: var(--primary);
+}
+
+/* Compact layout for Laptops (1024px to 1366px) */
+@media (min-width: 769px) and (max-width: 1366px) {
+  .topbar {
+    padding: 0 16px !important;
+  }
+
+  .brand-text span {
+    display: none !important;
+  }
+
+  .nav {
+    gap: 3px !important;
+  }
+
+  .nav button,
+  .nav-btn {
+    padding: 5px 8px !important;
+    font-size: 12px !important;
+    gap: 3px !important;
+  }
+
+  .topbar-tour-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .user-badge {
+    padding: 4px 8px !important;
+  }
+}
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+  .nav-dropdown-menu {
+    position: fixed !important;
+    top: 115px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    z-index: 10005 !important;
+  }
 }
 
 /* ======================================================== */

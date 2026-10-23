@@ -699,13 +699,17 @@ export const StudentDashboard: React.FC = () => {
             Pantau kemajuan checkpoint, logbook laboratorium, dan komunikasi tim kolaborator.
           </p>
         </div>
-        <button className="btn btn-ghost" onClick={() => setCurrentPage('projects')}>
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={() => setCurrentPage('projects')}
+          style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
+        >
           <span>Lihat Semua ({projects.length}) &rarr;</span>
         </button>
       </div>
 
       <div className="projects-grid">
-        {projects.slice(0, 4).map(proj => (
+        {projects.slice(0, 3).map(proj => (
           <div key={proj.id} className="project-card">
             <div>
               <div className="project-card-top">
@@ -757,6 +761,34 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* View All Projects Banner Link */}
+      <div
+        style={{
+          marginTop: '16px',
+          padding: '14px 20px',
+          borderRadius: '12px',
+          background: 'var(--surface-alt)',
+          border: '1px solid var(--line)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}
+      >
+        <div style={{ fontSize: '12.5px', color: 'var(--ink-secondary)' }}>
+          Menampilkan <strong>3 proyek terbaru</strong> dari total <strong>{projects.length} proyek riset</strong> terdaftar.
+        </div>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => setCurrentPage('projects')}
+          style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
+        >
+          <span>Buka Halaman Katalog Lengkap ({projects.length} Proyek) &rarr;</span>
+        </button>
       </div>
     </section>
   );
