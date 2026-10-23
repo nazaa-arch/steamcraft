@@ -783,13 +783,27 @@ export const ProjectWorkspace: React.FC = () => {
                     Kolaborasi civitas akademika lintas disiplin ilmu STEAM.
                   </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
-                    Open Recruitment:
-                  </span>
-                  <span className={`badge ${currentProject.open_recruitment ? 'badge-teal' : 'badge-gray'}`}>
-                    {currentProject.open_recruitment ? 'Sedang Dibuka' : 'Ditutup'}
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+                      Open Recruitment:
+                    </span>
+                    <span className={`badge ${currentProject.open_recruitment ? 'badge-teal' : 'badge-gray'}`}>
+                      {currentProject.open_recruitment ? 'Sedang Dibuka' : 'Ditutup'}
+                    </span>
+                  </div>
+                  {isLead && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openModal('inviteProject', currentProject)}
+                      style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                      title="Undang kolaborator baru melalui tautan, kode, atau civitas terdaftar"
+                    >
+                      <UserPlus size={13} />
+                      <span>+ Undang Tim</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -922,9 +936,9 @@ export const ProjectWorkspace: React.FC = () => {
                             <button
                               type="button"
                               className="btn btn-secondary btn-sm"
-                              onClick={() => openModal('inviteMember', currentProject)}
+                              onClick={() => openModal('inviteProject', currentProject)}
                               style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                              title="Undang mahasiswa secara langsung via NIM/NAMA"
+                              title="Undang mahasiswa secara langsung via tautan, kode, atau civitas"
                             >
                               <UserPlus size={13} />
                               <span>+ Undang Anggota</span>

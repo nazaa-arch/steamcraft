@@ -94,7 +94,7 @@ export const Modals: React.FC = () => {
         {activeModal === 'newAnnouncement' && <NewAnnouncementContent onClose={closeModal} />}
         {activeModal === 'register' && <RegisterModalContent onClose={closeModal} />}
         {activeModal === 'forgotPassword' && <ForgotPasswordModalContent onClose={closeModal} />}
-        {activeModal === 'inviteProject' && <InviteProjectModalContent project={modalData} onClose={closeModal} />}
+        {(activeModal === 'inviteProject' || activeModal === 'inviteMember') && <InviteProjectModalContent project={modalData} onClose={closeModal} />}
         {activeModal === 'joinProject' && <JoinProjectModalContent initialCode={typeof modalData === 'string' ? modalData : ''} onClose={closeModal} />}
         {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
         {activeModal === 'projectDetail' && <ProjectDetailModalContent project={modalData} onClose={closeModal} />}
@@ -2860,12 +2860,17 @@ const ForgotPasswordModalContent: React.FC<{ onClose: () => void }> = ({ onClose
 };
 
 /* ==================== 12. INVITE PROJECT COLLABORATOR MODAL ==================== */
-const InviteProjectModalContent: React.FC<{ project: any; onClose: () => void }> = ({ project, onClose }) => {
-  const { users, members, inviteUserToProject, showToast } = useApp();
+const InviteProjectModalContent: React.FC<{ project: any; onClose: () => void }> = ({ project: propProject, onClose }) => {
+  const { users, members, inviteUserToProject, showToast, projects, selectedProjectId } = useApp();
   const [selectedUserId, setSelectedUserId] = useState<number>(0);
   const [invitedRole, setInvitedRole] = useState('Co-Researcher (Kolaborator Inti)');
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  // Robust fallback: if propProject is null, an ID, or object, resolve to a valid project object
+  const project = (propProject && typeof propProject === 'object' && propProject.id)
+    ? propProject
+    : (projects.find(p => p.id === (typeof propProject === 'number' ? propProject : selectedProjectId)) || projects[0]);
 
   if (!project) return null;
 
@@ -2974,15 +2979,18 @@ const InviteProjectModalContent: React.FC<{ project: any; onClose: () => void }>
           Pilih mahasiswa atau dosen lain untuk langsung dimasukkan ke dalam tim riset ini.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '14px' }}>
           <div className="auth-field" style={{ margin: 0 }}>
             <label>Pilih Peneliti Civitas</label>
             <select
               value={selectedUserId}
               onChange={e => setSelectedUserId(Number(e.target.value))}
               required
+              disabled={candidateUsers.length === 0}
             >
-              <option value="0" disabled>-- Pilih Pengguna Terdaftar --</option>
+              <option value="0" disabled>
+                {candidateUsers.length === 0 ? '-- Semua civitas terdaftar sudah menjadi anggota --' : '-- Pilih Pengguna Terdaftar --'}
+              </option>
               {candidateUsers.map(u => (
                 <option key={u.id} value={u.id}>
                   {u.name} ({u.study_program} &bull; {u.role === 'student' ? 'Mhs' : u.role === 'lecturer' ? 'Dosen' : 'Admin'})
