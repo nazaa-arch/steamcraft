@@ -1967,14 +1967,14 @@ html, body {
   }
 
   .login-brand-image {
-    margin: clamp(6px, 1.8vh, 16px) auto !important;
-    max-width: 320px !important;
-    padding: 10px !important;
-    border-radius: 18px !important;
+    margin: clamp(10px, 2.2vh, 22px) auto !important;
+    max-width: 440px !important;
+    padding: 14px 18px !important;
+    border-radius: 22px !important;
   }
 
   .login-brand-image img {
-    max-height: clamp(80px, 16vh, 135px) !important;
+    max-height: clamp(140px, 24vh, 220px) !important;
   }
 
   .login-copy h1 {
