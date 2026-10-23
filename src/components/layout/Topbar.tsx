@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronDown, UserCheck } from 'lucide-react';
+import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronDown, UserCheck, Menu, ChevronRight } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -29,6 +29,30 @@ export const Topbar: React.FC = () => {
   const profileWrapperRef = useRef<HTMLDivElement>(null);
   const toolsWrapperRef = useRef<HTMLDivElement>(null);
   const projectWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [currentPage]);
+
+  // Handle Escape key and body scroll lock for mobile drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
 
   // Close dropdowns when clicking outside or pressing Escape
   useEffect(() => {
@@ -172,7 +196,8 @@ export const Topbar: React.FC = () => {
   );
 
   return (
-    <header className="topbar">
+    <>
+      <header className="topbar">
       <a
         href="#"
         className="brand"
@@ -716,7 +741,511 @@ export const Topbar: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Mobile Hamburger Menu Button (Garis 3) */}
+        <button
+          type="button"
+          className="mobile-burger-btn"
+          onClick={() => {
+            setNotifDropdownOpen(false);
+            setProfileDropdownOpen(false);
+            setToolsDropdownOpen(false);
+            setProjectDropdownOpen(false);
+            setMobileMenuOpen(prev => !prev);
+          }}
+          aria-label={mobileMenuOpen ? 'Tutup Menu Navigasi' : 'Buka Menu Navigasi'}
+          aria-expanded={mobileMenuOpen}
+          title={mobileMenuOpen ? 'Tutup Menu' : 'Menu Navigasi'}
+        >
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
     </header>
-  );
+
+    {/* Mobile Navigation Backdrop Overlay */}
+    {mobileMenuOpen && (
+      <div
+        className="mobile-menu-backdrop"
+        onClick={() => setMobileMenuOpen(false)}
+        onTouchStart={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+    )}
+
+    {/* Mobile Navigation Drawer */}
+    <aside className={`mobile-menu-drawer ${mobileMenuOpen ? 'open' : ''}`} aria-hidden={!mobileMenuOpen}>
+      {/* Drawer Header */}
+      <div className="mobile-drawer-header">
+        <div className="mobile-drawer-user">
+          <div
+            className="user-avatar"
+            style={{
+              backgroundColor: currentUser?.avatar_color || '#2878d7',
+              width: '38px',
+              height: '38px',
+              fontSize: '15px'
+            }}
+          >
+            {currentUser?.name?.charAt(0) || 'U'}
+          </div>
+          <div className="mobile-drawer-user-info">
+            <strong>{currentUser?.name}</strong>
+            <small>
+              {role === 'student' && '🎓 Mahasiswa Peneliti'}
+              {role === 'lecturer' && '👩‍🏫 Dosen Pembimbing'}
+              {role === 'admin' && '🛡️ Administrator'}
+              {' • '}{currentUser?.study_program || 'STEAM'}
+            </small>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="mobile-drawer-close"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-label="Tutup menu"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Drawer Body */}
+      <div className="mobile-drawer-body">
+        {/* Section 1: Navigasi Utama */}
+        <div className="mobile-drawer-section">
+          <span className="mobile-drawer-section-title">Navigasi Utama</span>
+
+          {role === 'student' && (
+            <>
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'dashboard' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('dashboard');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🏠</span>
+                  <span className="mobile-drawer-item-label">Dashboard Peneliti</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'workspace' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('workspace');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">💻</span>
+                  <span className="mobile-drawer-item-label">Ruang Kerja Tim (Workspace)</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
+                onClick={() => {
+                  setProjectCatalogTab('myProjects');
+                  setCurrentPage('projects');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🗂️</span>
+                  <span className="mobile-drawer-item-label">Proyek Riset Saya</span>
+                </div>
+                {myProjectsCount > 0 && (
+                  <span className="badge badge-teal" style={{ fontSize: '10px', padding: '1px 6px' }}>
+                    {myProjectsCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
+                onClick={() => {
+                  setProjectCatalogTab('all');
+                  setCurrentPage('projects');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🌐</span>
+                  <span className="mobile-drawer-item-label">Katalog Riset & Rekrutmen</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'studentConsultations' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('studentConsultations');
+                  markConsultationsRead();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">💬</span>
+                  <span className="mobile-drawer-item-label">Bimbingan Dosen</span>
+                </div>
+                {pendingStudentConsults > 0 && (
+                  <span className="mobile-drawer-badge">{pendingStudentConsults}</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'studentResources' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('studentResources');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🔬</span>
+                  <span className="mobile-drawer-item-label">Fasilitas Laboratorium</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'studentPortfolio' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('studentPortfolio');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🏆</span>
+                  <span className="mobile-drawer-item-label">Portofolio Ilmiah STEAM</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+            </>
+          )}
+
+          {role === 'lecturer' && (
+            <>
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'mission' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('mission');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🎯</span>
+                  <span className="mobile-drawer-item-label">Supervisi Riset Tim</span>
+                </div>
+                {blockerProjectsCount > 0 && (
+                  <span className="mobile-drawer-badge warning">{blockerProjectsCount}</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'workspace' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('workspace');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">💻</span>
+                  <span className="mobile-drawer-item-label">Ruang Kerja Tim (Workspace)</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
+                onClick={() => {
+                  setProjectCatalogTab('myProjects');
+                  setCurrentPage('projects');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🗂️</span>
+                  <span className="mobile-drawer-item-label">Daftar Proyek Bimbingan</span>
+                </div>
+                {myProjectsCount > 0 && (
+                  <span className="badge badge-teal" style={{ fontSize: '10px', padding: '1px 6px' }}>
+                    {myProjectsCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
+                onClick={() => {
+                  setProjectCatalogTab('all');
+                  setCurrentPage('projects');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🌐</span>
+                  <span className="mobile-drawer-item-label">Katalog & Rekrutmen Riset</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'consultations' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('consultations');
+                  markConsultationsRead();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">💬</span>
+                  <span className="mobile-drawer-item-label">Bimbingan & Konsultasi</span>
+                </div>
+                {pendingLecturerConsults > 0 && (
+                  <span className="mobile-drawer-badge">{pendingLecturerConsults}</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'resources' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('resources');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🔬</span>
+                  <span className="mobile-drawer-item-label">Fasilitas Laboratorium</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'analytics' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('analytics');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">📊</span>
+                  <span className="mobile-drawer-item-label">Analitik & Evaluasi STEAM</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+            </>
+          )}
+
+          {role === 'admin' && (
+            <>
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'dashboard' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('dashboard');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🏠</span>
+                  <span className="mobile-drawer-item-label">Dashboard Sistem</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'mission' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('mission');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🎯</span>
+                  <span className="mobile-drawer-item-label">Supervisi Riset</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'admin' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('admin');
+                  setMobileMenuOpen(false);
+                }}
+                style={{ background: '#0f172a', color: '#38bdf8', border: '1px solid #0284c7' }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🛠️</span>
+                  <span className="mobile-drawer-item-label" style={{ fontWeight: 800 }}>Admin Console</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.7 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'workspace' ? 'active' : ''}`}
+                onClick={() => {
+                  setCurrentPage('workspace');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">💻</span>
+                  <span className="mobile-drawer-item-label">Ruang Kerja Tim</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+
+              <button
+                type="button"
+                className={`mobile-drawer-item ${currentPage === 'projects' ? 'active' : ''}`}
+                onClick={() => {
+                  setProjectCatalogTab('all');
+                  setCurrentPage('projects');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <div className="mobile-drawer-item-left">
+                  <span className="mobile-drawer-item-icon">🌐</span>
+                  <span className="mobile-drawer-item-label">Katalog Riset</span>
+                </div>
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Section 2: Instrumen STEAM */}
+        <div className="mobile-drawer-section">
+          <span className="mobile-drawer-section-title">Instrumen STEAM</span>
+
+          <button
+            type="button"
+            className={`mobile-drawer-item ${currentPage === 'radar' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentPage('radar');
+              setMobileMenuOpen(false);
+            }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon">🎯</span>
+              <div>
+                <div className="mobile-drawer-item-label">STEAM Radar Matrix</div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Keseimbangan 5 pilar riset</small>
+              </div>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.4 }} />
+          </button>
+
+          <button
+            type="button"
+            className={`mobile-drawer-item ${currentPage === 'logbook' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentPage('logbook');
+              setMobileMenuOpen(false);
+            }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon">📝</span>
+              <div>
+                <div className="mobile-drawer-item-label">Logbook Riset Ilmiah</div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Catatan harian &amp; ekspor PDF</small>
+              </div>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.4 }} />
+          </button>
+
+          <button
+            type="button"
+            className={`mobile-drawer-item ${currentPage === 'dataRepo' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentPage('dataRepo');
+              setMobileMenuOpen(false);
+            }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon">🔬</span>
+              <div>
+                <div className="mobile-drawer-item-label">Repository Data Empiris</div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Dataset &amp; Reproducibility</small>
+              </div>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.4 }} />
+          </button>
+        </div>
+
+        {/* Section 3: Akun & Bantuan */}
+        <div className="mobile-drawer-section">
+          <span className="mobile-drawer-section-title">Akun &amp; Bantuan</span>
+
+          <button
+            type="button"
+            className="mobile-drawer-item"
+            onClick={() => {
+              openModal('profile', currentUser);
+              setMobileMenuOpen(false);
+            }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon">👤</span>
+              <span className="mobile-drawer-item-label">Profil Peneliti</span>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.4 }} />
+          </button>
+
+          <button
+            type="button"
+            className="mobile-drawer-item"
+            onClick={() => {
+              openModal('quickTour');
+              setMobileMenuOpen(false);
+            }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon">✨</span>
+              <span className="mobile-drawer-item-label">Panduan Cepat (Quick Tour)</span>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.4 }} />
+          </button>
+
+          <button
+            type="button"
+            className="mobile-drawer-item"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              logout();
+            }}
+            style={{ color: '#e11d48' }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#e11d48' }}>
+                <LogOut size={16} />
+              </span>
+              <span className="mobile-drawer-item-label">Keluar dari Akun</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </>
+);
 };
