@@ -167,7 +167,7 @@ const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }>
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--line)', paddingTop: '14px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--line)', paddingTop: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
         <button type="button" className="btn btn-ghost" onClick={onClose}>
           Tutup
         </button>

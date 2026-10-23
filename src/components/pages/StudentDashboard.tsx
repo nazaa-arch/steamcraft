@@ -28,7 +28,8 @@ export const StudentDashboard: React.FC = () => {
     markAnnouncementRead,
     showToast,
     setProjectCatalogTab,
-    isUserMemberOfProject
+    isUserMemberOfProject,
+    getUserProjectRole
   } = useApp();
 
   const myProjects = projects.filter(p => isUserMemberOfProject(p.id));
@@ -722,13 +723,29 @@ export const StudentDashboard: React.FC = () => {
             <div>
               <div className="project-card-top">
                 <span className="badge badge-blue">{proj.study}</span>
-                <span className={`badge ${proj.blocker ? 'badge-rose' : proj.progress === 100 ? 'badge-teal' : 'badge-orange'}`}>
-                  {proj.blocker ? '⚠️ Ada Blocker' : proj.status}
-                </span>
+                <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexShrink: 0 }}>
+                  {isUserMemberOfProject(proj.id) && (
+                    <span className="badge badge-purple" title="Proyek yang Anda ikuti">
+                      ✓ Tim Saya
+                    </span>
+                  )}
+                  <span className={`badge ${proj.blocker ? 'badge-rose' : proj.progress === 100 ? 'badge-teal' : 'badge-orange'}`}>
+                    {proj.blocker ? '⚠️ Ada Blocker' : proj.status}
+                  </span>
+                </div>
               </div>
 
               <h3>{proj.name}</h3>
               <p>{proj.desc}</p>
+
+              {isUserMemberOfProject(proj.id) && getUserProjectRole(proj.id) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>Peran Anda:</span>
+                  <span className="badge badge-purple" style={{ fontSize: '10.5px', padding: '2px 8px' }}>
+                    {getUserProjectRole(proj.id)}
+                  </span>
+                </div>
+              )}
 
               <div style={{ marginBottom: '8px' }}>
                 <span className="badge badge-purple" style={{ fontSize: '10px' }}>

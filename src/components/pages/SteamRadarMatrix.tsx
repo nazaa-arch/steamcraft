@@ -199,7 +199,7 @@ export const SteamRadarMatrix: React.FC = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '24px', alignItems: 'start' }}>
+      <div className="steam-radar-layout">
         {/* Left: Radar Chart + Score Summary */}
         <div>
           <div className="card" style={{ padding: '24px', borderRadius: '18px', textAlign: 'center' }}>

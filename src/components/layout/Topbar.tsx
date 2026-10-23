@@ -109,7 +109,7 @@ export const Topbar: React.FC = () => {
 
       {projectDropdownOpen && (
         <div
-          className="nav-dropdown-menu"
+          className="nav-dropdown-menu nav-dropdown-left"
           onClick={e => e.stopPropagation()}
         >
           <button
@@ -157,7 +157,7 @@ export const Topbar: React.FC = () => {
             <span style={{ fontSize: '15px' }}>🌐</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>Katalog & Rekrutmen Riset</div>
-              <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Eksplorasi seluruh riset & bursa lowongan</small>
+              <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Eksplorasi riset & lowongan kolaborasi</small>
             </div>
           </button>
         </div>
@@ -167,6 +167,22 @@ export const Topbar: React.FC = () => {
 
   return (
     <header className="topbar">
+      {/* Backdrop for Mobile Navigation Dropdowns */}
+      {(projectDropdownOpen || toolsDropdownOpen) && (
+        <div
+          className="nav-dropdown-backdrop"
+          onClick={() => {
+            setProjectDropdownOpen(false);
+            setToolsDropdownOpen(false);
+          }}
+          onTouchStart={() => {
+            setProjectDropdownOpen(false);
+            setToolsDropdownOpen(false);
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       <a
         href="#"
         className="brand"
@@ -312,7 +328,7 @@ export const Topbar: React.FC = () => {
 
           {toolsDropdownOpen && (
             <div
-              className="nav-dropdown-menu"
+              className="nav-dropdown-menu nav-dropdown-right"
               onClick={e => e.stopPropagation()}
             >
               <button

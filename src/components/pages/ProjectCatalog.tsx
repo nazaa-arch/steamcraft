@@ -193,10 +193,10 @@ export const ProjectCatalog: React.FC = () => {
                 <div>
                   <div className="project-card-top">
                     <span className="badge badge-blue">{proj.study}</span>
-                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexShrink: 0 }}>
                       {isMember && (
-                        <span className="badge badge-purple" title="Peran Anda dalam proyek ini">
-                          ✓ {userRole || 'Anggota Tim'}
+                        <span className="badge badge-purple" title="Proyek yang Anda ikuti">
+                          ✓ Tim Saya
                         </span>
                       )}
                       {proj.open_recruitment === 1 && !isMember && (
@@ -222,6 +222,15 @@ export const ProjectCatalog: React.FC = () => {
 
                   <h3>{proj.name}</h3>
                   <p>{proj.desc}</p>
+
+                  {isMember && userRole && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>Peran Anda:</span>
+                      <span className="badge badge-purple" style={{ fontSize: '10.5px', padding: '2px 8px' }}>
+                        {userRole}
+                      </span>
+                    </div>
+                  )}
 
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
                     <span className="badge badge-purple" style={{ fontSize: '10px' }}>
