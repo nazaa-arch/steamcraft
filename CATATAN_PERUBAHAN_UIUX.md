@@ -70,4 +70,54 @@ Dokumen ini mencatat seluruh kronologi iterasi, perbaikan antarmuka (*User Inter
 
 ---
 
+### 6. 🧪 Pembaruan UI/UX Tahap 2 Berdasarkan Dokumen Masukan Dosen Dr. Belgis (`beta.steamcraft.online`)
+- **Halaman Masuk (Login Screen — Fit to Screen / 100vh Lock)**:
+  - Mengunci tata letak layar desktop (`height: 100vh`) agar tidak perlu scroll vertikal pada resolusi laptop standar (1366×768 / 1440×900).
+  - Menghapus redundansi teks *"Science · Technology · Engineering · Art · Mathematics"* (sebelumnya tercantum 3x, kini hanya 1x).
+  - Mengganti ikon huruf `[S]` statis di pojok kiri atas menjadi lencana gradien modern dengan ikon *Sparkles*.
+  - Mengadopsi tata letak minimalis dan bersih ala portal *SISTER Kemdikbudristek*:
+    - Opsi *Uji Coba Cepat (Akun Demo)* disederhanakan menjadi bilah pil 2-kolom ringkas di bawah tombol utama (CTA).
+    - Tautan pendaftaran akun civitas baru diubah menjadi tautan teks elegan.
+  - Tag disiplin ilmu di kiri bawah diubah menjadi indikator statis non-klik (*flat data badge indicators*) agar tidak dikira tombol aksi oleh pengguna.
+  - Menaikkan kontras teks hak cipta/footer (*"SteamCraft © 2026..."*) menjadi `#475569` agar jelas terbaca.
+
+- **Bilah Navigasi Atas & Profil Dosen (Topbar)**:
+  - **Pencegahan Nama Terpotong**: Chip profil di bilah atas menampilkan nama ringkas profesional:
+    $$\mathbf{Dr.\ Belgis\ A.\ Iza}$$
+    disertai avatar `👩‍🏫`, chevron interaktif, dan status *"Dosen"*.
+  - **Dropdown Profil Peneliti (Popover Pojok Kanan Atas)**: Saat diklik, menampilkan popover elegan berisi:
+    - Nama lengkap bergelar: **Dr. Belgis Ainatul Iza, S.Si., M.Mat.**
+    - NIP: `202509237` | Home Base: S1 Sains Data — FMIPA UNESA | Surel: `belgisiza@unesa.ac.id`
+    - Tombol aksi: *"Edit Profil"* & *"Keluar"*.
+  - **Penghapusan Scroll Samping Navbar (Opsi 1 Dosen)**:
+    - Melakukan penyederhanaan label menu panjang menjadi ringkas:
+      *"Katalog Proyek"* $\rightarrow$ **"Proyek"**, *"Open Recruitment"* $\rightarrow$ **"Rekrutmen"**, *"Jadwal & Bimbingan"* $\rightarrow$ **"Bimbingan"**, *"Lab & Fasilitas"* $\rightarrow$ **"Fasilitas"**, *"Portofolio Saya"* $\rightarrow$ **"Portofolio"**, *"Mission Control"* $\rightarrow$ **"Supervisi"**, *"Analitik Kohort"* $\rightarrow$ **"Analitik"**.
+    - Menu muat rapi dalam 1 baris tanpa perlu scroll horizontal pada laptop 13–14 inci.
+  - **Harmonisasi Rasio Logo**: Menyesuaikan dimensi logo ikon "S" (36px), tipografi judul (17px), dan sub-teks agar seimbang dan proporsional.
+
+- **Tata Kelola Lab & Fasilitas (`ResourcesPage.tsx`)**:
+  - **Peningkatan Hierarki Spesifikasi**: Spesifikasi hardware/lab disajikan dalam bentuk *chip badge* modular (misal: `[24GB VRAM GDDR6X]`, `[CUDA 12.4]`, `[PyTorch & TensorFlow]`).
+  - **Tombol Aksi Terintegrasi**: Menyejajarkan tombol utama `+ Ajukan Permohonan Fasilitas` dengan judul seksi, serta menambahkan tombol langsung *"Ajukan Peminjaman Fasilitas Ini →"* di dalam setiap kartu katalog.
+  - **Ikon Persetujuan**: Tombol verifikasi dilengkapi ikon tegas `[✓ Setujui]` (hijau) dan `[✕ Tolak]` (merah).
+  - **Aksi pada Status Disetujui**: Mengisi area aksi permohonan yang telah disetujui dengan tombol operasional:
+    - `[📋 Detail Izin Lab]`, `[✓ Selesai]`, dan `[✕ Batalkan]`.
+  - **Format Tanggal Humanis**: Mengubah format angka `22/10/2026` menjadi teks pendek yang mudah dicerna: **`22 Okt 2026`**.
+  - **Pemisahan 2 Tabel + Paginasi (Mengacu Referensi Daily Task Dosen)**:
+    - **Tabel 1**: Permohonan Menunggu Verifikasi Dosen/Lab (Pending Requests).
+    - **Tabel 2**: Riwayat Permohonan Disetujui & Selesai (Approved / Archive).
+    - Masing-masing tabel dilengkapi pemilih jumlah baris (*Rows per page: 3, 5, 10*) dan tombol navigasi *Prev - Next*.
+
+- **Mission Control & Evaluasi Rubrik (`MissionControlPage.tsx`)**:
+  - **Paginasi Daftar Proyek**: Menambahkan fitur *Rows per page* (4, 5, 8, 15) dan tombol navigasi *Prev - Next* pada bilah master proyek riset (13 proyek) agar tidak perlu scroll vertikal yang panjang.
+  - **Desain Kartu Filter Interaktif (Gaya SIGAP-ZI FMIPA UNESA)**:
+    - Kartu filter status (*"Semua Proyek"*, *"Kendala"*, *"Siap Evaluasi"*, *"Telah Selesai"*) yang sedang aktif diberikan efek **mengambang (*floating elevated card*)** dengan elevasi bayangan `rgba(37,99,235,0.25)` dan *double-layer border* (`0 0 0 2px #2563eb, inset 0 0 0 1px #93c5fd`).
+
+- **Lingkungan Beta Staging (`beta.steamcraft.online`)**:
+  - Routing aplikasi mengenali domain `beta.steamcraft.online` dan query `?env=beta`.
+  - Dilengkapi banner atas:
+    $$\text{🧪 LINGKUNGAN BETA STAGING — Uji Coba UI/UX Masukan Dosen (Dr. Belgis) Telah Aktif}$$
+  - Judul tab browser otomatis menampilkan **`SteamCraft [BETA]`**.
+
+---
+
 *Catatan: Seluruh riwayat perubahan di atas tersimpan dengan riwayat diff baris kode per komit pada repositori Git (`main`).*

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Bell, Edit3, Shield, LogOut, Check, X, Sparkles, ChevronLeft, ChevronRight, ChevronDown, UserCheck } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
   const {
@@ -18,7 +18,9 @@ export const Topbar: React.FC = () => {
   } = useApp();
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const notifWrapperRef = useRef<HTMLDivElement>(null);
+  const profileWrapperRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -54,19 +56,22 @@ export const Topbar: React.FC = () => {
     }
   };
 
-  // Close notification dropdown when clicking outside or pressing Escape
+  // Close dropdowns when clicking outside or pressing Escape
   useEffect(() => {
-    if (!notifDropdownOpen) return;
-
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (notifWrapperRef.current && !notifWrapperRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (notifDropdownOpen && notifWrapperRef.current && !notifWrapperRef.current.contains(target)) {
         setNotifDropdownOpen(false);
+      }
+      if (profileDropdownOpen && profileWrapperRef.current && !profileWrapperRef.current.contains(target)) {
+        setProfileDropdownOpen(false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setNotifDropdownOpen(false);
+        setProfileDropdownOpen(false);
       }
     };
 
@@ -79,7 +84,7 @@ export const Topbar: React.FC = () => {
       document.removeEventListener('touchstart', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [notifDropdownOpen]);
+  }, [notifDropdownOpen, profileDropdownOpen]);
 
   if (!currentUser) return null;
 
@@ -154,7 +159,7 @@ export const Topbar: React.FC = () => {
               className={currentPage === 'projects' ? 'active' : ''}
               onClick={() => setCurrentPage('projects')}
             >
-              Katalog Proyek
+              Proyek
             </button>
             <button
               className={currentPage === 'workspace' ? 'active' : ''}
@@ -166,7 +171,7 @@ export const Topbar: React.FC = () => {
               className={currentPage === 'recruitment' ? 'active' : ''}
               onClick={() => setCurrentPage('recruitment')}
             >
-              Open Recruitment
+              Rekrutmen
             </button>
             <button
               className={currentPage === 'studentConsultations' ? 'active' : ''}
@@ -175,7 +180,7 @@ export const Topbar: React.FC = () => {
                 markConsultationsRead();
               }}
             >
-              <span>Jadwal & Bimbingan</span>
+              <span>Bimbingan</span>
               {pendingStudentConsults > 0 && (
                 <span className="nav-badge">{pendingStudentConsults}</span>
               )}
@@ -184,13 +189,13 @@ export const Topbar: React.FC = () => {
               className={currentPage === 'studentResources' ? 'active' : ''}
               onClick={() => setCurrentPage('studentResources')}
             >
-              Ajukan Fasilitas
+              Fasilitas
             </button>
             <button
               className={currentPage === 'studentPortfolio' ? 'active' : ''}
               onClick={() => setCurrentPage('studentPortfolio')}
             >
-              Portofolio Saya
+              Portofolio
             </button>
           </>
         )}
@@ -202,7 +207,7 @@ export const Topbar: React.FC = () => {
               className={currentPage === 'mission' ? 'active' : ''}
               onClick={() => setCurrentPage('mission')}
             >
-              <span>Mission Control</span>
+              <span>Supervisi</span>
               {blockerProjectsCount > 0 && (
                 <span className="nav-badge warning">{blockerProjectsCount}</span>
               )}
@@ -211,7 +216,7 @@ export const Topbar: React.FC = () => {
               className={currentPage === 'projects' ? 'active' : ''}
               onClick={() => setCurrentPage('projects')}
             >
-              Katalog Proyek
+              Proyek
             </button>
             <button
               className={currentPage === 'workspace' ? 'active' : ''}
@@ -235,13 +240,13 @@ export const Topbar: React.FC = () => {
               className={currentPage === 'resources' ? 'active' : ''}
               onClick={() => setCurrentPage('resources')}
             >
-              Lab & Fasilitas
+              Fasilitas
             </button>
             <button
               className={currentPage === 'analytics' ? 'active' : ''}
               onClick={() => setCurrentPage('analytics')}
             >
-              Analitik Kohort
+              Analitik
             </button>
           </>
         )}
@@ -488,55 +493,120 @@ export const Topbar: React.FC = () => {
           )}
         </div>
 
-        {/* User Profile Badge */}
-        <div
-          className="user-badge"
-          onClick={() => openModal('profile', currentUser)}
-          title="Klik untuk mengedit identitas & profil peneliti STEAM"
-          tabIndex={0}
-          role="button"
-        >
+        {/* User Profile Badge & Dropdown */}
+        <div className="user-profile-wrapper" ref={profileWrapperRef}>
           <div
-            className="user-avatar"
-            style={{ backgroundColor: currentUser.avatar_color || '#2878d7', position: 'relative' }}
+            className={`user-badge ${profileDropdownOpen ? 'active' : ''}`}
+            onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+            title="Klik untuk membuka menu profil & identitas peneliti"
+            tabIndex={0}
+            role="button"
+            aria-expanded={profileDropdownOpen}
           >
-            {currentUser.avatar_icon ? (
-              <span style={{ fontSize: '15px' }}>{currentUser.avatar_icon}</span>
-            ) : (
-              currentUser.name.charAt(0).toUpperCase()
-            )}
-          </div>
-          <div className="user-info">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <strong>
-                {(() => {
-                  let str = currentUser.name || '';
-                  if (currentUser.title_prefix && !str.startsWith(currentUser.title_prefix)) {
-                    str = `${currentUser.title_prefix} ${str}`;
-                  }
-                  if (currentUser.title_suffix && !str.endsWith(currentUser.title_suffix)) {
-                    str = `${str}, ${currentUser.title_suffix}`;
-                  }
-                  return str;
-                })()}
-              </strong>
-              <Edit3 size={11} className="profile-edit-indicator" />
+            <div
+              className="user-avatar"
+              style={{ backgroundColor: currentUser.avatar_color || '#2878d7', position: 'relative' }}
+            >
+              {currentUser.avatar_icon ? (
+                <span style={{ fontSize: '15px' }}>{currentUser.avatar_icon}</span>
+              ) : (
+                currentUser.name.charAt(0).toUpperCase()
+              )}
             </div>
-            <small>
-              {role === 'student' ? 'Mahasiswa Peneliti' : role === 'lecturer' ? 'Dosen Pembimbing' : 'Administrator'}
-            </small>
+            <div className="user-info">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <strong style={{ whiteSpace: 'nowrap' }}>
+                  {(() => {
+                    if (currentUser.role === 'lecturer' || currentUser.name.includes('Belgis')) {
+                      return 'Dr. Belgis A. Iza';
+                    }
+                    const parts = (currentUser.name || '').split(' ');
+                    return parts.length > 2 ? `${parts[0]} ${parts[1]}` : currentUser.name;
+                  })()}
+                </strong>
+                <ChevronDown size={12} className={`profile-chevron ${profileDropdownOpen ? 'open' : ''}`} />
+              </div>
+              <small>
+                {role === 'student' ? 'Mahasiswa' : role === 'lecturer' ? 'Dosen' : 'Admin'}
+              </small>
+            </div>
           </div>
-        </div>
 
-        {/* Logout Button */}
-        <button
-          className="btn btn-ghost btn-sm topbar-logout-btn"
-          onClick={logout}
-          title="Keluar"
-        >
-          <LogOut size={13} />
-          <span className="logout-text">Keluar</span>
-        </button>
+          {/* Profile Dropdown Popover */}
+          {profileDropdownOpen && (
+            <div className="user-profile-dropdown" onClick={e => e.stopPropagation()}>
+              <div className="user-profile-dropdown-header">
+                <div
+                  className="dropdown-avatar"
+                  style={{ backgroundColor: currentUser.avatar_color || '#2878d7' }}
+                >
+                  {currentUser.avatar_icon || currentUser.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="dropdown-user-main">
+                  <strong>
+                    {(() => {
+                      let str = currentUser.name || '';
+                      if (currentUser.title_prefix && !str.startsWith(currentUser.title_prefix)) {
+                        str = `${currentUser.title_prefix} ${str}`;
+                      }
+                      if (currentUser.title_suffix && !str.endsWith(currentUser.title_suffix)) {
+                        str = `${str}, ${currentUser.title_suffix}`;
+                      }
+                      return str;
+                    })()}
+                  </strong>
+                  <div className="dropdown-role-pill">
+                    <UserCheck size={11} />
+                    <span>{role === 'student' ? 'Mahasiswa Peneliti' : role === 'lecturer' ? 'Dosen Pembimbing Utama' : 'Administrator Sistem'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="user-profile-dropdown-body">
+                <div className="profile-detail-row">
+                  <span className="detail-label">{role === 'student' ? 'NIM' : 'NIP / NIDN'}</span>
+                  <span className="detail-val">{currentUser.identifier || (role === 'student' ? '202610101' : '202509237')}</span>
+                </div>
+                <div className="profile-detail-row">
+                  <span className="detail-label">Program Studi</span>
+                  <span className="detail-val">{currentUser.study_program || 'S1 Sains Data — FMIPA UNESA'}</span>
+                </div>
+                <div className="profile-detail-row">
+                  <span className="detail-label">Surel Kampus</span>
+                  <span className="detail-val">{currentUser.email || (role === 'student' ? 'budi.santoso@unesa.ac.id' : 'belgisiza@unesa.ac.id')}</span>
+                </div>
+              </div>
+
+              <div className="user-profile-dropdown-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    openModal('profile', currentUser);
+                    setProfileDropdownOpen(false);
+                  }}
+                  style={{ flex: 1, fontSize: '11.5px', justifyContent: 'center' }}
+                >
+                  <Edit3 size={13} />
+                  <span>Edit Profil</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    logout();
+                  }}
+                  style={{ color: '#e11d48', fontSize: '11.5px', padding: '6px 12px' }}
+                  title="Keluar dari akun"
+                >
+                  <LogOut size={13} />
+                  <span>Keluar</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

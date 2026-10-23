@@ -35,6 +35,13 @@ export const App: React.FC = () => {
     searchParams.get('portal') === 'adm' ||
     currentPage === 'adminDev';
 
+  // 1.2 Dedicated Beta / Staging Environment route: beta.steamcraft.online or ?env=beta or ?beta=true
+  const isBetaSubdomain =
+    hostname.startsWith('beta.') ||
+    hostname === 'beta.steamcraft.online' ||
+    searchParams.get('env') === 'beta' ||
+    searchParams.get('beta') === 'true';
+
   // 1.5 Dedicated Member Portfolio Subdomains:
   // portofolionaza.steamcraft.online / ?portfolio=naza
   // portofoliobima.steamcraft.online / ?portfolio=bima
@@ -53,6 +60,8 @@ export const App: React.FC = () => {
     if (typeof document !== 'undefined') {
       if (isAdmSubdomain) {
         document.title = 'Adm Steam';
+      } else if (isBetaSubdomain) {
+        document.title = 'SteamCraft [BETA]';
       } else if (portfolioTarget === 'naza') {
         document.title = 'Portofolio Muhammad Naza Firmansyah — STEAM';
       } else if (portfolioTarget === 'bima') {
@@ -63,7 +72,7 @@ export const App: React.FC = () => {
         document.title = 'SteamCraft';
       }
     }
-  }, [isAdmSubdomain, portfolioTarget, currentPage]);
+  }, [isAdmSubdomain, isBetaSubdomain, portfolioTarget, currentPage]);
 
   if (isAdmSubdomain) {
     return (
@@ -87,8 +96,9 @@ export const App: React.FC = () => {
 
   // 2. Main Team Project Hub Domain: steamcraft.online / www.steamcraft.online (Showcase Projek Tim Bersama)
   // When visitor opens steamcraft.online, show the Team Collaborative Projects Showcase & Multi-Project Gateway!
-  // When visitor opens app.steamcraft.online or ?view=app, show the full STEAM-Craft Application!
+  // When visitor opens app.steamcraft.online, beta.steamcraft.online or ?view=app, show the full STEAM-Craft Application!
   const isAppSubdomain =
+    isBetaSubdomain ||
     hostname.startsWith('app.') ||
     hostname === 'app.steamcraft.online' ||
     searchParams.get('view') === 'app' ||
@@ -122,7 +132,7 @@ export const App: React.FC = () => {
     );
   }
 
-  // 3. Application Area (app.steamcraft.online or ?view=app):
+  // 3. Application Area (app.steamcraft.online, beta.steamcraft.online or ?view=app):
   // If Maintenance Mode is globally active and user is not an Admin, show MaintenancePage directly
   if (maintenanceMode && currentUser?.role !== 'admin') {
     return (
@@ -137,6 +147,45 @@ export const App: React.FC = () => {
   if (!currentUser) {
     return (
       <>
+        {isBetaSubdomain && (
+          <aside
+            role="region"
+            aria-label="Lingkungan Beta Staging"
+            style={{
+              background: 'linear-gradient(90deg, #1e3a8a, #0284c7)',
+              color: 'white',
+              padding: '6px 16px',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontWeight: 700,
+              zIndex: 99999,
+              position: 'relative',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>🧪</span>
+              <span>
+                <strong>LINGKUNGAN BETA STAGING</strong> &mdash; Uji Coba UI/UX Masukan Dosen (Dr. Belgis) Telah Aktif
+              </span>
+            </div>
+            <a
+              href="https://app.steamcraft.online"
+              style={{
+                color: '#38bdf8',
+                background: 'rgba(255,255,255,0.15)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                textDecoration: 'none',
+                fontSize: '11px'
+              }}
+            >
+              Versi Stabil &rarr;
+            </a>
+          </aside>
+        )}
         {currentPage === 'maintenance' ? <MaintenancePage /> : <LoginScreen />}
         <Modals />
         <Toast />
@@ -146,6 +195,49 @@ export const App: React.FC = () => {
 
   return (
     <div className={`workspace-app ${currentUser.role === 'admin' ? 'dev-mode-active' : ''}`}>
+      {/* Top Banner for Beta Staging Environment */}
+      {isBetaSubdomain && (
+        <aside
+          role="region"
+          aria-label="Lingkungan Beta Staging"
+          style={{
+            background: 'linear-gradient(90deg, #1e3a8a, #0284c7)',
+            color: 'white',
+            padding: '6px 16px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 700,
+            zIndex: 99999,
+            position: 'relative',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>🧪</span>
+            <span>
+              <strong>LINGKUNGAN BETA STAGING</strong> &mdash; Uji Coba UI/UX Masukan Dosen (Dr. Belgis) Telah Aktif
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '11px', opacity: 0.9 }}>Domain Utama: app.steamcraft.online</span>
+            <a
+              href="https://app.steamcraft.online"
+              style={{
+                color: '#38bdf8',
+                background: 'rgba(255,255,255,0.15)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                textDecoration: 'none',
+                fontSize: '11px'
+              }}
+            >
+              Buka Versi Stabil &rarr;
+            </a>
+          </div>
+        </aside>
+      )}
       {/* Top Banner when Maintenance Mode is ON for Admin */}
       {maintenanceMode && currentUser.role === 'admin' && (
         <div

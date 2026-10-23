@@ -185,7 +185,7 @@ export interface ResourceRequest {
   resource_name: string;
   date_needed: string;
   note?: string;
-  status: 'Menunggu' | 'Disetujui' | 'Ditolak';
+  status: 'Menunggu' | 'Disetujui' | 'Ditolak' | 'Selesai';
   feedback?: string | null;
   created_at: string;
 }

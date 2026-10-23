@@ -36,7 +36,9 @@ export const LoginScreen: React.FC = () => {
       {/* Left Showcase */}
       <section className="login-showcase">
         <div className="login-topline">
-          <span className="login-mark">S</span>
+          <span className="login-mark-badge" title="STEAM-Craft Ekosistem">
+            <Sparkles size={15} />
+          </span>
           <span>Platform Kolaborasi Riset Ilmiah & Inovasi Mahasiswa</span>
         </div>
 
@@ -45,35 +47,34 @@ export const LoginScreen: React.FC = () => {
         </div>
 
         <div className="login-copy">
-          <div className="eyebrow">Science · Technology · Engineering · Art · Mathematics</div>
           <h1>
             Ruang untuk Rasa Ingin Tahu <span>Lintas Disiplin.</span>
           </h1>
           <p>
             Integrasikan eksplorasi sains, implementasi teknologi, rancang bangun rekayasa, ekspresi estetika seni,
-            dan ketelitian matematika dalam satu alur kerja berbasis reproducible research.
+            dan ketelitian matematika dalam satu alur kerja riset civitas akademika.
           </p>
 
           <div className="login-discipline">
-            <span className="disc-pill">
+            <span className="disc-pill disc-indicator" title="Pilar Sains">
               <span className="dot dot-blue"></span> Science
             </span>
-            <span className="disc-pill">
+            <span className="disc-pill disc-indicator" title="Pilar Teknologi">
               <span className="dot dot-teal"></span> Technology
             </span>
-            <span className="disc-pill">
+            <span className="disc-pill disc-indicator" title="Pilar Rekayasa">
               <span className="dot dot-amber"></span> Engineering
             </span>
-            <span className="disc-pill">
+            <span className="disc-pill disc-indicator" title="Pilar Seni & Humaniora">
               <span className="dot dot-rose"></span> Art
             </span>
-            <span className="disc-pill">
+            <span className="disc-pill disc-indicator" title="Pilar Matematika & Komputasi">
               <span className="dot dot-purple"></span> Mathematics
             </span>
           </div>
         </div>
 
-        <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+        <div className="login-footer-note">
           SteamCraft &copy; 2026. Standar Inovasi Pendidikan Tinggi Nasional.
         </div>
       </section>
@@ -176,62 +177,61 @@ export const LoginScreen: React.FC = () => {
 
             {error && <div className="auth-error">{error}</div>}
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', marginTop: '6px' }}>
+            <button type="submit" className="btn btn-primary auth-submit-btn" style={{ width: '100%', padding: '11px', marginTop: '6px' }}>
               <span>Masuk ke Ruang Kerja</span>
               <ArrowRight size={16} />
             </button>
 
-            {/* Quick Demo Switcher Box */}
-            <div className="demo-box">
-              <h4>Akses Cepat Akun Demo (1-Klik)</h4>
-              <div className="demo-btns">
+            {/* Quick Demo Switcher Bar - Compact & Clean ala SISTER */}
+            <div className="auth-quick-demo">
+              <div className="quick-demo-header">
+                <Sparkles size={12} className="text-primary" />
+                <span>Uji Coba Cepat (Akun Demo Juri & Penguji):</span>
+              </div>
+              <div className="quick-demo-grid">
                 <button
                   type="button"
-                  className="demo-btn"
+                  className="quick-demo-pill"
                   onClick={() => switchDemoUser('budi')}
+                  title="Masuk sebagai Mahasiswa Peneliti Budi Santoso"
                 >
-                  <span>🎓 Budi Santoso (Mahasiswa Sains Data)</span>
-                  <span style={{ fontSize: '10px', opacity: 0.8 }}>NIM 202610101 &rarr;</span>
+                  <span className="demo-icon">🎓</span>
+                  <div className="demo-text">
+                    <strong>Budi Santoso</strong>
+                    <small>Mahasiswa Sains Data</small>
+                  </div>
                 </button>
                 <button
                   type="button"
-                  className="demo-btn"
+                  className="quick-demo-pill highlight"
                   onClick={() => switchDemoUser('dosen')}
+                  title="Masuk sebagai Dosen Pembimbing Dr. Belgis Ainatul Iza"
                 >
-                  <span>👩‍🏫 Dr. Belgis Ainatul Iza, S.Si., M.Mat. (FMIPA UNESA)</span>
-                  <span style={{ fontSize: '10px', opacity: 0.8 }}>Dosen STEAM &rarr;</span>
+                  <span className="demo-icon">👩‍🏫</span>
+                  <div className="demo-text">
+                    <strong>Dr. Belgis A. Iza</strong>
+                    <small>Dosen FMIPA UNESA</small>
+                  </div>
                 </button>
               </div>
             </div>
 
-            {/* Register New Account */}
-            <div className="auth-register-card">
-              <span className="prompt-text">Belum punya akun peneliti STEAM?</span>
+            {/* Register New Account Text Link */}
+            <div className="auth-register-row">
+              <span>Belum punya akun peneliti?</span>{' '}
               <button
                 type="button"
-                className="auth-register-btn"
+                className="auth-register-link-btn"
                 onClick={() => openModal('register')}
               >
-                <Sparkles size={14} />
-                <span>Daftar Akun Baru Sekarang</span>
-                <ArrowRight size={14} />
+                Daftar Akun Baru
               </button>
             </div>
 
-            {/* Back Link to Team Project Hub */}
-            <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px solid rgba(148, 163, 184, 0.15)', paddingTop: '14px' }}>
-              <a
-                href="https://steamcraft.online"
-                style={{
-                  color: '#94a3b8',
-                  fontSize: '12.5px',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <span>🌐 Kunjungi Hub Portofolio Projek Tim (steamcraft.online) &rarr;</span>
+            {/* Hub Portofolio Projek Tim */}
+            <div className="auth-hub-footer">
+              <a href="https://steamcraft.online" target="_blank" rel="noopener noreferrer">
+                🌐 Hub Portofolio Projek Tim (steamcraft.online) &rarr;
               </a>
             </div>
           </form>

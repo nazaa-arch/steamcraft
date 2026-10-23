@@ -1674,6 +1674,371 @@ html, body {
   margin-left: 4px;
 }
 
+/* ======================================================== */
+/* UI/UX REFINEMENTS: MASUKAN DOSEN DR. BELGIS AINATUL IZA  */
+/* ======================================================== */
+
+/* 1. DESKTOP LOGIN SCREEN: FIT TO SCREEN / 100VH LOCK */
+@media (min-width: 901px) {
+  .login-screen {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-columns: 1.12fr 0.88fr !important;
+  }
+
+  .login-showcase {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    padding: clamp(16px, 2.8vh, 32px) clamp(24px, 4vw, 48px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+
+  .login-brand-image {
+    margin: clamp(6px, 1.8vh, 16px) auto !important;
+    max-width: 320px !important;
+    padding: 10px !important;
+    border-radius: 18px !important;
+  }
+
+  .login-brand-image img {
+    max-height: clamp(80px, 16vh, 135px) !important;
+  }
+
+  .login-copy h1 {
+    font-size: clamp(20px, 2.3vw, 29px) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 6px !important;
+  }
+
+  .login-copy p {
+    font-size: clamp(12px, 0.95vw, 13.5px) !important;
+    line-height: 1.55 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .login-discipline {
+    margin-top: 8px !important;
+    gap: 6px !important;
+  }
+
+  .login-panel {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 3.5vw, 44px) !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .auth-card {
+    padding: clamp(20px, 2.8vh, 30px) clamp(18px, 2.2vw, 26px) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+  }
+}
+
+/* Static Informational Discipline Indicators */
+.disc-indicator {
+  cursor: default !important;
+  pointer-events: none !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+  padding: 3px 10px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+}
+
+.login-mark-badge {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--primary), var(--accent-teal));
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 10px rgba(40, 120, 215, 0.3);
+}
+
+.login-footer-note {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 8px;
+}
+
+/* SISTER Kemdikbudristek-style Quick Demo Switcher */
+.auth-quick-demo {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.quick-demo-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.quick-demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.quick-demo-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.quick-demo-pill:hover {
+  border-color: var(--primary);
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+.quick-demo-pill.highlight {
+  border-color: #38bdf8;
+  background: #f0fdf4;
+}
+
+.quick-demo-pill .demo-icon {
+  font-size: 16px;
+}
+
+.quick-demo-pill .demo-text strong {
+  display: block;
+  font-size: 11.5px;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.quick-demo-pill .demo-text small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.auth-register-row {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.auth-register-link-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 12px;
+  padding: 0;
+}
+
+.auth-hub-footer {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 11.5px;
+}
+
+.auth-hub-footer a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-hub-footer a:hover {
+  color: var(--primary);
+}
+
+/* 2. USER PROFILE DROPDOWN (TOPBAR) */
+.user-profile-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.user-badge {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 20px;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  transition: all 0.2s ease;
+}
+
+.user-badge:hover,
+.user-badge.active {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.profile-chevron {
+  transition: transform 0.2s ease;
+  color: var(--muted);
+}
+
+.profile-chevron.open {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+
+.user-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 290px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  padding: 16px;
+  z-index: 1000;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-profile-dropdown-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dropdown-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  border: 2px solid #38bdf8;
+  flex-shrink: 0;
+}
+
+.dropdown-user-main strong {
+  display: block;
+  font-size: 13px;
+  color: var(--navy);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.dropdown-role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.user-profile-dropdown-body {
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.profile-detail-row .detail-label {
+  color: var(--muted);
+}
+
+.profile-detail-row .detail-val {
+  color: var(--navy);
+  font-weight: 700;
+  text-align: right;
+  max-width: 175px;
+}
+
+.user-profile-dropdown-footer {
+  display: flex;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* 3. FLOATING ELEVATED ACTIVE CARD (GAYA SIGAP-ZI FMIPA UNESA) */
+.floating-active-card {
+  transform: translateY(-4px) !important;
+  border-color: #2563eb !important;
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%) !important;
+  box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.25), 0 0 0 2px #2563eb, inset 0 0 0 1px #93c5fd !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 4. PROPORTIONAL BRAND TOPBAR LOGO & HEADLINE */
+.brand-logo-img {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+  object-fit: contain !important;
+}
+
+.brand-text h2 {
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  margin: 0 !important;
+}
+
+.brand-text span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: var(--primary) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+}
+
 
 
 

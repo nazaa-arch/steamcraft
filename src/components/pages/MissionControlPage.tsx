@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { AlertTriangle, CheckCircle, Award, FileText, ChevronRight, Save } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Award, FileText, ChevronRight, ChevronLeft, Save } from 'lucide-react';
 
 export const MissionControlPage: React.FC = () => {
   const { projects, rubrics, saveRubric, toggleBlocker, setSelectedProjectId, setCurrentPage } = useApp();
 
   const [selectedId, setSelectedId] = useState<number>(projects[0]?.id || 1);
   const [filterMode, setFilterMode] = useState<'all' | 'blocker' | 'review' | 'done'>('all');
+  const [projPage, setProjPage] = useState<number>(1);
+  const [projRowsPerPage, setProjRowsPerPage] = useState<number>(5);
 
   const activeProject = projects.find(p => p.id === selectedId) || projects[0];
   const existingRubric = rubrics.find(r => r.project_id === activeProject?.id);
@@ -63,6 +65,14 @@ export const MissionControlPage: React.FC = () => {
     return true;
   });
 
+  // Pagination for Master Sidebar List (as requested by Dosen Belgis Page 5)
+  const totalProjPages = Math.max(1, Math.ceil(filteredProjects.length / projRowsPerPage));
+  const currentProjPage = Math.min(projPage, totalProjPages);
+  const pagedProjects = filteredProjects.slice(
+    (currentProjPage - 1) * projRowsPerPage,
+    currentProjPage * projRowsPerPage
+  );
+
   return (
     <section className="page active">
       <div className="section-head">
@@ -76,11 +86,15 @@ export const MissionControlPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Tabs */}
+      {/* Filter Tabs with Floating Elevated Active Styling (Gaya SIGAP-ZI FMIPA UNESA) */}
       <div className="mission-tabs">
         <button
-          className={`mission-tab-btn ${filterMode === 'all' ? 'active' : ''}`}
-          onClick={() => setFilterMode('all')}
+          type="button"
+          className={`mission-tab-btn ${filterMode === 'all' ? 'active floating-active-card' : ''}`}
+          onClick={() => {
+            setFilterMode('all');
+            setProjPage(1);
+          }}
         >
           <div className="mission-mode-num">{projects.length}</div>
           <div>
@@ -90,8 +104,12 @@ export const MissionControlPage: React.FC = () => {
         </button>
 
         <button
-          className={`mission-tab-btn ${filterMode === 'blocker' ? 'active' : ''}`}
-          onClick={() => setFilterMode('blocker')}
+          type="button"
+          className={`mission-tab-btn ${filterMode === 'blocker' ? 'active floating-active-card' : ''}`}
+          onClick={() => {
+            setFilterMode('blocker');
+            setProjPage(1);
+          }}
         >
           <div className="mission-mode-num" style={{ color: '#e11d48', borderColor: '#fecdd3' }}>
             {projects.filter(p => p.blocker === 1).length}
@@ -103,8 +121,12 @@ export const MissionControlPage: React.FC = () => {
         </button>
 
         <button
-          className={`mission-tab-btn ${filterMode === 'review' ? 'active' : ''}`}
-          onClick={() => setFilterMode('review')}
+          type="button"
+          className={`mission-tab-btn ${filterMode === 'review' ? 'active floating-active-card' : ''}`}
+          onClick={() => {
+            setFilterMode('review');
+            setProjPage(1);
+          }}
         >
           <div className="mission-mode-num" style={{ color: 'var(--accent-teal)' }}>
             {projects.filter(p => p.status === 'Review diajukan' || (p.progress >= 80 && p.status !== 'Selesai')).length}
@@ -116,8 +138,12 @@ export const MissionControlPage: React.FC = () => {
         </button>
 
         <button
-          className={`mission-tab-btn ${filterMode === 'done' ? 'active' : ''}`}
-          onClick={() => setFilterMode('done')}
+          type="button"
+          className={`mission-tab-btn ${filterMode === 'done' ? 'active floating-active-card' : ''}`}
+          onClick={() => {
+            setFilterMode('done');
+            setProjPage(1);
+          }}
         >
           <div className="mission-mode-num" style={{ color: '#16a34a' }}>
             {projects.filter(p => p.status === 'Selesai').length}
@@ -131,13 +157,39 @@ export const MissionControlPage: React.FC = () => {
 
       {/* Master-Detail Layout */}
       <div className="mission-master-detail">
-        {/* Left Master List */}
+        {/* Left Master List with Rows-per-Page & Prev-Next Pagination */}
         <div className="mission-master-sidebar">
-          <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '10px' }}>
-            Daftar Proyek Riset ({filteredProjects.length})
-          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+              Daftar Proyek Riset ({filteredProjects.length})
+            </h4>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--muted)' }}>
+              <span>Rows:</span>
+              <select
+                value={projRowsPerPage}
+                onChange={e => {
+                  setProjRowsPerPage(Number(e.target.value));
+                  setProjPage(1);
+                }}
+                style={{
+                  fontSize: '11px',
+                  padding: '2px 6px',
+                  borderRadius: '5px',
+                  border: '1px solid var(--line)',
+                  background: 'white',
+                  fontWeight: 700
+                }}
+              >
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+                <option value={8}>8</option>
+                <option value={15}>15</option>
+              </select>
+            </div>
+          </div>
+
           <div className="mission-project-list">
-            {filteredProjects.map(proj => (
+            {pagedProjects.map(proj => (
               <div
                 key={proj.id}
                 className={`project-list-item ${proj.id === selectedId ? 'selected' : ''}`}
@@ -162,6 +214,35 @@ export const MissionControlPage: React.FC = () => {
               </div>
             ))}
           </div>
+
+          {/* Master Sidebar Prev-Next Pagination */}
+          {totalProjPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '11px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setProjPage(p => Math.max(1, p - 1))}
+                disabled={currentProjPage === 1}
+                style={{ padding: '3px 8px', fontSize: '11px', opacity: currentProjPage === 1 ? 0.5 : 1 }}
+              >
+                <ChevronLeft size={12} />
+                <span>Prev</span>
+              </button>
+              <span style={{ fontWeight: 700, color: 'var(--navy)' }}>
+                {currentProjPage} / {totalProjPages}
+              </span>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setProjPage(p => Math.min(totalProjPages, p + 1))}
+                disabled={currentProjPage === totalProjPages}
+                style={{ padding: '3px 8px', fontSize: '11px', opacity: currentProjPage === totalProjPages ? 0.5 : 1 }}
+              >
+                <span>Next</span>
+                <ChevronRight size={12} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Detail Inspector & Rubric Form */}

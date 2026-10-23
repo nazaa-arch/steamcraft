@@ -97,7 +97,7 @@ interface AppContextType {
   updateConsultation: (id: number, data: Partial<Consultation>) => void;
   markConsultationsRead: () => void;
   requestResource: (data: Omit<ResourceRequest, 'id' | 'created_at' | 'status'>) => void;
-  updateResourceStatus: (id: number, status: 'Menunggu' | 'Disetujui' | 'Ditolak', feedback?: string) => void;
+  updateResourceStatus: (id: number, status: 'Menunggu' | 'Disetujui' | 'Ditolak' | 'Selesai', feedback?: string) => void;
 
   // Rubrics & Assessments
   saveRubric: (
@@ -990,7 +990,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     closeModal();
   };
 
-  const updateResourceStatus = (id: number, status: 'Menunggu' | 'Disetujui' | 'Ditolak', feedback?: string) => {
+  const updateResourceStatus = (id: number, status: 'Menunggu' | 'Disetujui' | 'Ditolak' | 'Selesai', feedback?: string) => {
     setResourceRequests(prev => prev.map(r => (r.id === id ? { ...r, status, feedback: feedback || r.feedback } : r)));
     showToast(`Permohonan fasilitas lab "${status}".`);
   };
