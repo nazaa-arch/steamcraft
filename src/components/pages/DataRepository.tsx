@@ -87,18 +87,27 @@ const TYPE_CONFIG: Record<string, { icon: string; color: string; label: string }
 };
 
 export const DataRepository: React.FC = () => {
-  const { projects, currentUser } = useApp();
+  const { projects, currentUser, showToast } = useApp();
   const [selectedProjectId, setSelectedProjectId] = useState<number>(projects[0]?.id || 1);
   const [artifacts, setArtifacts] = useState<DataArtifact[]>(INITIAL_ARTIFACTS);
   const [checks, setChecks] = useState<ReproducibilityCheck[]>(REPRODUCIBILITY_CHECKS);
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'artifacts' | 'reproducibility'>('artifacts');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unverified' | 'verified'>('all');
   const [newArtifact, setNewArtifact] = useState({ name: '', type: 'dataset', format: '', url: '', description: '', license: 'CC BY 4.0' });
   const [uploadedFileSize, setUploadedFileSize] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Lecturer Verification Modal State
+  const [verifyingArtifact, setVerifyingArtifact] = useState<DataArtifact | null>(null);
+  const [endorsementNote, setEndorsementNote] = useState<string>('');
+
   const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
   const selectedProject = projects.find(p => p.id === selectedProjectId) || projects[0];
+
+  const verifiedArtifactsCount = artifacts.filter(a => a.verified).length;
+  const unverifiedArtifactsCount = artifacts.length - verifiedArtifactsCount;
 
   const totalChecked = checks.filter(c => c.checked).length;
   const reproScore = Math.round((totalChecked / checks.length) * 100);
@@ -121,19 +130,47 @@ export const DataRepository: React.FC = () => {
     const artifact: DataArtifact = {
       id: Date.now(), project_id: selectedProjectId,
       name: newArtifact.name, type: newArtifact.type as DataArtifact['type'],
-      format: newArtifact.format || newArtifact.type, size: '-', url: newArtifact.url,
-      description: newArtifact.description, license: newArtifact.license,
+      format: newArtifact.format || newArtifact.type.toUpperCase(), size: uploadedFileSize || '1.2 MB', url: newArtifact.url,
+      description: newArtifact.description || 'Artefak penelitian digital telah diunggah ke repositori proyek.', license: newArtifact.license,
       uploaded_by: currentUser?.name || 'Mahasiswa', uploaded_at: new Date().toISOString().split('T')[0],
       verified: false
     };
     setArtifacts(prev => [artifact, ...prev]);
     setNewArtifact({ name: '', type: 'dataset', format: '', url: '', description: '', license: 'CC BY 4.0' });
+    setUploadedFileSize('');
     setShowAddForm(false);
+    showToast('✓ Artefak baru berhasil diunggah ke repositori! Menunggu verifikasi Dosen Pembimbing.');
   };
 
-  const handleVerifyArtifact = (id: number) => {
-    setArtifacts(prev => prev.map(a => a.id === id ? { ...a, verified: true } : a));
+  const handleOpenVerifyModal = (artifact: DataArtifact) => {
+    if (!isLecturerOrAdmin) {
+      showToast('⚠️ Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi artefak data.');
+      return;
+    }
+    setVerifyingArtifact(artifact);
+    setEndorsementNote('Artefak data telah diperiksa dan memenuhi kaidah FAIR data serta standar replikasi ilmiah PKM.');
   };
+
+  const handleConfirmVerifyArtifact = () => {
+    if (!verifyingArtifact) return;
+    setArtifacts(prev =>
+      prev.map(a =>
+        a.id === verifyingArtifact.id
+          ? { ...a, verified: true, description: a.description + (endorsementNote ? ` [Validasi Pembimbing: ${endorsementNote}]` : '') }
+          : a
+      )
+    );
+    showToast(`✓ Artefak "${verifyingArtifact.name}" berhasil divalidasi oleh Dosen Pembimbing.`);
+    setVerifyingArtifact(null);
+  };
+
+  // Filtered artifacts
+  const filteredArtifacts = artifacts.filter(a => {
+    if (typeFilter !== 'all' && a.type !== typeFilter) return false;
+    if (statusFilter === 'unverified' && a.verified) return false;
+    if (statusFilter === 'verified' && !a.verified) return false;
+    return true;
+  });
 
   const categories = [
     { key: 'data', label: '📊 Data & Dataset', color: '#2563eb' },
@@ -144,13 +181,14 @@ export const DataRepository: React.FC = () => {
 
   return (
     <section className="page active" style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '40px' }}>
-      <div className="section-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
+      <div className="section-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
         <div style={{ flex: '1 1 320px' }}>
-          <div className="eyebrow">Manajemen Artefak Digital & Standar Reproduktibilitas</div>
+          <div className="eyebrow">{isLecturerOrAdmin ? 'Portal Verifikasi Data & Open Science Dosen' : 'Manajemen Artefak Digital & Standar Reproduktibilitas'}</div>
           <h2 className="h1" style={{ margin: '4px 0 6px 0' }}>Repository Data Empiris</h2>
           <p className="sub" style={{ margin: 0 }}>
-            Kelola dataset mentah, kode sumber, protokol eksperimen, dan notebook analisis.
-            Verifikasi reproduktibilitas riset sesuai standar jurnal ilmiah internasional.
+            {isLecturerOrAdmin
+              ? 'Tinjau dan validasi kelengkapan artefak data penelitian, notebook analisis Colab, serta pastikan standar reproduktibilitas riset memenuhi kaidah jurnal ilmiah bereputasi.'
+              : 'Kelola dataset mentah, kode sumber, protokol eksperimen, dan notebook analisis. Verifikasi reproduktibilitas riset sesuai standar jurnal ilmiah internasional.'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignSelf: 'center', flexWrap: 'wrap' }}>
@@ -161,6 +199,89 @@ export const DataRepository: React.FC = () => {
             <Upload size={15} /> <span>Unggah Artefak</span>
           </button>
         </div>
+      </div>
+
+      {/* Role Guidance Banner */}
+      <div
+        style={{
+          background: isLecturerOrAdmin ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' : '#eff6ff',
+          border: `1.5px solid ${isLecturerOrAdmin ? '#86efac' : '#bfdbfe'}`,
+          borderRadius: '14px',
+          padding: '14px 18px',
+          marginBottom: '20px',
+          fontSize: '12.5px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 300px' }}>
+          <span style={{ fontSize: '24px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👨‍🏫' : '🔬'}</span>
+          <div style={{ color: isLecturerOrAdmin ? '#14532d' : '#1e40af', lineHeight: 1.45 }}>
+            <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '2px' }}>
+              {isLecturerOrAdmin ? 'Mode Tinjauan Dosen Pembimbing (Validasi FAIR Data & Replikasi):' : 'Standar Keterbukaan Sains & Reproduktibilitas (PKM Dikti):'}
+            </div>
+            {isLecturerOrAdmin
+              ? 'Anda dapat meninjau dataset, kode pemrograman, dan notebook yang diunggah mahasiswa. Klik tombol "Verifikasi" untuk menyetujui artefak dan memberikan catatan kelayakan replikasi.'
+              : 'Unggah dataset mentah dan skrip analisis untuk memenuhi standar Open Science. Status verifikasi oleh Dosen Pembimbing memastikan riset siap diajukan ke jurnal nasional/internasional.'}
+          </div>
+        </div>
+
+        {isLecturerOrAdmin && unverifiedArtifactsCount > 0 && (
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={() => {
+              setActiveTab('artifacts');
+              setStatusFilter('unverified');
+            }}
+            style={{
+              background: '#ea580c',
+              color: '#ffffff',
+              border: 'none',
+              padding: '6px 14px',
+              fontSize: '11.5px',
+              fontWeight: 800,
+              borderRadius: '20px',
+              boxShadow: '0 2px 8px rgba(234,88,12,0.25)'
+            }}
+          >
+            <span>⏳ Tinjau {unverifiedArtifactsCount} Artefak Belum Terverifikasi &rarr;</span>
+          </button>
+        )}
+      </div>
+
+      {/* Summary Statistics */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+        {[
+          { label: 'Total Artefak Riset', value: artifacts.length, unit: 'Berkas', color: '#2563eb', icon: '📦', onClick: () => { setActiveTab('artifacts'); setTypeFilter('all'); setStatusFilter('all'); } },
+          { label: 'Dataset Primer/Sekunder', value: artifacts.filter(a => a.type === 'dataset').length, unit: 'Data', color: '#0d9488', icon: '📊', onClick: () => { setActiveTab('artifacts'); setTypeFilter('dataset'); } },
+          { label: 'Kode & Notebook', value: artifacts.filter(a => a.type === 'code' || a.type === 'notebook').length, unit: 'Skrip', color: '#7c3aed', icon: '💻', onClick: () => { setActiveTab('artifacts'); setTypeFilter('code'); } },
+          { label: 'Terverifikasi Dosen', value: verifiedArtifactsCount, unit: `/ ${artifacts.length}`, color: '#16a34a', icon: '✅', onClick: () => { setActiveTab('artifacts'); setStatusFilter('verified'); } },
+          { label: isLecturerOrAdmin ? 'Perlu Validasi Anda' : 'Menunggu Validasi', value: unverifiedArtifactsCount, unit: 'Berkas', color: '#f59e0b', icon: '⏳', onClick: () => { setActiveTab('artifacts'); setStatusFilter('unverified'); } },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card"
+            onClick={stat.onClick}
+            style={{
+              padding: '16px',
+              borderRadius: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              cursor: stat.onClick ? 'pointer' : 'default'
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>{stat.icon}</span>
+            <div>
+              <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>{stat.label}</div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: stat.color }}>{stat.value} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)' }}>{stat.unit}</span></div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Tab Switcher */}
@@ -413,48 +534,180 @@ export const DataRepository: React.FC = () => {
             </div>
           )}
 
+          {/* Filter Controls: Type and Status */}
+          <div className="card" style={{ padding: '16px 18px', borderRadius: '14px', marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '15px' }}>⚡</span>
+                <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>Status Validasi Artefak:</strong>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('all')}
+                  className={`btn btn-sm ${statusFilter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+                  style={{ fontSize: '11.5px', padding: '5px 12px', borderRadius: '20px', border: '1px solid var(--line)' }}
+                >
+                  Semua ({artifacts.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('unverified')}
+                  style={{
+                    fontSize: '11.5px',
+                    padding: '5px 12px',
+                    borderRadius: '20px',
+                    border: `1.5px solid ${statusFilter === 'unverified' ? '#d97706' : '#fde68a'}`,
+                    background: statusFilter === 'unverified' ? '#f59e0b' : '#fffbeb',
+                    color: statusFilter === 'unverified' ? '#ffffff' : '#b45309',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⏳ Menunggu Validasi ({unverifiedArtifactsCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('verified')}
+                  style={{
+                    fontSize: '11.5px',
+                    padding: '5px 12px',
+                    borderRadius: '20px',
+                    border: `1.5px solid ${statusFilter === 'verified' ? '#15803d' : '#bbf7d0'}`,
+                    background: statusFilter === 'verified' ? '#16a34a' : '#f0fdf4',
+                    color: statusFilter === 'verified' ? '#ffffff' : '#15803d',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✓ Terverifikasi Dosen ({verifiedArtifactsCount})
+                </button>
+              </div>
+            </div>
+
+            {/* Type Filter Pills */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>Jenis Artefak:</span>
+              <button
+                type="button"
+                onClick={() => setTypeFilter('all')}
+                className={`btn btn-sm ${typeFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ fontSize: '11.5px', padding: '4px 10px', borderRadius: '20px' }}
+              >
+                Semua
+              </button>
+              {Object.entries(TYPE_CONFIG).map(([key, cfg]) => {
+                const count = artifacts.filter(a => a.type === key).length;
+                const isSelected = typeFilter === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTypeFilter(key)}
+                    className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ fontSize: '11.5px', padding: '4px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  >
+                    <span>{cfg.icon}</span>
+                    <span>{cfg.label}</span>
+                    <span style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '999px', background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--line)', color: isSelected ? '#fff' : 'var(--navy)' }}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Artifacts Grid */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {artifacts.map(artifact => {
-              const cfg = TYPE_CONFIG[artifact.type] || TYPE_CONFIG.dataset;
-              return (
-                <div key={artifact.id} className="card" style={{ padding: '18px 20px', borderRadius: '14px', borderLeft: `4px solid ${cfg.color}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '18px' }}>{cfg.icon}</span>
-                        <strong style={{ fontSize: '14px', color: 'var(--navy)' }}>{artifact.name}</strong>
-                        <span className={`badge badge-${artifact.type === 'dataset' ? 'blue' : artifact.type === 'code' ? 'teal' : artifact.type === 'protocol' ? 'orange' : artifact.type === 'notebook' ? 'purple' : 'teal'}`} style={{ fontSize: '10px' }}>
-                          {cfg.label}
-                        </span>
-                        {artifact.verified && (
-                          <span className="badge badge-teal" style={{ fontSize: '10px' }}>✓ Terverifikasi</span>
+            {filteredArtifacts.length === 0 ? (
+              <div
+                className="card"
+                style={{
+                  padding: '36px 20px',
+                  textAlign: 'center',
+                  borderRadius: '16px',
+                  background: 'var(--surface-alt)',
+                  border: '1.5px dashed var(--line)'
+                }}
+              >
+                <div style={{ fontSize: '32px', marginBottom: '10px' }}>🔍</div>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--navy)', marginBottom: '4px' }}>
+                  Tidak Ada Artefak yang Sesuai Filter
+                </h4>
+                <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 auto 16px', maxWidth: '400px' }}>
+                  Tidak ditemukan artefak dengan filter yang dipilih. Coba atur ulang filter status atau jenis artefak.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => { setTypeFilter('all'); setStatusFilter('all'); }}
+                >
+                  Reset Filter Artefak
+                </button>
+              </div>
+            ) : (
+              filteredArtifacts.map(artifact => {
+                const cfg = TYPE_CONFIG[artifact.type] || TYPE_CONFIG.dataset;
+                return (
+                  <div key={artifact.id} className="card" style={{ padding: '18px 20px', borderRadius: '14px', borderLeft: `4px solid ${cfg.color}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                      <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '18px' }}>{cfg.icon}</span>
+                          <strong style={{ fontSize: '14px', color: 'var(--navy)', wordBreak: 'break-all' }}>{artifact.name}</strong>
+                          <span className={`badge badge-${artifact.type === 'dataset' ? 'blue' : artifact.type === 'code' ? 'teal' : artifact.type === 'protocol' ? 'orange' : artifact.type === 'notebook' ? 'purple' : 'teal'}`} style={{ fontSize: '10px' }}>
+                            {cfg.label}
+                          </span>
+                          {artifact.verified ? (
+                            <span className="badge badge-teal" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              ✓ Terverifikasi Dosen
+                            </span>
+                          ) : (
+                            <span className="badge badge-orange" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              ⏳ Menunggu Validasi
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, marginBottom: '8px' }}>{artifact.description}</p>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', fontSize: '11px', color: 'var(--muted)' }}>
+                          <span style={{ background: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <strong>Format:</strong> {artifact.format}
+                          </span>
+                          <span style={{ background: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <strong>Ukuran:</strong> {artifact.size}
+                          </span>
+                          <span style={{ background: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <strong>Lisensi:</strong> {artifact.license}
+                          </span>
+                          <span style={{ background: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <strong>Pengunggah:</strong> {artifact.uploaded_by} ({artifact.uploaded_at})
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap' }}>
+                        {artifact.url && (
+                          <a href={artifact.url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ padding: '6px 12px', fontSize: '11.5px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <ExternalLink size={12} /> <span>Buka Tautan</span>
+                          </a>
+                        )}
+                        {isLecturerOrAdmin && !artifact.verified && (
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm"
+                            onClick={() => handleOpenVerifyModal(artifact)}
+                            style={{ padding: '6px 12px', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            title="Validasi artefak ini sebagai Dosen Pembimbing"
+                          >
+                            <Check size={12} /> <span>Validasi</span>
+                          </button>
                         )}
                       </div>
-                      <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, marginBottom: '8px' }}>{artifact.description}</p>
-                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', fontSize: '11px', color: 'var(--muted)' }}>
-                        <span><strong>Format:</strong> {artifact.format}</span>
-                        <span><strong>Ukuran:</strong> {artifact.size}</span>
-                        <span><strong>Lisensi:</strong> {artifact.license}</span>
-                        <span><strong>Oleh:</strong> {artifact.uploaded_by}</span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                      {artifact.url && (
-                        <a href={artifact.url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ padding: '5px 10px', fontSize: '11px', textDecoration: 'none' }}>
-                          <ExternalLink size={12} /> <span>Buka</span>
-                        </a>
-                      )}
-                      {isLecturerOrAdmin && !artifact.verified && (
-                        <button type="button" className="btn btn-success btn-sm" onClick={() => handleVerifyArtifact(artifact.id)} style={{ padding: '5px 10px', fontSize: '11px' }}>
-                          <Check size={12} /> <span>Verifikasi</span>
-                        </button>
-                      )}
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </>
       )}
@@ -462,6 +715,56 @@ export const DataRepository: React.FC = () => {
       {/* TAB 2: REPRODUCIBILITY CHECKER */}
       {activeTab === 'reproducibility' && (
         <>
+          {/* Panel Evaluasi Dosen Pembimbing (Khusus Dosen) */}
+          {isLecturerOrAdmin && (
+            <div
+              className="card"
+              style={{
+                padding: '20px',
+                borderRadius: '16px',
+                marginBottom: '20px',
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+                border: '1.5px solid #86efac'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>👨‍🏫</span>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#166534', margin: 0 }}>
+                    Panel Evaluasi Dosen Pembimbing &mdash; Kesiapan Publikasi Ilmiah
+                  </h4>
+                </div>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    background: reproScore >= 75 ? '#16a34a' : '#f59e0b',
+                    color: '#ffffff'
+                  }}
+                >
+                  {reproScore >= 75 ? '✓ Lolos Standar SINTA/Scopus (>=75%)' : '⚠️ Perlu Kelengkapan Replikasi (<75%)'}
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#166534', lineHeight: 1.5, margin: '0 0 12px 0' }}>
+                {reproScore >= 75
+                  ? 'Proyek riset telah memenuhi standar reproduktibilitas PKM Dikti dan siap untuk penyusunan manuskrip jurnal ilmiah bereputasi. Semua komponen data mentah, skrip, dan dokumentasi telah memadai.'
+                  : 'Proyek masih memerlukan pemenuhan dependensi environment (seperti requirements.txt atau Dockerfile) dan pencantuman random seed sebelum dapat diajukan ke jurnal internasional.'}
+              </p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => showToast('Catatan evaluasi reproduktibilitas berhasil dikirimkan ke tim mahasiswa.')}
+                  style={{ background: '#16a34a', color: '#ffffff', border: 'none', fontSize: '11.5px', fontWeight: 700, padding: '6px 14px' }}
+                >
+                  <span>Kirim Rekomendasi Replikasi ke Mahasiswa</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Score Card */}
           <div className="card" style={{ padding: '24px', borderRadius: '18px', marginBottom: '24px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: 'white' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
@@ -535,6 +838,69 @@ export const DataRepository: React.FC = () => {
             })}
           </div>
         </>
+      )}
+
+      {/* Modal Dialog Validasi Artefak oleh Dosen Pembimbing */}
+      {verifyingArtifact && (
+        <div className="modal-overlay active" onClick={() => setVerifyingArtifact(null)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+            <button className="modal-close" onClick={() => setVerifyingArtifact(null)}>
+              &times;
+            </button>
+
+            <div className="eyebrow">Validasi Artefak Open Science</div>
+            <h2 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+              Verifikasi Artefak Data Riset
+            </h2>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '14px' }}>
+              Validasi keaslian, kelengkapan metadata, dan kesesuaian lisensi artefak untuk menjamin reproduktibilitas ilmiah.
+            </p>
+
+            <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                <span className="badge badge-blue" style={{ fontSize: '10px' }}>{verifyingArtifact.type.toUpperCase()}</span>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Format: {verifyingArtifact.format} &middot; {verifyingArtifact.size}</span>
+              </div>
+              <strong style={{ fontSize: '13px', color: 'var(--navy)', display: 'block', wordBreak: 'break-all', marginBottom: '4px' }}>
+                {verifyingArtifact.name}
+              </strong>
+              <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', marginBottom: '6px' }}>
+                {verifyingArtifact.description}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                Lisensi: <strong>{verifyingArtifact.license}</strong> &middot; Diunggah oleh: <strong>{verifyingArtifact.uploaded_by}</strong>
+              </div>
+            </div>
+
+            <div className="auth-field" style={{ marginBottom: '18px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700 }}>
+                Catatan Endorsement / Validasi Pembimbing
+              </label>
+              <textarea
+                rows={3}
+                value={endorsementNote}
+                onChange={e => setEndorsementNote(e.target.value)}
+                placeholder="Tuliskan catatan kelayakan replikasi, rekomendasi penggunaan dataset, dll..."
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '12.5px', width: '100%', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setVerifyingArtifact(null)}>
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                onClick={handleConfirmVerifyArtifact}
+                style={{ padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Check size={14} />
+                <span>Setujui &amp; Verifikasi Artefak</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

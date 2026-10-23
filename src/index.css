@@ -2962,6 +2962,25 @@ html, body, #root, .app-layout, .workspace-app, .main-content, .wrap, .page {
   }
 }
 
+/* Responsive Logbook Layout */
+.logbook-desktop-table {
+  display: block;
+}
+.logbook-mobile-cards {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .logbook-desktop-table {
+    display: none !important;
+  }
+  .logbook-mobile-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}
+
 
 
 

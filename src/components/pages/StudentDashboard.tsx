@@ -29,11 +29,18 @@ export const StudentDashboard: React.FC = () => {
     showToast,
     setProjectCatalogTab,
     isUserMemberOfProject,
-    getUserProjectRole
+    getUserProjectRole,
+    currentUser
   } = useApp();
 
+  const isLecturer = currentUser?.role === 'lecturer';
+  const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
+
   const myProjects = projects.filter(p => isUserMemberOfProject(p.id));
-  const displayProjects = myProjects.length > 0 ? myProjects.slice(0, 3) : projects.slice(0, 3);
+  const activeProjects = projects.filter(p => p.status === 'Aktif' || p.status === 'Review diajukan');
+
+  const [projectTab, setProjectTab] = useState<'myProjects' | 'all'>('myProjects');
+  const displayProjects = projectTab === 'myProjects' ? myProjects : activeProjects;
 
   // Onboarding Checklist State
   const [tasks, setTasks] = useState<{ [key: string]: boolean }>(() => {
@@ -88,7 +95,6 @@ export const StudentDashboard: React.FC = () => {
   const completedTasksCount = Object.values(tasks).filter(Boolean).length;
 
   // Metrics
-  const activeProjects = projects.filter(p => p.status === 'Aktif' || p.status === 'Review diajukan');
   const totalCheckpoints = checkpoints.length;
   const completedCheckpoints = checkpoints.filter(c => c.is_completed === 1).length;
   const completionRate = totalCheckpoints > 0 ? Math.round((completedCheckpoints / totalCheckpoints) * 100) : 0;
@@ -100,16 +106,17 @@ export const StudentDashboard: React.FC = () => {
       {/* Hero Card */}
       <div className="hero-card">
         <div>
-          <div className="eyebrow">Workspace Overview</div>
-          <h2>Selamat Datang di SteamCraft</h2>
+          <div className="eyebrow">{isLecturer ? 'Portal Dosen Pembimbing' : 'Workspace Overview'}</div>
+          <h2>{isLecturer ? `Selamat Datang, ${currentUser?.name || 'Dosen Pembimbing'}` : 'Selamat Datang di SteamCraft'}</h2>
           <p>
-            Rancang proyek inovasi lintas disiplin, kumpulkan bukti empiris, lakukan simulasi terkontrol, dan susun
-            laporan ilmiah yang siap diverifikasi dalam satu workspace terintegrasi.
+            {isLecturer
+              ? 'Pantau kemajuan penelitian multidisiplin mahasiswa bimbingan Anda, verifikasi logbook kegiatan riset berbasis checkpoint, dan validasi artefak data empiris.'
+              : 'Rancang proyek inovasi lintas disiplin, kumpulkan bukti empiris, lakukan simulasi terkontrol, dan susun laporan ilmiah yang siap diverifikasi dalam satu workspace terintegrasi.'}
           </p>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={() => openModal('newProject')}>
               <Plus size={15} />
-              <span>Buat Proyek Baru</span>
+              <span>{isLecturer ? 'Inisiasi Proyek Riset Baru' : 'Buat Proyek Baru'}</span>
             </button>
             <button className="btn btn-secondary" onClick={() => setCurrentPage('projects')}>
               <Compass size={15} />
@@ -128,7 +135,7 @@ export const StudentDashboard: React.FC = () => {
         </div>
         <div className="orbit-box">
           <span className="orbit-pill op1">🔬 Science + Tech</span>
-          <div className="orbit-center">S</div>
+          <div className="orbit-center">{isLecturer ? 'D' : 'S'}</div>
           <span className="orbit-pill op2">📐 Math + Art</span>
         </div>
       </div>
@@ -570,7 +577,9 @@ export const StudentDashboard: React.FC = () => {
                 Logbook Riset & PDF Resmi
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
-                Pencatatan aktivitas riset harian/mingguan dengan verifikasi pembimbing (Dr. Belgis) serta fitur 1-klik cetak dokumen PDF resmi berkop surat universitas.
+                {isLecturer
+                  ? 'Validasi catatan aktivitas riset mahasiswa bimbingan, berikan umpan balik berkala, dan verifikasi dokumen cetak PDF resmi berkop universitas.'
+                  : 'Pencatatan aktivitas riset harian/mingguan dengan verifikasi pembimbing (Dr. Belgis) serta fitur 1-klik cetak dokumen PDF resmi berkop surat universitas.'}
               </p>
             </div>
             <button
@@ -579,7 +588,7 @@ export const StudentDashboard: React.FC = () => {
               onClick={() => setCurrentPage('logbook')}
               style={{ width: '100%', marginTop: '16px', justifyContent: 'center', fontSize: '12px', padding: '8px 12px' }}
             >
-              <span>Buka Logbook Riset</span>
+              <span>{isLecturer ? 'Validasi Logbook Riset' : 'Buka Logbook Riset'}</span>
               <ArrowRight size={13} />
             </button>
           </div>
@@ -607,7 +616,9 @@ export const StudentDashboard: React.FC = () => {
                 Repository Data & Replikasi
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
-                Kelola dataset mentah, notebook Google Colab, protokol SOP, dan evaluasi 12 kriteria reproduktibilitas standar jurnal ilmiah internasional.
+                {isLecturer
+                  ? 'Tinjau kelengkapan dataset mentah, script Python, notebook Colab, dan berikan validasi standar reproduktibilitas riset mahasiswa.'
+                  : 'Kelola dataset mentah, notebook Google Colab, protokol SOP, dan evaluasi 12 kriteria reproduktibilitas standar jurnal ilmiah internasional.'}
               </p>
             </div>
             <button
@@ -616,7 +627,7 @@ export const StudentDashboard: React.FC = () => {
               onClick={() => setCurrentPage('dataRepo')}
               style={{ width: '100%', marginTop: '16px', justifyContent: 'center', fontSize: '12px', padding: '8px 12px' }}
             >
-              <span>Buka Data Repository</span>
+              <span>{isLecturer ? 'Tinjau Data Repository' : 'Buka Data Repository'}</span>
               <ArrowRight size={13} />
             </button>
           </div>
@@ -699,95 +710,208 @@ export const StudentDashboard: React.FC = () => {
       {/* Featured Projects Section */}
       <div className="section-head" style={{ marginTop: '32px' }}>
         <div>
-          <div className="eyebrow">Akses Cepat Workspace</div>
-          <h2 className="h1">Proyek Riset Multidisiplin Aktif</h2>
+          <div className="eyebrow">{isLecturer ? 'Monitoring Proyek Riset' : 'Akses Cepat Workspace'}</div>
+          <h2 className="h1">{isLecturer ? 'Proyek Riset Bimbingan & Multidisiplin' : 'Proyek Riset Multidisiplin Aktif'}</h2>
           <p className="sub">
-            Pantau kemajuan checkpoint, logbook laboratorium, dan komunikasi tim kolaborator.
+            {isLecturer
+              ? 'Pantau progres checkpoint, validasi logbook mahasiswa bimbingan, dan evaluasi artefak data penelitian.'
+              : 'Pantau kemajuan checkpoint, logbook laboratorium, dan komunikasi tim kolaborator.'}
           </p>
         </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => {
+              setProjectCatalogTab('myProjects');
+              setCurrentPage('projects');
+            }}
+            style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
+          >
+            <span>{isLecturer ? `Proyek Bimbingan (${myProjects.length}) →` : `Proyek Saya (${myProjects.length}) →`}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Interactive Tabs for Project Filtering directly on Dashboard */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <button
-          className="btn btn-secondary btn-sm"
-          onClick={() => {
-            setProjectCatalogTab('myProjects');
-            setCurrentPage('projects');
+          type="button"
+          onClick={() => setProjectTab('myProjects')}
+          className={`btn btn-sm ${projectTab === 'myProjects' ? 'btn-primary' : 'btn-secondary'}`}
+          style={{
+            borderRadius: '20px',
+            padding: '7px 16px',
+            fontSize: '12px',
+            fontWeight: projectTab === 'myProjects' ? 800 : 600,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
           }}
-          style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
         >
-          <span>Proyek Saya ({myProjects.length}) &rarr;</span>
+          <span>{isLecturer ? '👨‍🏫 Proyek yang Anda Bimbing' : '⭐ Proyek yang Anda Ikuti'}</span>
+          <span
+            style={{
+              fontSize: '10px',
+              padding: '1px 7px',
+              borderRadius: '999px',
+              background: projectTab === 'myProjects' ? 'rgba(255,255,255,0.25)' : 'var(--line)',
+              color: projectTab === 'myProjects' ? '#ffffff' : 'var(--navy)',
+              fontWeight: 800
+            }}
+          >
+            {myProjects.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setProjectTab('all')}
+          className={`btn btn-sm ${projectTab === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+          style={{
+            borderRadius: '20px',
+            padding: '7px 16px',
+            fontSize: '12px',
+            fontWeight: projectTab === 'all' ? 800 : 600,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <span>🌐 Semua Proyek Riset Aktif</span>
+          <span
+            style={{
+              fontSize: '10px',
+              padding: '1px 7px',
+              borderRadius: '999px',
+              background: projectTab === 'all' ? 'rgba(255,255,255,0.25)' : 'var(--line)',
+              color: projectTab === 'all' ? '#ffffff' : 'var(--navy)',
+              fontWeight: 800
+            }}
+          >
+            {activeProjects.length}
+          </span>
         </button>
       </div>
 
-      <div className="projects-grid">
-        {displayProjects.map(proj => (
-          <div key={proj.id} className="project-card">
-            <div>
-              <div className="project-card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-                <span className="badge badge-blue">{proj.study}</span>
-                <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {isUserMemberOfProject(proj.id) && (
-                    <span className="badge badge-purple" title="Proyek yang Anda ikuti">
-                      ✓ Tim Saya
-                    </span>
-                  )}
-                  <span className={`badge ${proj.blocker ? 'badge-rose' : proj.progress === 100 ? 'badge-teal' : 'badge-orange'}`}>
-                    {proj.blocker ? '⚠️ Ada Blocker' : proj.status}
-                  </span>
-                </div>
-              </div>
-
-              <h3>{proj.name}</h3>
-              <p>{proj.desc}</p>
-
-              {isUserMemberOfProject(proj.id) && getUserProjectRole(proj.id) && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>Peran Anda:</span>
-                  <span className="badge badge-purple" style={{ fontSize: '10.5px', padding: '2px 8px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {getUserProjectRole(proj.id)}
-                  </span>
-                </div>
-              )}
-
-              <div style={{ marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                <span className="badge badge-purple" style={{ fontSize: '10px' }}>
-                  {proj.steam}
-                </span>
-              </div>
-
-              <div className="progress-bar-wrap">
-                <div className="progress-label-row">
-                  <span>Progres Ilmiah</span>
-                  <span>{proj.progress}%</span>
-                </div>
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${proj.progress}%` }}></div>
-                </div>
-              </div>
-
-              <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px', wordBreak: 'break-word' }}>
-                👨‍🏫 Pembimbing: <strong>{proj.lecturer}</strong>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--line)', paddingTop: '12px', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Users size={13} />
-                <span>{proj.members_count} Peneliti</span>
-              </div>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  setSelectedProjectId(proj.id);
-                  setCurrentPage('workspace');
-                }}
-                style={{ flexShrink: 0 }}
-              >
-                <span>Buka Ruang Kerja</span>
-                <ArrowRight size={13} />
-              </button>
-            </div>
+      {displayProjects.length === 0 ? (
+        <div
+          className="card"
+          style={{
+            padding: '36px 24px',
+            textAlign: 'center',
+            borderRadius: '16px',
+            background: 'var(--surface-alt)',
+            border: '1.5px dashed var(--line)',
+            marginBottom: '20px'
+          }}
+        >
+          <div style={{ fontSize: '36px', marginBottom: '12px' }}>📂</div>
+          <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
+            {projectTab === 'myProjects'
+              ? (isLecturer ? 'Belum Ada Proyek Bimbingan Terdaftar' : 'Belum Ada Proyek yang Anda Ikuti')
+              : 'Tidak Ada Proyek Riset Aktif'}
+          </h3>
+          <p style={{ fontSize: '12.5px', color: 'var(--muted)', maxWidth: '460px', margin: '0 auto 18px', lineHeight: 1.5 }}>
+            {projectTab === 'myProjects'
+              ? (isLecturer
+                  ? 'Anda belum terdaftar sebagai dosen pembimbing pada proyek aktif. Buka katalog untuk melihat seluruh proyek riset mahasiswa.'
+                  : 'Anda belum bergabung dalam tim riset. Jelajahi katalog riset atau open recruitment untuk bergabung!')
+              : 'Saat ini belum ada proyek dengan status aktif.'}
+          </p>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                setProjectCatalogTab('all');
+                setCurrentPage('projects');
+              }}
+            >
+              <Compass size={14} />
+              <span>Jelajahi Katalog Proyek</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setProjectTab('all')}
+            >
+              <span>Lihat Semua Proyek Aktif ({activeProjects.length})</span>
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="projects-grid">
+          {displayProjects.map(proj => (
+            <div key={proj.id} className="project-card">
+              <div>
+                <div className="project-card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                  <span className="badge badge-blue">{proj.study}</span>
+                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {isUserMemberOfProject(proj.id) && (
+                      <span className="badge badge-purple" title="Proyek yang Anda ikuti/bimbing">
+                        {isLecturer ? '👨‍🏫 Bimbingan Anda' : '✓ Tim Saya'}
+                      </span>
+                    )}
+                    <span className={`badge ${proj.blocker ? 'badge-rose' : proj.progress === 100 ? 'badge-teal' : 'badge-orange'}`}>
+                      {proj.blocker ? '⚠️ Ada Blocker' : proj.status}
+                    </span>
+                  </div>
+                </div>
+
+                <h3>{proj.name}</h3>
+                <p>{proj.desc}</p>
+
+                {isUserMemberOfProject(proj.id) && getUserProjectRole(proj.id) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>Peran Anda:</span>
+                    <span className="badge badge-purple" style={{ fontSize: '10.5px', padding: '2px 8px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {getUserProjectRole(proj.id)}
+                    </span>
+                  </div>
+                )}
+
+                <div style={{ marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  <span className="badge badge-purple" style={{ fontSize: '10px' }}>
+                    {proj.steam}
+                  </span>
+                </div>
+
+                <div className="progress-bar-wrap">
+                  <div className="progress-label-row">
+                    <span>Progres Ilmiah</span>
+                    <span>{proj.progress}%</span>
+                  </div>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: `${proj.progress}%` }}></div>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '14px', wordBreak: 'break-word' }}>
+                  👨‍🏫 Pembimbing: <strong>{proj.lecturer}</strong>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--line)', paddingTop: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Users size={13} />
+                  <span>{proj.members_count} Peneliti</span>
+                </div>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setSelectedProjectId(proj.id);
+                    setCurrentPage('workspace');
+                  }}
+                  style={{ flexShrink: 0 }}
+                >
+                  <span>{isLecturer ? 'Buka Bimbingan' : 'Buka Ruang Kerja'}</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* View All Projects Banner Link */}
       <div
@@ -805,7 +929,7 @@ export const StudentDashboard: React.FC = () => {
         }}
       >
         <div style={{ fontSize: '12.5px', color: 'var(--ink-secondary)' }}>
-          Menampilkan <strong>{displayProjects.length} proyek riset Anda</strong> dari total <strong>{projects.length} riset terdaftar</strong> di kampus.
+          Menampilkan <strong>{displayProjects.length} proyek</strong> {projectTab === 'myProjects' ? (isLecturer ? 'bimbingan Anda' : 'yang Anda ikuti') : 'riset aktif'} dari total <strong>{projects.length} riset terdaftar</strong> di kampus.
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
@@ -817,7 +941,7 @@ export const StudentDashboard: React.FC = () => {
             }}
             style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
           >
-            <span>Proyek Saya ({myProjects.length}) &rarr;</span>
+            <span>{isLecturer ? `Proyek Bimbingan (${myProjects.length}) →` : `Proyek Saya (${myProjects.length}) →`}</span>
           </button>
           <button
             type="button"

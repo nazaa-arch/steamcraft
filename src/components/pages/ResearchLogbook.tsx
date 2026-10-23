@@ -118,6 +118,7 @@ export const ResearchLogbook: React.FC = () => {
   const [entries, setEntries] = useState<LogbookEntry[]>(INITIAL_ENTRIES);
   const [selectedProjectId, setSelectedProjectId] = useState<number>(projects[0]?.id || 1);
   const [selectedCpFilter, setSelectedCpFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unverified' | 'verified'>('all');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -135,17 +136,28 @@ export const ResearchLogbook: React.FC = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Lecturer Verification Modal State
+  const [verifyingEntry, setVerifyingEntry] = useState<LogbookEntry | null>(null);
+  const [lecturerNoteInput, setLecturerNoteInput] = useState<string>('');
+
   const isLecturerOrAdmin = currentUser?.role === 'lecturer' || currentUser?.role === 'admin';
   const selectedProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
-  // Drill-down filtering based on checkpoint category
+  // Drill-down filtering based on checkpoint category & verification status
   const filteredEntries = entries.filter(e => {
-    if (selectedCpFilter === 'all') return true;
-    if (selectedCpFilter === 'cp1') return e.checkpoint_category.includes('CP-1');
-    if (selectedCpFilter === 'cp2') return e.checkpoint_category.includes('CP-2');
-    if (selectedCpFilter === 'cp3') return e.checkpoint_category.includes('CP-3');
-    if (selectedCpFilter === 'cp4') return e.checkpoint_category.includes('CP-4');
-    if (selectedCpFilter === 'cp5') return e.checkpoint_category.includes('CP-5');
+    // Checkpoint filter
+    if (selectedCpFilter !== 'all') {
+      if (selectedCpFilter === 'cp1' && !e.checkpoint_category.includes('CP-1')) return false;
+      if (selectedCpFilter === 'cp2' && !e.checkpoint_category.includes('CP-2')) return false;
+      if (selectedCpFilter === 'cp3' && !e.checkpoint_category.includes('CP-3')) return false;
+      if (selectedCpFilter === 'cp4' && !e.checkpoint_category.includes('CP-4')) return false;
+      if (selectedCpFilter === 'cp5' && !e.checkpoint_category.includes('CP-5')) return false;
+    }
+
+    // Status filter
+    if (statusFilter === 'unverified' && e.verified) return false;
+    if (statusFilter === 'verified' && !e.verified) return false;
+
     return true;
   });
 
@@ -154,6 +166,7 @@ export const ResearchLogbook: React.FC = () => {
   const pagedEntries = filteredEntries.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const verifiedCount = entries.filter(e => e.verified).length;
+  const unverifiedCount = entries.length - verifiedCount;
   const totalHours = entries.reduce((sum, e) => {
     const num = parseInt(e.duration) || 0;
     return sum + num;
@@ -214,7 +227,34 @@ export const ResearchLogbook: React.FC = () => {
     showToast('✓ Entri logbook riset berhasil disimpan! Menunggu verifikasi Dosen Pembimbing.');
   };
 
-  const handleVerify = (id: number) => {
+  const handleOpenVerifyModal = (entry: LogbookEntry) => {
+    if (!isLecturerOrAdmin) {
+      showToast('⚠️ Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi logbook riset.');
+      return;
+    }
+    setVerifyingEntry(entry);
+    setLecturerNoteInput(entry.notes || 'Kegiatan riset terverifikasi valid dan sesuai indikator capaian.');
+  };
+
+  const handleConfirmVerify = () => {
+    if (!verifyingEntry) return;
+    setEntries(prev =>
+      prev.map(e =>
+        e.id === verifyingEntry.id
+          ? {
+              ...e,
+              verified: true,
+              verified_by: currentUser?.name || 'Dr. Belgis Ainatul Iza, S.Si., M.Mat.',
+              notes: lecturerNoteInput.trim() || 'Kegiatan riset terverifikasi valid oleh dosen pembimbing.'
+            }
+          : e
+      )
+    );
+    showToast(`✓ Entri logbook #${verifyingEntry.id} berhasil diverifikasi dengan catatan pembimbing.`);
+    setVerifyingEntry(null);
+  };
+
+  const handleQuickVerify = (id: number) => {
     if (!isLecturerOrAdmin) {
       showToast('⚠️ Hanya Dosen Pembimbing yang memiliki wewenang memvalidasi logbook riset.');
       return;
@@ -231,7 +271,7 @@ export const ResearchLogbook: React.FC = () => {
           : e
       )
     );
-    showToast('✓ Entri logbook berhasil diverifikasi oleh Dosen Pembimbing.');
+    showToast('✓ Entri logbook berhasil diverifikasi.');
   };
 
   const handleDelete = (id: number) => {
@@ -339,11 +379,12 @@ export const ResearchLogbook: React.FC = () => {
     <section className="page active" style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '40px' }}>
       <div className="section-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
         <div style={{ flex: '1 1 320px' }}>
-          <div className="eyebrow">Dokumentasi &amp; Pencatatan Riset Berbasis Checkpoint</div>
+          <div className="eyebrow">{isLecturerOrAdmin ? 'Portal Verifikasi Riset Dosen Pembimbing' : 'Dokumentasi &amp; Pencatatan Riset Berbasis Checkpoint'}</div>
           <h2 className="h1" style={{ margin: '4px 0 6px 0' }}>Logbook Riset Ilmiah</h2>
           <p className="sub" style={{ margin: 0 }}>
-            Catatan kegiatan riset mahasiswa yang terhubung langsung dengan tahapan checkpoint,
-            dilengkapi lampiran link/berkas bukti empiris dan validasi resmi oleh Dosen Pembimbing.
+            {isLecturerOrAdmin
+              ? 'Tinjau dan validasi aktivitas riset mahasiswa bimbingan, berikan catatan koreksi metodologi, serta verifikasi kelayakan capaian 5 checkpoint ilmiah PKM Dikti.'
+              : 'Catatan kegiatan riset mahasiswa yang terhubung langsung dengan tahapan checkpoint, dilengkapi lampiran link/berkas bukti empiris dan validasi resmi oleh Dosen Pembimbing.'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignSelf: 'center', flexWrap: 'wrap' }}>
@@ -370,35 +411,77 @@ export const ResearchLogbook: React.FC = () => {
       {/* Role Verification Guidance Banner */}
       <div
         style={{
-          background: isLecturerOrAdmin ? '#f0fdf4' : '#eff6ff',
-          border: `1px solid ${isLecturerOrAdmin ? '#bbf7d0' : '#bfdbfe'}`,
-          borderRadius: '12px',
-          padding: '12px 16px',
+          background: isLecturerOrAdmin ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' : '#eff6ff',
+          border: `1.5px solid ${isLecturerOrAdmin ? '#86efac' : '#bfdbfe'}`,
+          borderRadius: '14px',
+          padding: '14px 18px',
           marginBottom: '20px',
           fontSize: '12.5px',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
           gap: '12px'
         }}
       >
-        <span style={{ fontSize: '20px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👩‍🏫' : 'ℹ️'}</span>
-        <div style={{ color: isLecturerOrAdmin ? '#166534' : '#1e40af', lineHeight: 1.45 }}>
-          <strong>{isLecturerOrAdmin ? 'Hak Akses Verifikasi Dosen Pembimbing:' : 'Alur Validasi Logbook & Checkpoint:'}</strong>{' '}
-          {isLecturerOrAdmin
-            ? 'Anda sedang melihat logbook sebagai Dosen Pembimbing. Klik tombol "Verifikasi (Dosen)" pada baris entri mahasiswa untuk menyetujui laporan kegiatan.'
-            : 'Mahasiswa mencatat aktivitas riset dan melampirkan bukti digital (link/file). Validasi status "Terverifikasi" hanya dapat diberikan oleh Dosen Pembimbing.'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 300px' }}>
+          <span style={{ fontSize: '24px', flexShrink: 0 }}>{isLecturerOrAdmin ? '👩‍🏫' : 'ℹ️'}</span>
+          <div style={{ color: isLecturerOrAdmin ? '#14532d' : '#1e40af', lineHeight: 1.45 }}>
+            <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '2px' }}>
+              {isLecturerOrAdmin ? 'Hak Validasi Penuh Dosen Pembimbing (Dr. Belgis Ainatul Iza, S.Si., M.Mat.):' : 'Alur Validasi Logbook & Checkpoint Mahasiswa:'}
+            </div>
+            {isLecturerOrAdmin
+              ? 'Anda memiliki hak akses untuk memverifikasi laporan riset mahasiswa dan memberikan catatan akademik pada setiap entri. Entri yang diverifikasi akan memiliki tanda tangan digital resmi pada cetak PDF PKM Dikti.'
+              : 'Mahasiswa mencatat aktivitas riset harian dan melampirkan bukti digital (link/file). Status "Terverifikasi" hanya dapat diberikan oleh Dosen Pembimbing.'}
+          </div>
         </div>
+
+        {isLecturerOrAdmin && unverifiedCount > 0 && (
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={() => {
+              setStatusFilter('unverified');
+              setPage(1);
+            }}
+            style={{
+              background: '#ea580c',
+              color: '#ffffff',
+              border: 'none',
+              padding: '6px 14px',
+              fontSize: '11.5px',
+              fontWeight: 800,
+              borderRadius: '20px',
+              boxShadow: '0 2px 8px rgba(234,88,12,0.25)'
+            }}
+          >
+            <span>⏳ Tinjau {unverifiedCount} Entri Menunggu Validasi &rarr;</span>
+          </button>
+        )}
       </div>
 
       {/* Summary Statistics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
         {[
-          { label: 'Total Sesi Riset', value: entries.length, unit: 'Sesi', color: '#2563eb', icon: '📋' },
+          { label: 'Total Sesi Riset', value: entries.length, unit: 'Sesi', color: '#2563eb', icon: '📋', onClick: () => { setStatusFilter('all'); setPage(1); } },
           { label: 'Jam Akumulatif', value: totalHours, unit: 'Jam', color: '#0d9488', icon: '⏱️' },
-          { label: 'Terverifikasi Dosen', value: verifiedCount, unit: `/ ${entries.length}`, color: '#16a34a', icon: '✅' },
-          { label: 'Menunggu Verifikasi', value: entries.length - verifiedCount, unit: 'Sesi', color: '#f59e0b', icon: '⏳' },
+          { label: 'Terverifikasi Dosen', value: verifiedCount, unit: `/ ${entries.length}`, color: '#16a34a', icon: '✅', onClick: () => { setStatusFilter('verified'); setPage(1); } },
+          { label: isLecturerOrAdmin ? 'Perlu Validasi Anda' : 'Menunggu Verifikasi', value: unverifiedCount, unit: 'Sesi', color: '#f59e0b', icon: '⏳', onClick: () => { setStatusFilter('unverified'); setPage(1); } },
         ].map((stat, i) => (
-          <div key={i} className="card" style={{ padding: '16px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            key={i}
+            className="card"
+            onClick={stat.onClick}
+            style={{
+              padding: '16px',
+              borderRadius: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              cursor: stat.onClick ? 'pointer' : 'default',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+            }}
+          >
             <span style={{ fontSize: '24px' }}>{stat.icon}</span>
             <div>
               <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>{stat.label}</div>
@@ -408,57 +491,116 @@ export const ResearchLogbook: React.FC = () => {
         ))}
       </div>
 
-      {/* DRILL DOWN: Filter by Checkpoint Category */}
-      <div className="card" style={{ padding: '14px 18px', borderRadius: '14px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-          <Filter size={14} style={{ color: 'var(--primary)' }} />
-          <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>
-            Drill-Down Kategori Checkpoint Riset Mahasiswa:
-          </strong>
+      {/* FILTER CONTROLS: Status Verifikasi & Drill-Down Checkpoint */}
+      <div className="card" style={{ padding: '16px 18px', borderRadius: '14px', marginBottom: '20px' }}>
+        {/* Row 1: Filter Status Validasi */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '16px' }}>⚡</span>
+            <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>Status Validasi Dosen:</strong>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={() => { setStatusFilter('all'); setPage(1); }}
+              className={`btn btn-sm ${statusFilter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{
+                fontSize: '11.5px',
+                padding: '5px 12px',
+                borderRadius: '20px',
+                border: '1px solid var(--line)',
+                fontWeight: statusFilter === 'all' ? 800 : 500
+              }}
+            >
+              Semua ({entries.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStatusFilter('unverified'); setPage(1); }}
+              style={{
+                fontSize: '11.5px',
+                padding: '5px 12px',
+                borderRadius: '20px',
+                border: `1.5px solid ${statusFilter === 'unverified' ? '#d97706' : '#fde68a'}`,
+                background: statusFilter === 'unverified' ? '#f59e0b' : '#fffbeb',
+                color: statusFilter === 'unverified' ? '#ffffff' : '#b45309',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              ⏳ Menunggu Validasi ({unverifiedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStatusFilter('verified'); setPage(1); }}
+              style={{
+                fontSize: '11.5px',
+                padding: '5px 12px',
+                borderRadius: '20px',
+                border: `1.5px solid ${statusFilter === 'verified' ? '#15803d' : '#bbf7d0'}`,
+                background: statusFilter === 'verified' ? '#16a34a' : '#f0fdf4',
+                color: statusFilter === 'verified' ? '#ffffff' : '#15803d',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              ✓ Terverifikasi Dosen ({verifiedCount})
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {CHECKPOINT_CATEGORIES.map(cat => {
-            const count = entries.filter(e => {
-              if (cat.id === 'all') return true;
-              return e.checkpoint_category.includes(cat.code);
-            }).length;
-            const isSelected = selectedCpFilter === cat.id;
 
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => {
-                  setSelectedCpFilter(cat.id);
-                  setPage(1);
-                }}
-                className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
-                style={{
-                  fontSize: '11.5px',
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontWeight: isSelected ? 800 : 600
-                }}
-              >
-                <span>{cat.icon}</span>
-                <span>{cat.label}</span>
-                <span
+        {/* Row 2: Drill-Down Checkpoint Categories */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+            <Filter size={14} style={{ color: 'var(--primary)' }} />
+            <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>
+              Drill-Down Kategori Checkpoint Riset Mahasiswa:
+            </strong>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {CHECKPOINT_CATEGORIES.map(cat => {
+              const count = entries.filter(e => {
+                if (cat.id === 'all') return true;
+                return e.checkpoint_category.includes(cat.code);
+              }).length;
+              const isSelected = selectedCpFilter === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCpFilter(cat.id);
+                    setPage(1);
+                  }}
+                  className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
                   style={{
-                    fontSize: '10px',
-                    padding: '1px 6px',
-                    borderRadius: '999px',
-                    background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--line)',
-                    color: isSelected ? '#ffffff' : 'var(--navy)'
+                    fontSize: '11.5px',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: isSelected ? 800 : 600
                   }}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      padding: '1px 6px',
+                      borderRadius: '999px',
+                      background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--line)',
+                      color: isSelected ? '#ffffff' : 'var(--navy)'
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -642,7 +784,7 @@ export const ResearchLogbook: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
+        <div className="logbook-desktop-table" style={{ overflowX: 'auto', width: '100%' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12.5px', minWidth: '760px' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--line)', background: '#f8fafc', color: 'var(--navy)' }}>
@@ -786,11 +928,11 @@ export const ResearchLogbook: React.FC = () => {
                             <button
                               type="button"
                               className="btn btn-success btn-sm"
-                              onClick={() => handleVerify(entry.id)}
+                              onClick={() => handleOpenVerifyModal(entry)}
                               style={{ padding: '4px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
-                              title="Verifikasi entri logbook ini sebagai Dosen Pembimbing"
+                              title="Verifikasi entri logbook ini dengan catatan Dosen Pembimbing"
                             >
-                              <Check size={12} /> <span>Verifikasi</span>
+                              <Check size={12} /> <span>Validasi</span>
                             </button>
                           )}
                           <button
@@ -810,6 +952,162 @@ export const ResearchLogbook: React.FC = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Dedicated Card List (< 640px) */}
+        <div className="logbook-mobile-cards">
+          {pagedEntries.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '28px 16px', color: 'var(--muted)', background: '#f8fafc', borderRadius: '12px' }}>
+              Tidak ada catatan kegiatan logbook untuk filter ini.
+            </div>
+          ) : (
+            pagedEntries.map((entry, i) => {
+              const rowNum = (currentPage - 1) * rowsPerPage + i + 1;
+              return (
+                <div
+                  key={entry.id}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${entry.verified ? '#bbf7d0' : '#e2e8f0'}`,
+                    borderLeft: `4px solid ${entry.verified ? '#16a34a' : '#f59e0b'}`,
+                    borderRadius: '12px',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}
+                >
+                  {/* Top Bar: Date, Duration, and Index */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--muted)', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+                        #{rowNum}
+                      </span>
+                      <strong style={{ fontSize: '12.5px', color: 'var(--navy)' }}>{formatHumanDate(entry.date)}</strong>
+                    </div>
+                    <span style={{ fontSize: '11px', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 700 }}>
+                      <Clock size={11} /> {entry.duration}
+                    </span>
+                  </div>
+
+                  {/* Checkpoint Pill */}
+                  <div>
+                    <span className="badge badge-blue" style={{ fontSize: '10px', fontWeight: 700, padding: '3px 8px' }}>
+                      {entry.checkpoint_category}
+                    </span>
+                  </div>
+
+                  {/* Activity & Achievement */}
+                  <div>
+                    <strong style={{ fontSize: '13px', color: '#0f172a', display: 'block', marginBottom: '3px', lineHeight: 1.4 }}>
+                      {entry.activity}
+                    </strong>
+                    <div style={{ fontSize: '12px', color: 'var(--ink-secondary)', background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', lineHeight: 1.45 }}>
+                      <span style={{ fontWeight: 600, color: 'var(--navy)' }}>Capaian:</span> {entry.achievement}
+                    </div>
+                  </div>
+
+                  {/* Attachments & Evidence */}
+                  {(entry.evidence_link || entry.evidence_file_name) && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '4px' }}>
+                      {entry.evidence_link && (
+                        <a
+                          href={entry.evidence_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '11px',
+                            color: 'var(--primary)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: '#eff6ff',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            fontWeight: 700
+                          }}
+                        >
+                          <LinkIcon size={11} /> <span>Tautan Digital &rarr;</span>
+                        </a>
+                      )}
+                      {entry.evidence_file_name && (
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            background: '#f1f5f9',
+                            border: '1px solid #cbd5e1',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            color: 'var(--navy)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            maxWidth: '100%',
+                            wordBreak: 'break-all'
+                          }}
+                        >
+                          <FileText size={11} style={{ flexShrink: 0, color: 'var(--primary)' }} />
+                          <span>{entry.evidence_file_name}</span>
+                          {entry.evidence_file_size && <small style={{ opacity: 0.7 }}>({entry.evidence_file_size})</small>}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Verification Status & Notes */}
+                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      {entry.verified ? (
+                        <div>
+                          <span className="badge badge-teal" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            ✓ Terverifikasi Dosen
+                          </span>
+                          <div style={{ fontSize: '10.5px', color: '#15803d', marginTop: '2px', fontWeight: 600 }}>
+                            oleh {entry.verified_by.split(',')[0]}
+                          </div>
+                          {entry.notes && (
+                            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '3px', fontStyle: 'italic' }}>
+                              "{entry.notes}"
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="badge badge-orange" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            ⏳ Menunggu Verifikasi Dosen
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      {isLecturerOrAdmin && !entry.verified && (
+                        <button
+                          type="button"
+                          className="btn btn-success btn-sm"
+                          onClick={() => handleOpenVerifyModal(entry)}
+                          style={{ padding: '5px 10px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <Check size={12} /> <span>Validasi</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => handleDelete(entry.id)}
+                        style={{ padding: '5px 8px', color: '#e11d48', fontSize: '11px' }}
+                        title="Hapus entri logbook"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {filteredEntries.length > 0 && (
@@ -978,6 +1276,70 @@ export const ResearchLogbook: React.FC = () => {
               >
                 <Check size={14} style={{ marginRight: '4px' }} />
                 <span>Terapkan Lampiran</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Dialog Validasi Dosen dengan Catatan Pembimbing */}
+      {verifyingEntry && (
+        <div className="modal-overlay active" onClick={() => setVerifyingEntry(null)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+            <button className="modal-close" onClick={() => setVerifyingEntry(null)}>
+              &times;
+            </button>
+
+            <div className="eyebrow">Validasi Akademik Dosen Pembimbing</div>
+            <h2 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+              Verifikasi Kegiatan Logbook Riset
+            </h2>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '14px' }}>
+              Validasi catatan aktivitas mahasiswa dan berikan catatan pembimbing untuk penyempurnaan riset PKM Dikti.
+            </p>
+
+            <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '14px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700, marginBottom: '2px' }}>
+                {verifyingEntry.checkpoint_category} &middot; {formatHumanDate(verifyingEntry.date)} ({verifyingEntry.duration})
+              </div>
+              <strong style={{ fontSize: '13px', color: 'var(--navy)', display: 'block', marginBottom: '4px' }}>
+                {verifyingEntry.activity}
+              </strong>
+              <div style={{ fontSize: '11.5px', color: 'var(--ink-secondary)' }}>
+                <strong>Capaian:</strong> {verifyingEntry.achievement}
+              </div>
+              {verifyingEntry.evidence_file_name && (
+                <div style={{ marginTop: '6px', fontSize: '11px', color: '#15803d' }}>
+                  📎 Berkas terlampir: {verifyingEntry.evidence_file_name} ({verifyingEntry.evidence_file_size || ''})
+                </div>
+              )}
+            </div>
+
+            <div className="auth-field" style={{ marginBottom: '18px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700 }}>
+                Catatan / Masukan Pembimbing (Opsional)
+              </label>
+              <textarea
+                rows={3}
+                value={lecturerNoteInput}
+                onChange={e => setLecturerNoteInput(e.target.value)}
+                placeholder="Tuliskan apresiasi, saran penyempurnaan, atau arahan untuk checkpoint berikutnya..."
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '12.5px', width: '100%', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setVerifyingEntry(null)}>
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                onClick={handleConfirmVerify}
+                style={{ padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Check size={14} />
+                <span>Setujui &amp; Simpan Validasi</span>
               </button>
             </div>
           </div>
