@@ -52,8 +52,12 @@ export const ProjectWorkspace: React.FC = () => {
     currentUser,
     openModal,
     showToast,
-    setCurrentPage
+    setCurrentPage,
+    setProjectCatalogTab,
+    isUserMemberOfProject
   } = useApp();
+
+  const myProjects = projects.filter(p => isUserMemberOfProject(p.id));
 
   const [activeTab, setActiveTab] = useState<'checkpoints' | 'journals' | 'versions' | 'team' | 'peerFeedback' | 'evaluation'>('checkpoints');
   const [peerFilterReviewee, setPeerFilterReviewee] = useState<string>('all');
@@ -184,12 +188,15 @@ export const ProjectWorkspace: React.FC = () => {
             </span>
           </div>
 
-          {/* Dedicated Project Selector Button (Navigates to Full Catalog Directory) */}
+          {/* Dedicated Project Selector Button (Navigates to My Projects Tab) */}
           <button
             type="button"
             className="btn btn-secondary btn-sm"
-            onClick={() => setCurrentPage('projects')}
-            title="Buka direktori lengkap katalog proyek untuk memilih atau berganti ruang kerja"
+            onClick={() => {
+              setProjectCatalogTab('myProjects');
+              setCurrentPage('projects');
+            }}
+            title="Buka daftar Proyek Saya untuk berganti ruang kerja tim"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -204,7 +211,7 @@ export const ProjectWorkspace: React.FC = () => {
             }}
           >
             <Layers size={13} style={{ color: 'var(--primary)' }} />
-            <span>Ganti Proyek ({projects.length} Tersedia) &rarr;</span>
+            <span>Ganti Proyek ({myProjects.length} Proyek Saya) &rarr;</span>
           </button>
         </div>
 

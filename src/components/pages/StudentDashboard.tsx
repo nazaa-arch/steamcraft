@@ -26,8 +26,13 @@ export const StudentDashboard: React.FC = () => {
     setSelectedProjectId,
     openModal,
     markAnnouncementRead,
-    showToast
+    showToast,
+    setProjectCatalogTab,
+    isUserMemberOfProject
   } = useApp();
+
+  const myProjects = projects.filter(p => isUserMemberOfProject(p.id));
+  const displayProjects = myProjects.length > 0 ? myProjects.slice(0, 3) : projects.slice(0, 3);
 
   // Onboarding Checklist State
   const [tasks, setTasks] = useState<{ [key: string]: boolean }>(() => {
@@ -701,15 +706,18 @@ export const StudentDashboard: React.FC = () => {
         </div>
         <button
           className="btn btn-secondary btn-sm"
-          onClick={() => setCurrentPage('projects')}
+          onClick={() => {
+            setProjectCatalogTab('myProjects');
+            setCurrentPage('projects');
+          }}
           style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
         >
-          <span>Lihat Semua ({projects.length}) &rarr;</span>
+          <span>Proyek Saya ({myProjects.length}) &rarr;</span>
         </button>
       </div>
 
       <div className="projects-grid">
-        {projects.slice(0, 3).map(proj => (
+        {displayProjects.map(proj => (
           <div key={proj.id} className="project-card">
             <div>
               <div className="project-card-top">
@@ -779,16 +787,32 @@ export const StudentDashboard: React.FC = () => {
         }}
       >
         <div style={{ fontSize: '12.5px', color: 'var(--ink-secondary)' }}>
-          Menampilkan <strong>3 proyek terbaru</strong> dari total <strong>{projects.length} proyek riset</strong> terdaftar.
+          Menampilkan <strong>{displayProjects.length} proyek riset Anda</strong> dari total <strong>{projects.length} riset terdaftar</strong> di kampus.
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          onClick={() => setCurrentPage('projects')}
-          style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
-        >
-          <span>Buka Halaman Katalog Lengkap ({projects.length} Proyek) &rarr;</span>
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => {
+              setProjectCatalogTab('myProjects');
+              setCurrentPage('projects');
+            }}
+            style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
+          >
+            <span>Proyek Saya ({myProjects.length}) &rarr;</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => {
+              setProjectCatalogTab('all');
+              setCurrentPage('projects');
+            }}
+            style={{ fontSize: '12px', padding: '6px 14px', fontWeight: 700 }}
+          >
+            <span>Katalog Lengkap ({projects.length}) &rarr;</span>
+          </button>
+        </div>
       </div>
     </section>
   );

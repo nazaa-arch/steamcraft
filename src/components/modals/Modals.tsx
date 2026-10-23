@@ -96,6 +96,111 @@ export const Modals: React.FC = () => {
         {activeModal === 'inviteProject' && <InviteProjectModalContent project={modalData} onClose={closeModal} />}
         {activeModal === 'joinProject' && <JoinProjectModalContent initialCode={typeof modalData === 'string' ? modalData : ''} onClose={closeModal} />}
         {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
+        {activeModal === 'projectDetail' && <ProjectDetailModalContent project={modalData} onClose={closeModal} />}
+      </div>
+    </div>
+  );
+};
+
+/* ==================== PROJECT DETAIL & ABSTRACT MODAL ==================== */
+const ProjectDetailModalContent: React.FC<{ project: any; onClose: () => void }> = ({ project, onClose }) => {
+  const { openModal, isUserMemberOfProject, setSelectedProjectId, setCurrentPage } = useApp();
+  if (!project) return null;
+
+  const isMember = isUserMemberOfProject(project.id);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+        <span className="badge badge-blue">{project.study}</span>
+        <span className="badge badge-purple">{project.steam}</span>
+        {project.open_recruitment === 1 && <span className="badge badge-teal">Membuka Rekrutmen</span>}
+        {isMember && <span className="badge badge-teal">✓ Tim Anda</span>}
+      </div>
+
+      <h3 style={{ fontSize: '18px', color: 'var(--navy)', marginBottom: '8px', lineHeight: 1.3 }}>
+        {project.name}
+      </h3>
+      <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '16px' }}>
+        👨‍🏫 Dosen Pembimbing: <strong>{project.lecturer}</strong> • 👥 {project.members_count} Peneliti
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
+          Abstrak & Gambaran Riset:
+        </h4>
+        <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--ink-secondary)', background: 'var(--surface-alt)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--line)', margin: 0 }}>
+          {project.desc}
+        </p>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
+          🎯 Fokus & Target Penelitian:
+        </h4>
+        <p style={{ fontSize: '12.5px', color: 'var(--ink-secondary)', margin: 0 }}>
+          {project.goal}
+        </p>
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', marginBottom: '6px' }}>
+          🛠️ Perangkat / Metodologi Riset:
+        </h4>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {project.tools?.split(',').map((tool: string, idx: number) => (
+            <span key={idx} className="badge badge-gray" style={{ fontSize: '11px', background: '#f1f5f9', color: '#334155' }}>
+              {tool.trim()}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {project.open_recruitment === 1 && (
+        <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '12px 14px', borderRadius: '10px', marginBottom: '20px' }}>
+          <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#047857', marginBottom: '4px' }}>
+            📢 LOWONGAN KOLABORATOR TERBUKA:
+          </div>
+          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#064e3b' }}>
+            Posisi yang dicari: {project.recruitment_roles || 'Terbuka untuk kolaborator lintas prodi'}
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--line)', paddingTop: '14px', alignItems: 'center' }}>
+        <button type="button" className="btn btn-ghost" onClick={onClose}>
+          Tutup
+        </button>
+        {isMember ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              setSelectedProjectId(project.id);
+              setCurrentPage('workspace');
+              onClose();
+            }}
+          >
+            <span>Masuk Ruang Kerja</span>
+            <ArrowRight size={14} />
+          </button>
+        ) : project.open_recruitment === 1 ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              onClose();
+              openModal('apply', project);
+            }}
+          >
+            <UserPlus size={14} />
+            <span>Ajukan Bergabung ke Tim</span>
+          </button>
+        ) : (
+          <div style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
+            🔒 Tim riset ini telah terisi penuh.
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { UserPlus, Sparkles, Search, Users, ArrowRight } from 'lucide-react';
+import { UserPlus, Sparkles, Search, Users, ArrowRight, Info } from 'lucide-react';
 
 export const OpenRecruitmentHub: React.FC = () => {
-  const { projects, openModal, setSelectedProjectId, setCurrentPage } = useApp();
+  const { projects, openModal } = useApp();
   const [filterQuery, setFilterQuery] = useState('');
 
   const recruitingProjects = projects.filter(
@@ -96,17 +96,19 @@ export const OpenRecruitmentHub: React.FC = () => {
               </div>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <button
+                  type="button"
                   className="btn btn-ghost btn-sm"
-                  onClick={() => {
-                    setSelectedProjectId(proj.id);
-                    setCurrentPage('workspace');
-                  }}
+                  onClick={() => openModal('projectDetail', proj)}
+                  title="Lihat Abstrak & Rincian Riset"
                 >
-                  <span>Detail</span>
+                  <Info size={13} />
+                  <span>Info Riset</span>
                 </button>
                 <button
+                  type="button"
                   className="btn btn-primary btn-sm"
                   onClick={() => openModal('apply', proj)}
+                  title="Daftar & Ajukan Diri Bergabung"
                 >
                   <UserPlus size={13} />
                   <span>Daftar Bergabung</span>

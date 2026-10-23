@@ -14,15 +14,20 @@ export const Topbar: React.FC = () => {
     logout,
     consultations,
     markConsultationsRead,
-    projects
+    projects,
+    projectCatalogTab,
+    setProjectCatalogTab,
+    isUserMemberOfProject
   } = useApp();
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const notifWrapperRef = useRef<HTMLDivElement>(null);
   const profileWrapperRef = useRef<HTMLDivElement>(null);
   const toolsWrapperRef = useRef<HTMLDivElement>(null);
+  const projectWrapperRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside or pressing Escape
   useEffect(() => {
@@ -37,6 +42,9 @@ export const Topbar: React.FC = () => {
       if (toolsDropdownOpen && toolsWrapperRef.current && !toolsWrapperRef.current.contains(target)) {
         setToolsDropdownOpen(false);
       }
+      if (projectDropdownOpen && projectWrapperRef.current && !projectWrapperRef.current.contains(target)) {
+        setProjectDropdownOpen(false);
+      }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -44,6 +52,7 @@ export const Topbar: React.FC = () => {
         setNotifDropdownOpen(false);
         setProfileDropdownOpen(false);
         setToolsDropdownOpen(false);
+        setProjectDropdownOpen(false);
       }
     };
 
@@ -56,7 +65,7 @@ export const Topbar: React.FC = () => {
       document.removeEventListener('touchstart', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [notifDropdownOpen, profileDropdownOpen, toolsDropdownOpen]);
+  }, [notifDropdownOpen, profileDropdownOpen, toolsDropdownOpen, projectDropdownOpen]);
 
   if (!currentUser) return null;
 
@@ -79,6 +88,82 @@ export const Topbar: React.FC = () => {
   ).length;
 
   const blockerProjectsCount = projects.filter(p => p.blocker === 1).length;
+  const myProjectsCount = projects.filter(p => isUserMemberOfProject(p.id)).length;
+
+  const renderProjectDropdown = () => (
+    <div className="nav-dropdown-wrapper" ref={projectWrapperRef}>
+      <button
+        type="button"
+        className={`nav-btn nav-dropdown-btn ${['projects', 'workspace', 'recruitment'].includes(currentPage) ? 'active' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setProjectDropdownOpen(prev => !prev);
+          setToolsDropdownOpen(false);
+        }}
+        aria-expanded={projectDropdownOpen}
+        title="Pusat Riset & Proyek Multidisiplin"
+      >
+        <span>Riset dan Proyek</span>
+        <ChevronDown size={11} style={{ transform: projectDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+
+      {projectDropdownOpen && (
+        <div
+          className="nav-dropdown-menu"
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className={`dropdown-menu-item ${currentPage === 'workspace' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentPage('workspace');
+              setProjectDropdownOpen(false);
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>💻</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>Ruang Kerja Tim (Workspace)</div>
+              <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Kanban, Editor Naskah, & Logbook aktif</small>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className={`dropdown-menu-item ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
+            onClick={() => {
+              setProjectCatalogTab('myProjects');
+              setCurrentPage('projects');
+              setProjectDropdownOpen(false);
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>🗂️</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>
+                {role === 'lecturer' ? 'Proyek Bimbingan' : role === 'admin' ? 'Semua Proyek' : 'Proyek Saya'} ({myProjectsCount})
+              </div>
+              <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Daftar proyek riset yang Anda ikuti / bina</small>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className={`dropdown-menu-item ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
+            onClick={() => {
+              setProjectCatalogTab('all');
+              setCurrentPage('projects');
+              setProjectDropdownOpen(false);
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>🌐</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>Katalog & Rekrutmen Riset</div>
+              <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Eksplorasi seluruh riset & bursa lowongan</small>
+            </div>
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <header className="topbar">
@@ -109,24 +194,7 @@ export const Topbar: React.FC = () => {
             >
               Dashboard
             </button>
-            <button
-              className={currentPage === 'projects' ? 'active' : ''}
-              onClick={() => setCurrentPage('projects')}
-            >
-              Proyek
-            </button>
-            <button
-              className={currentPage === 'workspace' ? 'active' : ''}
-              onClick={() => setCurrentPage('workspace')}
-            >
-              Ruang Kerja
-            </button>
-            <button
-              className={currentPage === 'recruitment' ? 'active' : ''}
-              onClick={() => setCurrentPage('recruitment')}
-            >
-              Rekrutmen
-            </button>
+            {renderProjectDropdown()}
             <button
               className={currentPage === 'studentConsultations' ? 'active' : ''}
               onClick={() => {
@@ -166,18 +234,7 @@ export const Topbar: React.FC = () => {
                 <span className="nav-badge warning">{blockerProjectsCount}</span>
               )}
             </button>
-            <button
-              className={currentPage === 'projects' ? 'active' : ''}
-              onClick={() => setCurrentPage('projects')}
-            >
-              Proyek
-            </button>
-            <button
-              className={currentPage === 'workspace' ? 'active' : ''}
-              onClick={() => setCurrentPage('workspace')}
-            >
-              Ruang Kerja
-            </button>
+            {renderProjectDropdown()}
             <button
               className={currentPage === 'consultations' ? 'active' : ''}
               onClick={() => {
@@ -214,18 +271,7 @@ export const Topbar: React.FC = () => {
             >
               Dashboard
             </button>
-            <button
-              className={currentPage === 'projects' ? 'active' : ''}
-              onClick={() => setCurrentPage('projects')}
-            >
-              Katalog Proyek
-            </button>
-            <button
-              className={currentPage === 'workspace' ? 'active' : ''}
-              onClick={() => setCurrentPage('workspace')}
-            >
-              Ruang Kerja
-            </button>
+            {renderProjectDropdown()}
             <button
               className={currentPage === 'mission' ? 'active' : ''}
               onClick={() => setCurrentPage('mission')}

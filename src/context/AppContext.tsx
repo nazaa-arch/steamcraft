@@ -59,6 +59,10 @@ interface AppContextType {
   modalData: any;
   toastMessage: string | null;
   maintenanceMode: boolean;
+  projectCatalogTab: 'myProjects' | 'all' | 'recruitment';
+  setProjectCatalogTab: (tab: 'myProjects' | 'all' | 'recruitment') => void;
+  isUserMemberOfProject: (projectId: number) => boolean;
+  getUserProjectRole: (projectId: number) => string | null;
 
   // Actions
   setCurrentPage: (page: PageName) => void;
@@ -207,6 +211,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     trackPageView(page);
   };
   const [selectedProjectId, setSelectedProjectId] = useState<number>(1);
+  const [projectCatalogTab, setProjectCatalogTab] = useState<'myProjects' | 'all' | 'recruitment'>('all');
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
@@ -901,6 +906,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  const isUserMemberOfProject = (projectId: number): boolean => {
+    if (!currentUser) return false;
+    if (currentUser.role === 'admin') return true;
+    if (currentUser.role === 'lecturer') {
+      const proj = projects.find(p => p.id === projectId);
+      return proj
+        ? Boolean(
+            proj.lecturer?.toLowerCase().includes('belgis') ||
+            (currentUser.name && proj.lecturer?.toLowerCase().includes(currentUser.name.toLowerCase()))
+          )
+        : false;
+    }
+    return members.some(
+      m =>
+        m.project_id === projectId &&
+        ((m.user_id && m.user_id === currentUser.id) ||
+          (m.identifier && currentUser.identifier && m.identifier === currentUser.identifier) ||
+          (m.name && currentUser.name && m.name.toLowerCase().includes(currentUser.name.toLowerCase())) ||
+          (currentUser.id === 1 && (m.user_id === 1 || m.name.toLowerCase().includes('budi'))))
+    );
+  };
+
+  const getUserProjectRole = (projectId: number): string | null => {
+    if (!currentUser) return null;
+    if (currentUser.role === 'admin') return 'Administrator Sistem';
+    if (currentUser.role === 'lecturer') {
+      const proj = projects.find(p => p.id === projectId);
+      if (
+        proj &&
+        (proj.lecturer?.toLowerCase().includes('belgis') ||
+          (currentUser.name && proj.lecturer?.toLowerCase().includes(currentUser.name.toLowerCase())))
+      ) {
+        return 'Dosen Pembimbing Utama';
+      }
+    }
+    const mem = members.find(
+      m =>
+        m.project_id === projectId &&
+        ((m.user_id && m.user_id === currentUser.id) ||
+          (m.identifier && currentUser.identifier && m.identifier === currentUser.identifier) ||
+          (m.name && currentUser.name && m.name.toLowerCase().includes(currentUser.name.toLowerCase())) ||
+          (currentUser.id === 1 && (m.user_id === 1 || m.name.toLowerCase().includes('budi'))))
+    );
+    return mem ? mem.role : null;
+  };
+
   // Applications
   const applyRecruitment = (projectId: number, applicantRole: string, applicantStudy: string, message: string) => {
     const newApp: RecruitmentApplication = {
@@ -1162,6 +1213,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         modalData,
         toastMessage,
         maintenanceMode,
+        projectCatalogTab,
+        setProjectCatalogTab,
+        isUserMemberOfProject,
+        getUserProjectRole,
 
         setCurrentPage,
         setSelectedProjectId,
