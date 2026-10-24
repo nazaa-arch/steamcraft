@@ -12,6 +12,7 @@ import {
   Radio,
   Shield,
   Users,
+  UserCheck,
   Compass,
   CheckCircle2,
   Calendar,
@@ -57,6 +58,7 @@ interface ProjectCard {
   metrics?: { label: string; value: string }[];
   targetUrl: string;
   isFlagship?: boolean;
+  developer?: string;
 }
 
 export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunchApp }) => {
@@ -164,17 +166,19 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
       id: 'verilab-ai',
       title: 'VeriLab AI — Scientific Reproducibility & Data Integrity Engine',
       category: 'software',
-      categoryBadge: 'Engine Saintifik & Audit AI (Live)',
+      categoryBadge: 'Engine Saintifik Mandiri (Live)',
       badgeColor: '#0284c7',
+      developer: 'Muhammad Naza Firmansyah',
       description:
-        'Mesin audit data eksperimen dan replikasi saintifik berbasis AI. Dilengkapi kalibrasi Gaussian Process Regression (GPR), uji ketahanan stokastik Monte Carlo, deteksi anomali multi-dimensi, dan verifikasi sertifikat kriptografis SHA-256.',
+        'Proyek riset dan engineering mandiri yang dikembangkan secara independen oleh Muhammad Naza Firmansyah (bukan satu tim). Mesin audit data eksperimen saintifik berbasis AI dilengkapi kalibrasi Gaussian Process Regression (GPR), uji ketahanan stokastik Monte Carlo, deteksi anomali multi-dimensi, dan verifikasi sertifikat kriptografis SHA-256.',
       status: 'live',
       statusText: 'Production Live (Aktif)',
       tags: ['FastAPI Python 3.13', 'Gaussian Process (GPR)', 'Monte Carlo Chaos', 'SHA-256 Audit Trail', 'Docker Cloud'],
       metrics: [
         { label: 'Domain Akses', value: 'verilab.steamcraft.online' },
-        { label: 'Engine Core', value: 'GPR & Chaos Robustness' },
-        { label: 'Backend Cluster', value: 'Render Docker + LiteSpeed' }
+        { label: 'Pembuat / Developer', value: 'Muhammad Naza Firmansyah' },
+        { label: 'Status Tim', value: 'Proyek Mandiri (Independen)' },
+        { label: 'Engine Core', value: 'GPR & Chaos Robustness' }
       ],
       targetUrl: 'https://verilab.steamcraft.online'
     },
@@ -823,6 +827,27 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                     {proj.title}
                   </h3>
 
+                  {proj.developer && (
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        color: '#1d4ed8',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        marginBottom: '12px'
+                      }}
+                    >
+                      <UserCheck size={13} />
+                      <span>Developer / Pembuat: <strong>{proj.developer}</strong> (Proyek Mandiri)</span>
+                    </div>
+                  )}
+
                   <p style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.6, margin: '0 0 18px 0' }}>
                     {proj.description}
                   </p>
@@ -957,10 +982,10 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                 <Shield size={18} />
               </div>
               <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>
-                3. VeriLab AI &amp; Integritas Data
+                3. VeriLab AI (Karya Mandiri Muhammad Naza Firmansyah)
               </h4>
               <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                Engine audit saintifik otonom untuk kalibrasi sensor, pengujian replikabilitas algoritma, dan sertifikat kriptografis di verilab.steamcraft.online.
+                Engine audit saintifik otonom yang dikembangkan secara mandiri oleh Muhammad Naza Firmansyah (bukan satu tim) untuk kalibrasi sensor, pengujian replikabilitas algoritma, dan sertifikat kriptografis di verilab.steamcraft.online.
               </p>
             </div>
           </div>
