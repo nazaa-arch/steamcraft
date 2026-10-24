@@ -30,15 +30,6 @@ def get_ftp_connection():
             print(f"[ERROR] Plain FTP connection failed: {e2}")
             sys.exit(1)
 
-def get_dir_listing(ftp, path="."):
-    listing = []
-    try:
-        ftp.cwd(path)
-        ftp.retrlines("LIST", listing.append)
-    except Exception as e:
-        print(f"[-] Could not list directory {path}: {e}")
-    return listing
-
 def ensure_remote_dir(ftp, remote_path):
     parts = remote_path.strip("/").split("/")
     ftp.cwd("/")
@@ -99,22 +90,9 @@ def main():
 
     ftp = get_ftp_connection()
 
-    # 1. Inspect root and public_html
-    print("\n[*] Remote Root Directory Structure:")
-    root_items = get_dir_listing(ftp, "/")
-    for item in root_items:
-        print(f"    {item}")
-
-    print("\n[*] Remote public_html/ Structure:")
-    pub_items = get_dir_listing(ftp, "/public_html")
-    for item in pub_items:
-        print(f"    {item}")
-
-    ftp.cwd("/")
-
     # Subdomain mapping: target both explicit and conventional folders
     deploy_targets = [
-        # PaperCraft AI -> PaperAI, scholar, and scholar.steamcraft.online
+        # PaperCraft AI -> PaperAI (explicit on cPanel), scholar, and scholar.steamcraft.online
         ("deploy_subdomains/scholar", "/public_html/PaperAI"),
         ("deploy_subdomains/scholar", "/public_html/scholar"),
         ("deploy_subdomains/scholar", "/scholar.steamcraft.online"),
@@ -135,13 +113,25 @@ def main():
         ("deploy_subdomains/arena", "/public_html/arena"),
         ("deploy_subdomains/arena", "/arena.steamcraft.online"),
         
-        # Beta Staging Portal (NOTE: Does NOT touch /public_html root which is app.steamcraft.online)
-        ("dist", "/public_html/beta"),
-        ("dist", "/beta.steamcraft.online")
+        # Beta Staging Portal (NOTE: Does NOT touch /public_html root index.html)
+        ("dist_beta", "/public_html/beta"),
+        ("dist_beta", "/beta.steamcraft.online")
     ]
 
     for local_dir, remote_dir in deploy_targets:
         upload_folder(ftp, local_dir, remote_dir)
+
+    # Upload main .htaccess with beta routing to public_html/.htaccess
+    htaccess_file = Path("public/.htaccess")
+    if htaccess_file.exists():
+        print("\n[+] Updating /public_html/.htaccess for seamless beta routing...")
+        try:
+            ftp.cwd("/public_html")
+            with open(htaccess_file, "rb") as f:
+                ftp.storbinary("STOR .htaccess", f)
+            print("[SUCCESS] /public_html/.htaccess updated.")
+        except Exception as e:
+            print(f"[-] Could not update .htaccess: {e}")
 
     try:
         ftp.quit()

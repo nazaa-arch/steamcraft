@@ -6,6 +6,11 @@
   RewriteEngine On
   RewriteBase /
 
+  # Route beta.steamcraft.online to beta/ staging folder
+  RewriteCond %{HTTP_HOST} ^beta\.steamcraft\.online$ [NC]
+  RewriteCond %{REQUEST_URI} !^/beta/
+  RewriteRule ^(.*)$ /beta/$1 [L]
+
   # Force HTTPS Security
   RewriteCond %{HTTPS} off
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

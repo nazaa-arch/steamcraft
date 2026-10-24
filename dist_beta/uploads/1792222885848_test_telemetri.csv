@@ -1,0 +1,2 @@
+Sensor_ID,Timestamp,Temperature_C,Humidity_Pct
+BME280_01,2026-10-17T10:00:00Z,27.4,65.2
