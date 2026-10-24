@@ -99,13 +99,12 @@ def main():
 
     ftp = get_ftp_connection()
 
-    # 1. Inspect root
+    # 1. Inspect root and public_html
     print("\n[*] Remote Root Directory Structure:")
     root_items = get_dir_listing(ftp, "/")
     for item in root_items:
         print(f"    {item}")
 
-    # 2. Inspect public_html
     print("\n[*] Remote public_html/ Structure:")
     pub_items = get_dir_listing(ftp, "/public_html")
     for item in pub_items:
@@ -113,61 +112,43 @@ def main():
 
     ftp.cwd("/")
 
-    # Detect targets for 5 subdomains
-    # In cPanel, subdomains can be at /public_html/<name> or /<name>.steamcraft.online
-    subdomain_mapping = {
-        "scholar": "deploy_subdomains/scholar",
-        "sim": "deploy_subdomains/sim",
-        "maker": "deploy_subdomains/maker",
-        "geo": "deploy_subdomains/geo",
-        "arena": "deploy_subdomains/arena",
-    }
-
-    # Extract remote folder names from listing
-    pub_text = "\n".join(pub_items).lower()
-    root_text = "\n".join(root_items).lower()
-
-    for sub_name, local_dir in subdomain_mapping.items():
-        # Check where it lives
-        # Try both public_html/<sub_name> and <sub_name>.steamcraft.online
-        targets = []
-        if f"{sub_name}.steamcraft.online" in root_text:
-            targets.append(f"/{sub_name}.steamcraft.online")
-        if sub_name in pub_text or f"{sub_name}" in pub_items:
-            targets.append(f"/public_html/{sub_name}")
+    # Subdomain mapping: target both explicit and conventional folders
+    deploy_targets = [
+        # PaperCraft AI -> PaperAI, scholar, and scholar.steamcraft.online
+        ("deploy_subdomains/scholar", "/public_html/PaperAI"),
+        ("deploy_subdomains/scholar", "/public_html/scholar"),
+        ("deploy_subdomains/scholar", "/scholar.steamcraft.online"),
         
-        # If neither detected explicitly, default to public_html/<sub_name> which is cPanel standard
-        if not targets:
-            targets.append(f"/public_html/{sub_name}")
-            # Also upload to root subdomain folder if standard cPanel subdomain structure
-            targets.append(f"/{sub_name}.steamcraft.online")
-
-        for target in targets:
-            upload_folder(ftp, local_dir, target)
-
-    # Deploy Beta Staging (beta.steamcraft.online)
-    # The built files of beta will be in dist_beta/ or dist/
-    beta_dir = "dist_beta" if Path("dist_beta").exists() else "dist"
-    if Path(beta_dir).exists():
-        beta_targets = []
-        if "beta.steamcraft.online" in root_text:
-            beta_targets.append("/beta.steamcraft.online")
-        if "beta" in pub_text:
-            beta_targets.append("/public_html/beta")
-        if not beta_targets:
-            beta_targets.append("/public_html/beta")
-            beta_targets.append("/beta.steamcraft.online")
+        # SteamSim Lab
+        ("deploy_subdomains/sim", "/public_html/sim"),
+        ("deploy_subdomains/sim", "/sim.steamcraft.online"),
         
-        print("\n[*] Deploying Beta Staging (NOT Touching app.steamcraft.online)...")
-        for target in beta_targets:
-            upload_folder(ftp, beta_dir, target)
+        # MakerCraft 3D
+        ("deploy_subdomains/maker", "/public_html/maker"),
+        ("deploy_subdomains/maker", "/maker.steamcraft.online"),
+        
+        # SteamGeo Intelligence
+        ("deploy_subdomains/geo", "/public_html/geo"),
+        ("deploy_subdomains/geo", "/geo.steamcraft.online"),
+        
+        # SteamArena
+        ("deploy_subdomains/arena", "/public_html/arena"),
+        ("deploy_subdomains/arena", "/arena.steamcraft.online"),
+        
+        # Beta Staging Portal (NOTE: Does NOT touch /public_html root which is app.steamcraft.online)
+        ("dist", "/public_html/beta"),
+        ("dist", "/beta.steamcraft.online")
+    ]
+
+    for local_dir, remote_dir in deploy_targets:
+        upload_folder(ftp, local_dir, remote_dir)
 
     try:
         ftp.quit()
     except:
         pass
     print("\n" + "=" * 70)
-    print("🎉 All 5 Subdomains & Beta Staging deployed successfully!")
+    print("🎉 All Subdomains & Beta Staging successfully synchronized!")
     print("=" * 70)
 
 if __name__ == "__main__":
