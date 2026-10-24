@@ -8,11 +8,15 @@
 **STEAM-Craft** adalah platform web terpadu untuk inkubasi dan kolaborasi riset ilmiah mahasiswa dan dosen berbasis pendekatan **STEAM** (*Science, Technology, Engineering, Art, and Mathematics*).
 
 - **Lead Developer & System Architect**: **Muhammad Naza Firmansyah** ([Portofolio](https://portofolionaza.steamcraft.online) • [GitHub](https://github.com/nazaa-arch))
-- **Live Ecosystem**:
-  - 🚀 **Web Application**: [`https://app.steamcraft.online`](https://app.steamcraft.online)
-  - 🌐 **Landing Page**: [`https://steamcraft.online`](https://steamcraft.online)
-  - 🔬 **AI Scientific Verification Engine**: [`https://verilab.steamcraft.online`](https://verilab.steamcraft.online)
-
+- **Live Ecosystem Hub & Subdomains**:
+  - 🌐 **Landing Page Portal**: [https://steamcraft.online](https://steamcraft.online)
+  - 🚀 **Main Web Application**: [https://app.steamcraft.online](https://app.steamcraft.online)
+  - 📝 **PaperCraft AI (Scholar)**: [https://scholar.steamcraft.online](https://scholar.steamcraft.online) • [GitHub Repo](https://github.com/nazaa-arch/papercraft-ai)
+  - 🌌 **SteamSim Lab (Physics Studio)**: [https://sim.steamcraft.online](https://sim.steamcraft.online) • [GitHub Repo](https://github.com/nazaa-arch/steamsim-lab)
+  - 🎨 **MakerCraft 3D (WebGL Studio)**: [https://maker.steamcraft.online](https://maker.steamcraft.online) • [GitHub Repo](https://github.com/nazaa-arch/makercraft-3d)
+  - 🗺️ **SteamGeo Intelligence (Spatial GIS)**: [https://geo.steamcraft.online](https://geo.steamcraft.online) • [GitHub Repo](https://github.com/nazaa-arch/steamgeo-intelligence)
+  - 🏆 **SteamArena (Hackathon & Radar)**: [https://arena.steamcraft.online](https://arena.steamcraft.online) • [GitHub Repo](https://github.com/nazaa-arch/steam-arena)
+  - 🔬 **VeriLab AI Scientific Engine**: [https://verilab.steamcraft.online](https://verilab.steamcraft.online) • [GitHub Repo](https://github.com/nazaa-arch/VerilabAI)
 Direkayasa ulang secara penuh menggunakan arsitektur **React 19 + TypeScript + Vite** modern, mempertahankan seluruh integritas alur kerja riset, manajemen peran multi-role, 13 proyek penelitian unggulan, penilaian rubrik 4 pilar standar nasional, dan asisten riset cerdas.
 
 ---
