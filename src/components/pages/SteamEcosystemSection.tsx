@@ -29,9 +29,9 @@ export const SteamEcosystemSection: React.FC<{ onOpenApp?: () => void }> = ({ on
     {
       icon: Layers,
       color: '#8b5cf6',
-      badge: 'FAIR Data Standard',
-      title: 'Repositori Data & Arsitektur Cloud',
-      desc: 'Pengelolaan data eksperimen berstandar global Findable, Accessible, Interoperable, dan Reusable dengan enkripsi pipeline data dan audit jejak rekam ilmiah terpercaya.'
+      badge: 'FAIR Data & VeriLab AI',
+      title: 'Repositori Data & Engine Audit AI',
+      desc: 'Pengelolaan data eksperimen berstandar FAIR terintegrasi langsung dengan engine saintifik VeriLab AI (verilab.steamcraft.online) untuk verifikasi replikabilitas, deteksi anomali sensor, dan sertifikat audit SHA-256.'
     },
     {
       icon: Cpu,

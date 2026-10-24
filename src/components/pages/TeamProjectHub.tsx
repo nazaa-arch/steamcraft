@@ -161,22 +161,22 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
       targetUrl: 'https://app.steamcraft.online'
     },
     {
-      id: 'ai-reproducibility-verifier',
-      title: 'AI Scientific Reproducibility & Data Integrity Engine',
-      category: 'pipeline',
-      categoryBadge: 'Kecerdasan Buatan & Pipa Riset Masa Depan',
-      badgeColor: '#6366f1',
+      id: 'verilab-ai',
+      title: 'VeriLab AI — Scientific Reproducibility & Data Integrity Engine',
+      category: 'software',
+      categoryBadge: 'Engine Saintifik & Audit AI (Live)',
+      badgeColor: '#0284c7',
       description:
-        'Mesin audit data eksperimen dan replikasi kode otomatis berbasis AI untuk mendeteksi anomali kurva kalibrasi sensor, pengujian replikabilitas algoritma, dan simulasi ketahanan stokastik Monte Carlo.',
-      status: 'pipeline',
-      statusText: 'Pipa Sambungan Riset Lanjutan',
-      tags: ['Python AI Engine', 'Monte Carlo Simulation', 'Reproducibility', 'Jupyter Pipeline'],
+        'Mesin audit data eksperimen dan replikasi saintifik berbasis AI. Dilengkapi kalibrasi Gaussian Process Regression (GPR), uji ketahanan stokastik Monte Carlo, deteksi anomali multi-dimensi, dan verifikasi sertifikat kriptografis SHA-256.',
+      status: 'live',
+      statusText: 'Production Live (Aktif)',
+      tags: ['FastAPI Python 3.13', 'Gaussian Process (GPR)', 'Monte Carlo Chaos', 'SHA-256 Audit Trail', 'Docker Cloud'],
       metrics: [
-        { label: 'Tahap Inkubasi', value: 'Perancangan Algoritma' },
-        { label: 'Integrasi', value: 'STEAM-Craft API' },
-        { label: 'Target Rilis', value: 'Q4 2026' }
+        { label: 'Domain Akses', value: 'verilab.steamcraft.online' },
+        { label: 'Engine Core', value: 'GPR & Chaos Robustness' },
+        { label: 'Backend Cluster', value: 'Render Docker + LiteSpeed' }
       ],
-      targetUrl: 'https://app.steamcraft.online'
+      targetUrl: 'https://verilab.steamcraft.online'
     },
     {
       id: 'precision-agrodrone',
@@ -203,6 +203,10 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
     : projects.filter(p => p.category === activeCategory);
 
   const handleOpenApp = (url?: string) => {
+    if (url && url.startsWith('http') && !url.includes('app.steamcraft.online')) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     if (onLaunchApp) {
       onLaunchApp();
       return;
@@ -406,6 +410,32 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
             Peta Sambungan Riset
           </a>
 
+          {/* VeriLab AI Direct Button */}
+          <a
+            href="https://verilab.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              padding: '9px 16px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+              color: '#fff',
+              fontSize: '12.5px',
+              fontWeight: 800,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
+              transition: 'transform 0.15s ease'
+            }}
+            title="Buka VeriLab AI — Engine Audit & Integritas Data Saintifik"
+          >
+            <Shield size={14} />
+            <span>VeriLab AI</span>
+            <ExternalLink size={12} style={{ opacity: 0.85 }} />
+          </a>
+
           {/* Launch Application Button */}
           <button
             onClick={() => handleOpenApp()}
@@ -548,6 +578,29 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
               <span>Masuk ke Platform STEAM-Craft (app.steamcraft.online)</span>
               <ArrowRight size={16} />
             </button>
+
+            <a
+              href="https://verilab.steamcraft.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: '14px 24px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                color: '#ffffff',
+                fontSize: '15px',
+                fontWeight: 800,
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 8px 24px rgba(2, 132, 199, 0.25)'
+              }}
+            >
+              <Shield size={18} />
+              <span>VeriLab AI Engine (verilab.steamcraft.online)</span>
+              <ExternalLink size={15} />
+            </a>
 
             <a
               href="#team"
@@ -826,9 +879,11 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                     borderRadius: '10px',
                     background: proj.isFlagship
                       ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
+                      : proj.targetUrl.includes('verilab')
+                      ? 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)'
                       : 'rgba(59, 130, 246, 0.08)',
-                    border: proj.isFlagship ? 'none' : '1px solid #bfdbfe',
-                    color: proj.isFlagship ? '#fff' : '#1e40af',
+                    border: (proj.isFlagship || proj.targetUrl.includes('verilab')) ? 'none' : '1px solid #bfdbfe',
+                    color: (proj.isFlagship || proj.targetUrl.includes('verilab')) ? '#fff' : '#1e40af',
                     fontSize: '13px',
                     fontWeight: 800,
                     cursor: 'pointer',
@@ -836,10 +891,16 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxShadow: proj.isFlagship ? '0 4px 14px rgba(30, 58, 138, 0.2)' : 'none'
+                    boxShadow: (proj.isFlagship || proj.targetUrl.includes('verilab')) ? '0 4px 14px rgba(30, 58, 138, 0.2)' : 'none'
                   }}
                 >
-                  <span>{proj.isFlagship ? 'Buka Aplikasi STEAM-Craft (app.steamcraft.online)' : 'Akses di Platform STEAM-Craft'}</span>
+                  <span>
+                    {proj.isFlagship
+                      ? 'Buka Aplikasi STEAM-Craft (app.steamcraft.online)'
+                      : proj.targetUrl.includes('verilab')
+                      ? 'Buka VeriLab AI Engine (verilab.steamcraft.online)'
+                      : 'Akses di Platform STEAM-Craft'}
+                  </span>
                   <ExternalLink size={14} />
                 </button>
               </div>
@@ -892,14 +953,14 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
             </div>
 
             <div style={{ background: '#ffffff', borderRadius: '16px', padding: '22px', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.1)', color: '#7c3aed', display: 'grid', placeItems: 'center', marginBottom: '12px' }}>
-                <Activity size={18} />
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', display: 'grid', placeItems: 'center', marginBottom: '12px' }}>
+                <Shield size={18} />
               </div>
               <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>
-                3. Pipa Inovasi Lanjutan
+                3. VeriLab AI &amp; Integritas Data
               </h4>
               <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                Inkubasi mesin AI verifikasi reproduktibilitas kode dan drone pertanian presisi siap ditambahkan secara modular.
+                Engine audit saintifik otonom untuk kalibrasi sensor, pengujian replikabilitas algoritma, dan sertifikat kriptografis di verilab.steamcraft.online.
               </p>
             </div>
           </div>
@@ -954,6 +1015,15 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
             >
               Aplikasi (app.steamcraft.online) &rarr;
             </button>
+            <span>•</span>
+            <a
+              href="https://verilab.steamcraft.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#38bdf8', fontWeight: 700, textDecoration: 'none' }}
+            >
+              VeriLab AI (verilab) &rarr;
+            </a>
             <span>•</span>
             <a
               href="https://adm.steamcraft.online"

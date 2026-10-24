@@ -22,7 +22,9 @@ import {
   GraduationCap,
   Star,
   Globe,
-  FlaskConical
+  FlaskConical,
+  Shield,
+  ExternalLink
 } from 'lucide-react';
 
 export const StudentDashboard: React.FC = () => {
@@ -653,6 +655,54 @@ export const StudentDashboard: React.FC = () => {
               <span>{isLecturer ? 'Tinjau Data Repository' : 'Buka Data Repository'}</span>
               <ArrowRight size={13} />
             </button>
+          </div>
+
+          {/* Card 4: VeriLab AI Engine */}
+          <div
+            className="card"
+            style={{
+              padding: '20px',
+              borderRadius: '16px',
+              border: '1.5px solid #7dd3fc',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+              boxShadow: '0 4px 14px rgba(2,132,199,0.08)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Shield size={20} />
+                </div>
+                <span className="badge badge-blue" style={{ fontSize: '10px', background: '#0284c7', color: '#fff' }}>AI Engine Live</span>
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--navy)', marginBottom: '6px' }}>
+                VeriLab AI &amp; Audit Data
+              </h4>
+              <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Engine audit data saintifik otonom berbasis Gaussian Process Regression (GPR), deteksi anomali kurva kalibrasi sensor, dan verifikasi sertifikat kriptografis SHA-256.
+              </p>
+            </div>
+            <a
+              href="https://verilab.steamcraft.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary btn-sm"
+              style={{
+                width: '100%',
+                marginTop: '16px',
+                justifyContent: 'center',
+                fontSize: '12px',
+                padding: '8px 12px',
+                background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                textDecoration: 'none'
+              }}
+            >
+              <span>Buka VeriLab AI Engine</span>
+              <ExternalLink size={13} />
+            </a>
           </div>
         </div>
       </div>

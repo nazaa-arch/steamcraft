@@ -305,6 +305,91 @@ export const DataRepository: React.FC = () => {
         )}
       </div>
 
+      {/* VeriLab AI Engine Integration Banner */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          border: '1.5px solid #0284c7',
+          borderRadius: '16px',
+          padding: '18px 22px',
+          marginBottom: '24px',
+          color: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px',
+          boxShadow: '0 8px 24px rgba(2, 132, 199, 0.15)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 360px' }}>
+          <div
+            style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
+            }}
+          >
+            <Shield size={24} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <strong style={{ fontSize: '15px', color: '#f8fafc', letterSpacing: '-0.2px' }}>
+                VeriLab AI — Scientific Reproducibility &amp; Data Integrity Engine
+              </strong>
+              <span
+                style={{
+                  fontSize: '9.5px',
+                  fontWeight: 800,
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  color: '#38bdf8',
+                  border: '1px solid #38bdf8',
+                  padding: '1px 7px',
+                  borderRadius: '999px'
+                }}
+              >
+                SUBDOMAIN RESMI LIVE
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: '12.5px', color: '#94a3b8', lineHeight: 1.5 }}>
+              Engine otonom untuk kalibrasi kurva sensor (Gaussian Process Regression), pengujian ketahanan stokastik Monte Carlo, deteksi anomali data, dan verifikasi sertifikat audit kriptografis SHA-256.
+            </p>
+          </div>
+        </div>
+
+        <a
+          href="https://verilab.steamcraft.online"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: '10px 18px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+            color: '#ffffff',
+            fontSize: '13px',
+            fontWeight: 800,
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 16px rgba(2, 132, 199, 0.35)',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <span>Buka VeriLab AI Engine</span>
+          <ExternalLink size={14} />
+        </a>
+      </div>
+
       {/* Summary Statistics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
         {[

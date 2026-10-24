@@ -27,7 +27,8 @@ import {
   Database,
   User,
   Megaphone,
-  GraduationCap
+  GraduationCap,
+  ExternalLink
 } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
@@ -464,9 +465,33 @@ export const Topbar: React.FC = () => {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>Repository Data Empiris</div>
-                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Dataset & Reproducibility</small>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Dataset &amp; Reproducibility</small>
                 </div>
               </button>
+
+              <a
+                href="https://verilab.steamcraft.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-menu-item"
+                style={{ textDecoration: 'none' }}
+                onClick={() => {
+                  setToolsDropdownOpen(false);
+                  closeMobileMenu();
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Shield size={15} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>VeriLab AI Engine</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: '#0284c7', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>AI LIVE</span>
+                    <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
+                  </div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Audit Integritas &amp; Kalibrasi Data</small>
+                </div>
+              </a>
             </div>
           )}
         </div>
@@ -511,6 +536,34 @@ export const Topbar: React.FC = () => {
             </span>
           </div>
         )}
+
+        {/* VeriLab AI Engine Gateway Pill */}
+        <a
+          href="https://verilab.steamcraft.online"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="topbar-verilab-btn"
+          style={{
+            padding: '5px 11px',
+            fontSize: '11.5px',
+            fontWeight: 800,
+            borderRadius: '10px',
+            color: '#0284c7',
+            background: 'rgba(2, 132, 199, 0.08)',
+            border: '1.5px solid rgba(2, 132, 199, 0.3)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          title="Buka VeriLab AI — Engine Audit & Integritas Data Saintifik (verilab.steamcraft.online)"
+        >
+          <Shield size={13} style={{ color: '#0284c7' }} />
+          <span>VeriLab AI</span>
+          <ExternalLink size={10} style={{ opacity: 0.7 }} />
+        </a>
 
         {/* Quick Tour / Panduan Button */}
         <button
@@ -1225,6 +1278,27 @@ export const Topbar: React.FC = () => {
             </div>
             <ChevronRight size={14} style={{ opacity: 0.4 }} />
           </button>
+
+          <a
+            href="https://verilab.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mobile-drawer-item"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#0284c7' }}><Shield size={16} /></span>
+              <div>
+                <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>VeriLab AI Engine</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#0284c7', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>LIVE</span>
+                </div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Audit Integritas &amp; Kalibrasi GPR</small>
+              </div>
+            </div>
+            <ExternalLink size={14} style={{ opacity: 0.6 }} />
+          </a>
         </div>
 
         {/* Section 3: Akun & Bantuan */}
