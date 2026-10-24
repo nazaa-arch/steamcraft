@@ -3,7 +3,6 @@ import {
   Sparkles,
   Layers,
   Cpu,
-  GraduationCap,
   ShieldCheck,
   Maximize2,
   ExternalLink,
@@ -11,7 +10,14 @@ import {
   X,
   Compass,
   Activity,
-  Award
+  Award,
+  BookOpen,
+  FlaskConical,
+  Box,
+  MapPin,
+  Trophy,
+  Shield,
+  ChevronRight
 } from 'lucide-react';
 import { SparkleIcon } from './SteamIdCard';
 
@@ -46,6 +52,69 @@ export const SteamEcosystemSection: React.FC<{ onOpenApp?: () => void }> = ({ on
       badge: 'Radar Pentagon STEAM',
       title: 'Dossier Kompetensi & Evaluasi 360°',
       desc: 'Visualisasi pemetaan 5 dimensi STEAM melalui diagram Radar Pentagon interaktif, penilaian sejawat terverifikasi, dan sertifikasi kelayakan riset siap publikasi.'
+    }
+  ];
+
+  const subPlatforms = [
+    {
+      id: 'scholar',
+      title: 'PaperCraft AI',
+      badge: 'SCIENTIFIC MANUSCRIPT AUDITOR',
+      url: 'https://scholar.steamcraft.online',
+      github: 'https://github.com/nazaa-arch/papercraft-ai',
+      color: '#6366f1',
+      icon: BookOpen,
+      desc: 'Platform asisten naskah ilmiah: audit struktur 7 pilar IMRaD, verifikasi klaim statistik (p-value, chi-square), dan cross-referencing SINTA/Scopus.'
+    },
+    {
+      id: 'sim',
+      title: 'SteamSim Lab',
+      badge: '60 FPS VIRTUAL PHYSICS LAB',
+      url: 'https://sim.steamcraft.online',
+      github: 'https://github.com/nazaa-arch/steamsim-lab',
+      color: '#06b6d4',
+      icon: FlaskConical,
+      desc: 'Laboratorium simulasi peramban 60 FPS: Balistik kuadratik, osilator teredam ruang fasa, titrasi kurva pH kuantitatif, dan dinamika chaos bandul ganda.'
+    },
+    {
+      id: 'maker',
+      title: 'MakerCraft 3D',
+      badge: 'PARAMETRIC 3D WEBGL STUDIO',
+      url: 'https://maker.steamcraft.online',
+      github: 'https://github.com/nazaa-arch/makercraft-3d',
+      color: '#ec4899',
+      icon: Box,
+      desc: 'Studio visualisasi surface matematika parametrik (Torus Knot, Möbius Strip, Spherical Harmonics) dan ekspor model .OBJ instan untuk 3D printing.'
+    },
+    {
+      id: 'geo',
+      title: 'SteamGeo Intelligence',
+      badge: 'SPATIAL GWR & CLIMATE GIS',
+      url: 'https://geo.steamcraft.online',
+      github: 'https://github.com/nazaa-arch/steamgeo-intelligence',
+      color: '#10b981',
+      icon: MapPin,
+      desc: 'Sains data geospasial analitis: Geographically Weighted Regression (GWR), Global Moran\'s I, serta sistem peringatan dini wabah DBD 38 Kab/Kota Jatim.'
+    },
+    {
+      id: 'arena',
+      title: 'SteamArena',
+      badge: 'COMPETITIVE STEAM HACKATHON',
+      url: 'https://arena.steamcraft.online',
+      github: 'https://github.com/nazaa-arch/steam-arena',
+      color: '#f59e0b',
+      icon: Trophy,
+      desc: 'Arena evaluasi inovasi multidisiplin: radar pentagonal STEAM 5-sumbu interaktif, peer-review terbobot juri, dan leaderboard hackathon nasional.'
+    },
+    {
+      id: 'verilab',
+      title: 'VeriLab AI Engine',
+      badge: 'DATA REPRODUCIBILITY ENGINE',
+      url: 'https://verilab.steamcraft.online',
+      github: 'https://github.com/nazaa-arch/VerilabAI',
+      color: '#0284c7',
+      icon: Shield,
+      desc: 'Mesin audit replikabilitas saintifik: kalibrasi Gaussian Process Regression (GPR), analisis sensitivitas Sobol Monte Carlo, dan sertifikat digital SHA-256.'
     }
   ];
 
@@ -106,7 +175,7 @@ export const SteamEcosystemSection: React.FC<{ onOpenApp?: () => void }> = ({ on
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
           gap: '22px',
-          marginBottom: '36px'
+          marginBottom: '48px'
         }}
       >
         {pillars.map((item, idx) => {
@@ -182,6 +251,163 @@ export const SteamEcosystemSection: React.FC<{ onOpenApp?: () => void }> = ({ on
             </div>
           );
         })}
+      </div>
+
+      {/* 🚀 Specialized Sub-Platforms Ecosystem Showcase (v1.0 MAX) */}
+      <div style={{ marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 14px',
+              borderRadius: '999px',
+              background: 'rgba(2, 132, 199, 0.08)',
+              border: '1px solid rgba(2, 132, 199, 0.25)',
+              color: '#0284c7',
+              fontSize: '11px',
+              fontWeight: 800,
+              letterSpacing: '0.8px',
+              marginBottom: '8px'
+            }}
+          >
+            <Sparkles size={13} color="#0284c7" />
+            <span>SUBDOMAIN TERINTEGRASI • STATUS v1.0 MAX</span>
+          </div>
+          <h3
+            style={{
+              fontSize: 'clamp(22px, 3vw, 30px)',
+              fontWeight: 800,
+              color: '#0f172a',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.3px',
+              fontFamily: "'Montserrat', sans-serif"
+            }}
+          >
+            Ekosistem Platform Riset Spesialis STEAM
+          </h3>
+          <p style={{ fontSize: '13.5px', color: '#64748b', maxWidth: '640px', margin: '0 auto' }}>
+            Akses langsung ke seluruh instrumen riset terdedikasi di bawah arsitektur sistem <strong>Muhammad Naza Firmansyah</strong>.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '20px'
+          }}
+        >
+          {subPlatforms.map((p) => {
+            const PIcon = p.icon;
+            return (
+              <div
+                key={p.id}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <div
+                      style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '12px',
+                        background: `${p.color}15`,
+                        color: p.color,
+                        display: 'grid',
+                        placeItems: 'center'
+                      }}
+                    >
+                      <PIcon size={20} />
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: '9.5px',
+                        fontWeight: 800,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        background: `${p.color}10`,
+                        color: p.color,
+                        border: `1px solid ${p.color}30`,
+                        letterSpacing: '0.4px'
+                      }}
+                    >
+                      {p.badge}
+                    </span>
+                  </div>
+
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
+                    {p.title}
+                  </h4>
+
+                  <p style={{ fontSize: '12.5px', color: '#64748b', lineHeight: 1.55, margin: '0 0 16px 0' }}>
+                    {p.desc}
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      background: p.color,
+                      color: '#ffffff',
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <span>Buka Platform</span>
+                    <ExternalLink size={12} />
+                  </a>
+
+                  <a
+                    href={p.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      background: '#f8fafc',
+                      color: '#334155',
+                      border: '1px solid #e2e8f0',
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <span>GitHub Repo</span>
+                    <ChevronRight size={12} />
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Quote Banner */}

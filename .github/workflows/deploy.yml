@@ -1,4 +1,4 @@
-name: Deploy STEAM-Craft to AnymHost (cPanel)
+name: Deploy Subdomains & Beta Staging to AnymHost (cPanel)
 
 on:
   push:
@@ -8,12 +8,17 @@ on:
 
 jobs:
   web-deploy:
-    name: Build & Deploy to Production
+    name: Build & Deploy Subdomains and Beta
     runs-on: ubuntu-latest
 
     steps:
       - name: 🚚 Ambil Kode Sumber (Checkout)
         uses: actions/checkout@v4
+
+      - name: ⚙️ Siapkan Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: ⚙️ Siapkan Node.js 22
         uses: actions/setup-node@v4
@@ -24,15 +29,12 @@ jobs:
       - name: 📦 Pasang Dependensi
         run: npm ci
 
-      - name: 🔨 Bangun Aplikasi Produksi (Build dist)
+      - name: 🔨 Bangun Aplikasi Beta (Build dist)
         run: npm run build
 
-      - name: 🚀 Sinkronisasi Otomatis ke cPanel AnymHost via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ./public_html/
-          local-dir: ./dist/
-          dangerous-clean-slate: false
+      - name: 🚀 Multi-Deploy 5 Subdomains & Beta Staging via FTP
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: python scripts/ftp_deploy_all.py

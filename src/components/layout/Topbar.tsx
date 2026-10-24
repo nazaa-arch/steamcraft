@@ -28,7 +28,10 @@ import {
   User,
   Megaphone,
   GraduationCap,
-  ExternalLink
+  ExternalLink,
+  BookOpen,
+  Box,
+  MapPin
 } from 'lucide-react';
 
 export const Topbar: React.FC = () => {
@@ -490,6 +493,129 @@ export const Topbar: React.FC = () => {
                     <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
                   </div>
                   <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Audit Integritas &amp; Kalibrasi Data</small>
+                </div>
+              </a>
+              <div style={{ margin: '6px 0', borderTop: '1px solid #f1f5f9', padding: '4px 12px 2px 12px' }}>
+                <span style={{ fontSize: '9.5px', fontWeight: 800, color: 'var(--muted)', letterSpacing: '0.5px' }}>EKOSISTEM SPESIALIS (v1.0 MAX)</span>
+              </div>
+
+              <a
+                href="https://scholar.steamcraft.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-menu-item"
+                style={{ textDecoration: 'none' }}
+                onClick={() => {
+                  setToolsDropdownOpen(false);
+                  closeMobileMenu();
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eef2ff', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BookOpen size={15} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>PaperCraft AI</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: '#6366f1', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>SCHOLAR</span>
+                    <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
+                  </div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Audit Struktur IMRaD &amp; Klaim Statistik</small>
+                </div>
+              </a>
+
+              <a
+                href="https://sim.steamcraft.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-menu-item"
+                style={{ textDecoration: 'none' }}
+                onClick={() => {
+                  setToolsDropdownOpen(false);
+                  closeMobileMenu();
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#ecfeff', color: '#06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FlaskConical size={15} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>SteamSim Lab</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: '#06b6d4', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>60 FPS</span>
+                    <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
+                  </div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Simulasi Fisika, Kinetika &amp; Chaos</small>
+                </div>
+              </a>
+
+              <a
+                href="https://maker.steamcraft.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-menu-item"
+                style={{ textDecoration: 'none' }}
+                onClick={() => {
+                  setToolsDropdownOpen(false);
+                  closeMobileMenu();
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#fdf2f8', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Box size={15} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>MakerCraft 3D</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: '#ec4899', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>WEBGL</span>
+                    <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
+                  </div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Parametric 3D Surfaces &amp; Ekspor .OBJ</small>
+                </div>
+              </a>
+
+              <a
+                href="https://geo.steamcraft.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-menu-item"
+                style={{ textDecoration: 'none' }}
+                onClick={() => {
+                  setToolsDropdownOpen(false);
+                  closeMobileMenu();
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#ecfdf5', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <MapPin size={15} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>SteamGeo Intelligence</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: '#10b981', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>GIS AI</span>
+                    <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
+                  </div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>Sains Data Spasial GWR &amp; Peringatan Dini</small>
+                </div>
+              </a>
+
+              <a
+                href="https://arena.steamcraft.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-menu-item"
+                style={{ textDecoration: 'none' }}
+                onClick={() => {
+                  setToolsDropdownOpen(false);
+                  closeMobileMenu();
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#fffbeb', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Trophy size={15} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>SteamArena</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: '#f59e0b', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>HACKATHON</span>
+                    <ExternalLink size={11} style={{ color: 'var(--muted)', marginLeft: 'auto' }} />
+                  </div>
+                  <small style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 500 }}>STEAM Radar Matrix &amp; Peer-Review</small>
                 </div>
               </a>
             </div>
