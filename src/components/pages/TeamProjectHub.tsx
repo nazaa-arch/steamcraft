@@ -166,19 +166,19 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
       id: 'verilab-ai',
       title: 'VeriLab AI — Scientific Reproducibility & Data Integrity Engine',
       category: 'software',
-      categoryBadge: 'Engine Saintifik Mandiri (Live)',
+      categoryBadge: 'Engine Saintifik & Audit AI (Live)',
       badgeColor: '#0284c7',
       developer: 'Muhammad Naza Firmansyah',
       description:
-        'Proyek riset dan engineering mandiri yang dikembangkan secara independen oleh Muhammad Naza Firmansyah (bukan satu tim). Mesin audit data eksperimen saintifik berbasis AI dilengkapi kalibrasi Gaussian Process Regression (GPR), uji ketahanan stokastik Monte Carlo, deteksi anomali multi-dimensi, dan verifikasi sertifikat kriptografis SHA-256.',
+        'Platform audit data eksperimen dan replikasi saintifik berbasis AI yang dirancang dan dikembangkan oleh Muhammad Naza Firmansyah. Dilengkapi kalibrasi Gaussian Process Regression (GPR), uji ketahanan stokastik Monte Carlo, deteksi anomali multi-dimensi, dan verifikasi sertifikat kriptografis SHA-256.',
       status: 'live',
       statusText: 'Production Live (Aktif)',
       tags: ['FastAPI Python 3.13', 'Gaussian Process (GPR)', 'Monte Carlo Chaos', 'SHA-256 Audit Trail', 'Docker Cloud'],
       metrics: [
         { label: 'Domain Akses', value: 'verilab.steamcraft.online' },
-        { label: 'Pembuat / Developer', value: 'Muhammad Naza Firmansyah' },
-        { label: 'Status Tim', value: 'Proyek Mandiri (Independen)' },
-        { label: 'Engine Core', value: 'GPR & Chaos Robustness' }
+        { label: 'Lead Developer', value: 'Muhammad Naza Firmansyah' },
+        { label: 'Engine Core', value: 'GPR & Chaos Robustness' },
+        { label: 'Backend Cluster', value: 'Render Docker + LiteSpeed' }
       ],
       targetUrl: 'https://verilab.steamcraft.online'
     },
@@ -844,7 +844,7 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                       }}
                     >
                       <UserCheck size={13} />
-                      <span>Developer / Pembuat: <strong>{proj.developer}</strong> (Proyek Mandiri)</span>
+                      <span>Lead Developer: <strong>{proj.developer}</strong></span>
                     </div>
                   )}
 
@@ -982,10 +982,10 @@ export const TeamProjectHub: React.FC<{ onLaunchApp?: () => void }> = ({ onLaunc
                 <Shield size={18} />
               </div>
               <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px 0' }}>
-                3. VeriLab AI (Karya Mandiri Muhammad Naza Firmansyah)
+                3. VeriLab AI Engine
               </h4>
               <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                Engine audit saintifik otonom yang dikembangkan secara mandiri oleh Muhammad Naza Firmansyah (bukan satu tim) untuk kalibrasi sensor, pengujian replikabilitas algoritma, dan sertifikat kriptografis di verilab.steamcraft.online.
+                Engine audit saintifik otonom yang dikembangkan oleh Muhammad Naza Firmansyah untuk kalibrasi sensor, pengujian replikabilitas algoritma, dan sertifikat kriptografis di verilab.steamcraft.online.
               </p>
             </div>
           </div>

@@ -361,7 +361,7 @@ export const DataRepository: React.FC = () => {
               </span>
             </div>
             <p style={{ margin: 0, fontSize: '12.5px', color: '#94a3b8', lineHeight: 1.5 }}>
-              Engine otonom yang dikembangkan secara mandiri oleh <strong>Muhammad Naza Firmansyah</strong> untuk kalibrasi kurva sensor (Gaussian Process Regression), pengujian ketahanan stokastik Monte Carlo, deteksi anomali data, dan verifikasi sertifikat audit kriptografis SHA-256.
+              Engine otonom yang dikembangkan oleh <strong>Muhammad Naza Firmansyah</strong> untuk kalibrasi kurva sensor (Gaussian Process Regression), pengujian ketahanan stokastik Monte Carlo, deteksi anomali data, dan verifikasi sertifikat audit kriptografis SHA-256.
             </p>
           </div>
         </div>

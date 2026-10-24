@@ -682,7 +682,7 @@ export const StudentDashboard: React.FC = () => {
                 VeriLab AI &amp; Audit Data
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--ink-secondary)', lineHeight: 1.5, margin: 0 }}>
-                Engine audit data saintifik otonom karya mandiri <strong>Muhammad Naza Firmansyah</strong> berbasis Gaussian Process Regression (GPR), deteksi anomali kurva kalibrasi sensor, dan sertifikat kriptografis SHA-256.
+                Engine audit data saintifik otonom yang dikembangkan oleh <strong>Muhammad Naza Firmansyah</strong> berbasis Gaussian Process Regression (GPR), deteksi anomali kurva kalibrasi sensor, dan sertifikat kriptografis SHA-256.
               </p>
             </div>
             <a
