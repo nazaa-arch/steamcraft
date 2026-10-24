@@ -1,6 +1,17 @@
 # 🚀 STEAM-Craft — Ruang Kolaborasi Multidisiplin (React + TypeScript)
 
+[![Production Web App](https://img.shields.io/badge/Live%20Web%20App-app.steamcraft.online-0284c7?style=for-the-badge&logo=react&logoColor=white)](https://app.steamcraft.online)
+[![Landing Page](https://img.shields.io/badge/Landing%20Page-steamcraft.online-0ea5e9?style=for-the-badge&logo=googlechrome&logoColor=white)](https://steamcraft.online)
+[![VeriLab AI Engine](https://img.shields.io/badge/VeriLab%20AI-verilab.steamcraft.online-10b981?style=for-the-badge&logo=fastapi&logoColor=white)](https://verilab.steamcraft.online)
+[![Creator Portfolio](https://img.shields.io/badge/Portfolio-Muhammad%20Naza%20Firmansyah-6366f1?style=for-the-badge&logo=github&logoColor=white)](https://portofolionaza.steamcraft.online)
+
 **STEAM-Craft** adalah platform web terpadu untuk inkubasi dan kolaborasi riset ilmiah mahasiswa dan dosen berbasis pendekatan **STEAM** (*Science, Technology, Engineering, Art, and Mathematics*).
+
+- **Lead Developer & System Architect**: **Muhammad Naza Firmansyah** ([Portofolio](https://portofolionaza.steamcraft.online) • [GitHub](https://github.com/nazaa-arch))
+- **Live Ecosystem**:
+  - 🚀 **Web Application**: [`https://app.steamcraft.online`](https://app.steamcraft.online)
+  - 🌐 **Landing Page**: [`https://steamcraft.online`](https://steamcraft.online)
+  - 🔬 **AI Scientific Verification Engine**: [`https://verilab.steamcraft.online`](https://verilab.steamcraft.online)
 
 Direkayasa ulang secara penuh menggunakan arsitektur **React 19 + TypeScript + Vite** modern, mempertahankan seluruh integritas alur kerja riset, manajemen peran multi-role, 13 proyek penelitian unggulan, penilaian rubrik 4 pilar standar nasional, dan asisten riset cerdas.
 
