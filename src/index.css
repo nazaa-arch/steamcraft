@@ -529,7 +529,115 @@
   transition: width 0.3s ease;
 }
 
-/* ==================== NOTIFICATION BACKDROP & CLOSE BUTTON ==================== */
+/* ==================== TOPBAR RIGHT CONTROLS: VERILAB, TOUR & NOTIFICATIONS ==================== */
+.topbar-verilab-btn {
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 800;
+  border-radius: 10px;
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  border: 1.5px solid rgba(2, 132, 199, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.topbar-verilab-btn:hover {
+  background: rgba(2, 132, 199, 0.16);
+  border-color: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
+.topbar-tour-btn {
+  padding: 5px 10px;
+  font-size: 11.5px;
+  border-radius: 10px;
+  color: var(--navy);
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.topbar-tour-btn:hover {
+  background: white;
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.notif-bell-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notif-bell-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  color: var(--navy);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notif-bell-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.notif-bell-btn:active {
+  transform: translateY(0);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+  animation: notifPulse 2.5s infinite ease-in-out;
+  z-index: 2;
+}
+
+@keyframes notifPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
 .notif-backdrop {
   position: fixed;
   inset: 0;
@@ -541,12 +649,41 @@
 }
 
 .notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  max-width: 92vw;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(0, 0, 0, 0.04);
   z-index: 1050 !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: notifDropdownFade 0.2s ease;
 }
 
-@keyframes notifFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes notifDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notif-dropdown-header {
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .notif-close-btn {
@@ -568,6 +705,49 @@
   background: var(--surface-alt);
   color: var(--navy);
   border-color: var(--line);
+}
+
+.notif-dropdown-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-dropdown-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.notif-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.notif-dropdown-item:hover {
+  background: #f1f7fe;
+}
+
+.notif-dropdown-item.unread {
+  background: #f0f7ff;
+  border-left: 3.5px solid var(--primary);
+}
+
+.notif-dropdown-footer {
+  padding: 10px 14px;
+  background: var(--surface-alt);
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -1182,13 +1362,14 @@ textarea:focus,
 
 @media (max-width: 768px) {
   .topbar {
-    height: 58px !important;
-    padding: 0 14px !important;
+    height: 56px !important;
+    padding: 0 12px !important;
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
+    overflow: visible !important;
   }
 
   /* Hide the horizontal scrolling buttons bar on mobile */
@@ -1202,20 +1383,28 @@ textarea:focus,
     align-items: center !important;
     gap: 8px !important;
     text-decoration: none !important;
-    flex-shrink: 0 !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+    margin-right: 0 !important;
   }
 
   .brand-logo-img {
     width: 32px !important;
     height: 32px !important;
     border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-text {
+    min-width: 0 !important;
   }
 
   .brand-text h2 {
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 800 !important;
     line-height: 1.1 !important;
     margin: 0 !important;
+    white-space: nowrap !important;
   }
 
   .brand-text span {
@@ -1230,14 +1419,14 @@ textarea:focus,
     flex-shrink: 0 !important;
   }
 
+  /* Hide dev mode indicator text on mobile topbar (visible in drawer) */
   #devModeIndicator {
-    padding: 2px 7px !important;
-    font-size: 9.5px !important;
-    border-radius: 12px !important;
+    display: none !important;
   }
 
-  #devModeIndicator span:last-child {
-    font-size: 9.5px !important;
+  /* Hide VeriLab AI pill in mobile topbar (accessible in drawer under Instrumen STEAM) */
+  .topbar-verilab-btn {
+    display: none !important;
   }
 
   /* Hide standalone logout from topbar on mobile since it's available in the burger drawer */
@@ -1247,9 +1436,9 @@ textarea:focus,
 
   /* Panduan / Quick Tour icon button */
   .topbar-tour-btn {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
     padding: 0 !important;
     border-radius: 50% !important;
     display: inline-flex !important;
@@ -1257,13 +1446,22 @@ textarea:focus,
     justify-content: center !important;
     background: #f1f5f9 !important;
     border: 1px solid #e2e8f0 !important;
+    flex-shrink: 0 !important;
   }
 
   .topbar-tour-btn .tour-text {
     display: none !important;
   }
 
-  /* Notifikasi Bell icon button */
+  /* Notifikasi Bell wrapper & icon button */
+  .notif-bell-wrapper {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
   .notif-bell-btn {
     width: 34px !important;
     height: 34px !important;
@@ -1273,9 +1471,85 @@ textarea:focus,
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    background: var(--surface-alt) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--navy) !important;
+    cursor: pointer !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+  }
+
+  .notif-badge {
+    position: absolute !important;
+    top: -2px !important;
+    right: -2px !important;
+    min-width: 17px !important;
+    height: 17px !important;
+    padding: 0 4px !important;
+    border-radius: 999px !important;
+    background: #ef4444 !important;
+    color: white !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 2px solid white !important;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+    z-index: 2 !important;
+  }
+
+  /* Notification dropdown: Responsive floating card on mobile */
+  .notif-dropdown {
+    position: fixed !important;
+    top: 58px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(85vh - 58px) !important;
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+    z-index: 1050 !important;
+    border-radius: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .notif-dropdown-header {
+    padding: 12px 14px !important;
+  }
+
+  .notif-dropdown-list {
+    max-height: 50vh !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .notif-dropdown-item {
+    padding: 11px 14px !important;
+  }
+
+  .notif-dropdown-footer {
+    padding: 8px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .notif-dropdown-footer button {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
 
   /* User Profile Avatar Pill */
+  .user-profile-wrapper {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+
   .user-badge {
     padding: 0 !important;
     background: transparent !important;
@@ -1285,6 +1559,7 @@ textarea:focus,
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
+    flex-shrink: 0 !important;
   }
 
   .user-badge:hover,
@@ -1308,6 +1583,7 @@ textarea:focus,
     border-radius: 50% !important;
     border: 2px solid #38bdf8 !important;
     box-shadow: 0 2px 6px rgba(56, 189, 248, 0.25) !important;
+    flex-shrink: 0 !important;
   }
 
   /* Mobile Burger Button (Garis 3) */
@@ -1315,9 +1591,9 @@ textarea:focus,
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
     border-radius: 10px !important;
     background: #f1f5f9 !important;
     border: 1px solid #cbd5e1 !important;
@@ -1528,9 +1804,7 @@ textarea:focus,
     background: #f59e0b !important;
   }
 
-  .notif-dropdown {
-    top: 54px !important;
-  }
+
 }
 
 @keyframes mobileFadeIn {
@@ -2530,50 +2804,59 @@ html, body {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* 4. PROPORTIONAL BRAND TOPBAR LOGO & HEADLINE */
-.brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  text-decoration: none !important;
-  margin-right: 36px !important; /* Ruang lega yang nyaman antara brand SteamCraft dan menu navigasi */
-  flex-shrink: 0 !important;
-  transition: opacity 0.2s ease;
+/* 4. PROPORTIONAL BRAND TOPBAR LOGO & HEADLINE (DESKTOP ONLY) */
+@media (min-width: 769px) {
+  .brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-decoration: none !important;
+    margin-right: 36px !important; /* Ruang lega yang nyaman antara brand SteamCraft dan menu navigasi */
+    flex-shrink: 0 !important;
+    transition: opacity 0.2s ease;
+  }
+
+  .brand:hover {
+    opacity: 0.92;
+  }
+
+  .brand-logo-img {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 9px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-text {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  .brand-text h2 {
+    font-size: 17.5px !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .brand-text span {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: var(--primary) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.7px !important;
+    margin-top: 2px !important;
+  }
 }
 
-.brand:hover {
-  opacity: 0.92;
-}
-
-.brand-logo-img {
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 9px !important;
-  object-fit: contain !important;
-  flex-shrink: 0 !important;
-}
-
-.brand-text {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-}
-
-.brand-text h2 {
-  font-size: 17.5px !important;
-  font-weight: 900 !important;
-  line-height: 1.15 !important;
-  margin: 0 !important;
-  letter-spacing: 0.3px !important;
-}
-
-.brand-text span {
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  color: var(--primary) !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.7px !important;
-  margin-top: 2px !important;
+/* Extra small screens (< 380px): Hide tour button so notif bell, profile, and burger menu never overflow */
+@media (max-width: 380px) {
+  .topbar-tour-btn {
+    display: none !important;
+  }
 }
 
 /* ======================================================== */

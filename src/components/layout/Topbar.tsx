@@ -669,21 +669,6 @@ export const Topbar: React.FC = () => {
           target="_blank"
           rel="noopener noreferrer"
           className="topbar-verilab-btn"
-          style={{
-            padding: '5px 11px',
-            fontSize: '11.5px',
-            fontWeight: 800,
-            borderRadius: '10px',
-            color: '#0284c7',
-            background: 'rgba(2, 132, 199, 0.08)',
-            border: '1.5px solid rgba(2, 132, 199, 0.3)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            textDecoration: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
           title="Buka VeriLab AI — Engine Audit & Integritas Data Saintifik (verilab.steamcraft.online)"
         >
           <Shield size={13} style={{ color: '#0284c7' }} />
@@ -696,18 +681,6 @@ export const Topbar: React.FC = () => {
           type="button"
           className="btn btn-ghost btn-sm topbar-tour-btn"
           onClick={() => openModal('quickTour')}
-          style={{
-            padding: '5px 10px',
-            fontSize: '11.5px',
-            borderRadius: '10px',
-            color: 'var(--navy)',
-            background: 'var(--surface-alt)',
-            border: '1px solid var(--line)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            cursor: 'pointer'
-          }}
           title="Buka Panduan & Tur Alur Riset STEAM-Craft"
         >
           <Sparkles size={13} style={{ color: 'var(--primary)' }} />
