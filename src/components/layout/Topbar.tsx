@@ -162,7 +162,8 @@ export const Topbar: React.FC = () => {
         aria-expanded={projectDropdownOpen}
         title="Pusat Riset & Proyek Multidisiplin"
       >
-        <span>Riset dan Proyek</span>
+        <span className="nav-label-long">Riset dan Proyek</span>
+        <span className="nav-label-short">Proyek</span>
         <ChevronDown size={11} style={{ transform: projectDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
@@ -409,7 +410,8 @@ export const Topbar: React.FC = () => {
             title="Instrumen Riset Ilmiah STEAM"
           >
             <Sparkles size={13} style={{ color: 'var(--primary)' }} />
-            <span>Instrumen STEAM</span>
+            <span className="nav-label-long">Instrumen STEAM</span>
+            <span className="nav-label-short">Instrumen</span>
             <ChevronDown size={11} style={{ transform: toolsDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </button>
 

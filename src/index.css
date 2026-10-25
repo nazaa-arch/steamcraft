@@ -529,6 +529,32 @@
   transition: width 0.3s ease;
 }
 
+/* ==================== BASE TOPBAR & USER CONTROLS ==================== */
+.topbar {
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 0 clamp(16px, 2.5vw, 36px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.user-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+  z-index: 20;
+}
+
 /* ==================== TOPBAR RIGHT CONTROLS: VERILAB, TOUR & NOTIFICATIONS ==================== */
 .topbar-verilab-btn {
   padding: 5px 11px;
@@ -2334,14 +2360,26 @@ html, body {
   color: var(--primary);
 }
 
-/* Compact layout for Laptops (1024px to 1366px) */
-@media (min-width: 769px) and (max-width: 1366px) {
+/* ==================== MULTI-TIER DESKTOP & TABLET TOPBAR RESPONSIVENESS ==================== */
+/* Short navigation labels helper */
+.nav-label-short {
+  display: none;
+}
+
+/* Tier 1: Laptops & Narrow Desktops (1025px to 1240px) */
+@media (max-width: 1240px) {
   .topbar {
     padding: 0 16px !important;
+    gap: 10px !important;
+  }
+
+  /* Hide VeriLab AI pill in topbar on compact desktop screens to eliminate overlap; it is already in Instrumen STEAM */
+  .topbar-verilab-btn {
+    display: none !important;
   }
 
   .brand {
-    margin-right: 22px !important;
+    margin-right: 14px !important;
   }
 
   .brand-text span {
@@ -2356,16 +2394,116 @@ html, body {
   .nav-btn {
     padding: 5px 8px !important;
     font-size: 12px !important;
-    gap: 3px !important;
-  }
-
-  .topbar-tour-btn {
-    padding: 4px 8px !important;
-    font-size: 11px !important;
+    gap: 4px !important;
   }
 
   .user-badge {
     padding: 4px 8px !important;
+  }
+
+  .user-badge .user-info small {
+    display: none !important;
+  }
+}
+
+/* Tier 2: Small Tablets, iPad & Android "Desktop Site" View (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .topbar {
+    height: 58px !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+
+  /* Critical: Never show standalone VeriLab AI pill in this width to prevent collision */
+  .topbar-verilab-btn {
+    display: none !important;
+  }
+
+  .topbar-tour-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .topbar-tour-btn .tour-text {
+    display: none !important;
+  }
+
+  .brand {
+    margin-right: 8px !important;
+    gap: 6px !important;
+  }
+
+  .brand-logo-img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .brand-text h2 {
+    font-size: 14.5px !important;
+  }
+
+  .brand-text span {
+    display: none !important;
+  }
+
+  .nav {
+    gap: 2px !important;
+  }
+
+  .nav button,
+  .nav-btn {
+    padding: 4px 6px !important;
+    font-size: 11.5px !important;
+    gap: 3px !important;
+  }
+
+  /* Use compact labels ("Proyek", "Instrumen") */
+  .nav-label-long {
+    display: none !important;
+  }
+
+  .nav-label-short {
+    display: inline !important;
+  }
+
+  .user-badge {
+    padding: 2px 6px !important;
+    gap: 6px !important;
+  }
+
+  .user-badge .user-info small {
+    display: none !important;
+  }
+
+  .user-badge .user-info strong {
+    font-size: 11.5px !important;
+    max-width: 80px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* Tier 3: Extra Narrow Tablet View (769px to 880px) */
+@media (min-width: 769px) and (max-width: 880px) {
+  .user-badge .user-info {
+    display: none !important;
+  }
+
+  .user-badge {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .topbar-tour-btn {
+    display: none !important;
   }
 }
 
