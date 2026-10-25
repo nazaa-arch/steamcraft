@@ -35,6 +35,13 @@
   ExpiresByType application/javascript "access plus 1 day"
 </IfModule>
 
+# Immediate SPA Updates (Disable cache on HTML entry point)
+<FilesMatch "index\.html$">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires 0
+</FilesMatch>
+
 # Security Headers
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"

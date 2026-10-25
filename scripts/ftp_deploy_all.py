@@ -162,8 +162,8 @@ def main():
         ("dist", "/public_html/app"),
 
         # 2. Beta Staging Portal
-        ("dist_beta", "/beta.steamcraft.online"),
-        ("dist_beta", "/public_html/beta"),
+        ("dist", "/beta.steamcraft.online"),
+        ("dist", "/public_html/beta"),
 
         # 3. Subdomains
         ("deploy_subdomains/scholar", "/scholar.steamcraft.online"),
