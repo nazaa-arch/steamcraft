@@ -3434,3 +3434,98 @@ html, body, #root, .app-layout, .workspace-app, .main-content, .wrap, .page {
 
 
 
+
+/* ==================== TEAM ROSTER & MEMBER CARDS (WORKSPACE) ==================== */
+.team-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.member-card {
+  background: #ffffff;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 135px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  box-sizing: border-box;
+}
+
+.member-card:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.15);
+}
+
+.member-card.is-lead {
+  border-color: #38bdf8;
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.12);
+}
+
+.team-swipe-hint {
+  display: none;
+  font-size: 11px;
+  color: #0284c7;
+  font-weight: 600;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Mobile & Tablet Portrait (< 768px): Arrange horizontally side-by-side ("kesamping") */
+@media (max-width: 768px) {
+  .team-swipe-hint {
+    display: inline-flex;
+  }
+
+  .team-roster-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 12px !important;
+    padding: 4px 2px 14px 2px !important;
+    margin-top: 8px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Smooth custom slim scrollbar for mobile swipe */
+  .team-roster-grid::-webkit-scrollbar {
+    height: 4px !important;
+  }
+
+  .team-roster-grid::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 999px !important;
+  }
+
+  .team-roster-grid::-webkit-scrollbar-thumb {
+    background: #93c5fd !important;
+    border-radius: 999px !important;
+  }
+
+  .team-roster-grid .member-card {
+    flex: 0 0 82% !important;
+    min-width: 250px !important;
+    max-width: 295px !important;
+    scroll-snap-align: start !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+}

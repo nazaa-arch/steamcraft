@@ -842,13 +842,13 @@ export const ProjectWorkspace: React.FC = () => {
           {/* TAB 4: TEAM & COLLABORATION */}
           {activeTab === 'team' && (
             <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div className="team-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--navy)' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
                     Struktur Tim Peneliti Multidisiplin
                   </h3>
-                  <p style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                    Kolaborasi civitas akademika lintas disiplin ilmu STEAM.
+                  <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '3px 0 0 0' }}>
+                    Kolaborasi civitas akademika lintas disiplin ilmu STEAM ({projectMembers.length} anggota).
                   </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -875,7 +875,12 @@ export const ProjectWorkspace: React.FC = () => {
                 </div>
               </div>
 
-              {/* Roster Grid */}
+              {/* Mobile swipe helper hint */}
+              <div className="team-swipe-hint">
+                <span>Geser ke samping untuk melihat seluruh anggota tim &rarr;</span>
+              </div>
+
+              {/* Roster Grid (Horizontal Swipe on Mobile, Balanced Grid on Desktop) */}
               <div className="team-roster-grid">
                 {projectMembers.map(m => {
                   const mReviews = projectPeerFeedbacks.filter(f => f.reviewee_name === m.name);
