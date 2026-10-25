@@ -113,9 +113,14 @@ def main():
         ("deploy_subdomains/arena", "/public_html/arena"),
         ("deploy_subdomains/arena", "/arena.steamcraft.online"),
         
-        # Beta Staging Portal (NOTE: Does NOT touch /public_html root index.html)
+        # Beta Staging Portal
         ("dist_beta", "/public_html/beta"),
-        ("dist_beta", "/beta.steamcraft.online")
+        ("dist_beta", "/beta.steamcraft.online"),
+
+        # SteamCraft Web App (app.steamcraft.online & public_html)
+        ("dist", "/public_html/app"),
+        ("dist", "/app.steamcraft.online"),
+        ("dist", "/public_html")
     ]
 
     for local_dir, remote_dir in deploy_targets:
