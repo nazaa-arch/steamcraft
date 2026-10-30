@@ -1394,7 +1394,7 @@ textarea:focus,
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .topbar {
     height: 56px !important;
     padding: 0 12px !important;
@@ -1841,7 +1841,84 @@ textarea:focus,
     background: #f59e0b !important;
   }
 
+  /* Drawer Group (e.g. Riset dan Proyek accordion) */
+  .mobile-drawer-group {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    margin: 3px 0 !important;
+  }
 
+  .mobile-drawer-group-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 12px !important;
+    background: #f1f5f9 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: var(--navy) !important;
+    cursor: pointer !important;
+    border: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    transition: background 0.15s ease !important;
+  }
+
+  .mobile-drawer-group-header:hover,
+  .mobile-drawer-group-header:active {
+    background: #e2e8f0 !important;
+  }
+
+  .mobile-drawer-group-content {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 6px 8px 8px 8px !important;
+    gap: 3px !important;
+    border-top: 1px solid #e2e8f0 !important;
+  }
+
+  .mobile-drawer-subitem {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--ink-secondary) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    text-align: left !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .mobile-drawer-subitem:hover,
+  .mobile-drawer-subitem:active {
+    background: #eff6ff !important;
+    color: var(--primary) !important;
+  }
+
+  .mobile-drawer-subitem.active {
+    background: #dbeafe !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+  }
+
+  /* VeriLab AI Engine Highlight inside drawer */
+  .mobile-drawer-verilab {
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .mobile-drawer-verilab:hover,
+  .mobile-drawer-verilab:active {
+    border-color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.12) !important;
+  }
 }
 
 @keyframes mobileFadeIn {
@@ -2377,20 +2454,15 @@ html, body {
   display: none;
 }
 
-/* Tier 1: Laptops & Narrow Desktops (1025px to 1240px) */
-@media (max-width: 1240px) {
+/* Tier 1: Laptops & Narrow Desktops (1025px to 1360px) */
+@media (max-width: 1360px) {
   .topbar {
-    padding: 0 16px !important;
-    gap: 10px !important;
-  }
-
-  /* Hide VeriLab AI pill in topbar on compact desktop screens to eliminate overlap; it is already in Instrumen STEAM */
-  .topbar-verilab-btn {
-    display: none !important;
+    padding: 0 clamp(12px, 1.5vw, 20px) !important;
+    gap: 8px !important;
   }
 
   .brand {
-    margin-right: 14px !important;
+    margin-right: 8px !important;
   }
 
   .brand-text span {
@@ -2408,6 +2480,14 @@ html, body {
     gap: 4px !important;
   }
 
+  .topbar-tour-btn .tour-text {
+    display: none !important;
+  }
+
+  .topbar-tour-btn {
+    padding: 5px 8px !important;
+  }
+
   .user-badge {
     padding: 4px 8px !important;
   }
@@ -2415,111 +2495,17 @@ html, body {
   .user-badge .user-info small {
     display: none !important;
   }
-}
-
-/* Tier 2: Small Tablets, iPad & Android "Desktop Site" View (769px to 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .topbar {
-    height: 58px !important;
-    padding: 0 12px !important;
-    gap: 8px !important;
-  }
-
-  /* Critical: Never show standalone VeriLab AI pill in this width to prevent collision */
-  .topbar-verilab-btn {
-    display: none !important;
-  }
-
-  .topbar-tour-btn {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .topbar-tour-btn .tour-text {
-    display: none !important;
-  }
-
-  .brand {
-    margin-right: 8px !important;
-    gap: 6px !important;
-  }
-
-  .brand-logo-img {
-    width: 32px !important;
-    height: 32px !important;
-  }
-
-  .brand-text h2 {
-    font-size: 14.5px !important;
-  }
-
-  .brand-text span {
-    display: none !important;
-  }
-
-  .nav {
-    gap: 2px !important;
-  }
-
-  .nav button,
-  .nav-btn {
-    padding: 4px 6px !important;
-    font-size: 11.5px !important;
-    gap: 3px !important;
-  }
-
-  /* Use compact labels ("Proyek", "Instrumen") */
-  .nav-label-long {
-    display: none !important;
-  }
-
-  .nav-label-short {
-    display: inline !important;
-  }
-
-  .user-badge {
-    padding: 2px 6px !important;
-    gap: 6px !important;
-  }
-
-  .user-badge .user-info small {
-    display: none !important;
-  }
 
   .user-badge .user-info strong {
-    font-size: 11.5px !important;
-    max-width: 80px !important;
+    max-width: 95px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
 }
 
-/* Tier 3: Extra Narrow Tablet View (769px to 880px) */
-@media (min-width: 769px) and (max-width: 880px) {
-  .user-badge .user-info {
-    display: none !important;
-  }
-
-  .user-badge {
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-  }
-
-  .topbar-tour-btn {
-    display: none !important;
-  }
-}
-
-/* Mobile Navigation Dropdown */
-@media (max-width: 768px) {
+/* Mobile & Tablet Navigation Dropdown */
+@media (max-width: 1024px) {
   .nav-dropdown-menu {
     position: absolute !important;
     top: calc(100% + 8px) !important;

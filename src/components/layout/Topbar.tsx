@@ -57,6 +57,7 @@ export const Topbar: React.FC = () => {
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileProjectsOpen, setMobileProjectsOpen] = useState(true);
   const notifWrapperRef = useRef<HTMLDivElement>(null);
   const profileWrapperRef = useRef<HTMLDivElement>(null);
   const toolsWrapperRef = useRef<HTMLDivElement>(null);
@@ -665,19 +666,6 @@ export const Topbar: React.FC = () => {
           </div>
         )}
 
-        {/* VeriLab AI Engine Gateway Pill - Desktop only */}
-        <a
-          href="https://verilab.steamcraft.online"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="topbar-verilab-btn desktop-only"
-          title="Buka VeriLab AI — Engine Audit & Integritas Data Saintifik (verilab.steamcraft.online)"
-        >
-          <Shield size={13} style={{ color: '#0284c7' }} />
-          <span>VeriLab AI</span>
-          <ExternalLink size={10} style={{ opacity: 0.7 }} />
-        </a>
-
         {/* Quick Tour / Panduan Button */}
         <button
           type="button"
@@ -996,14 +984,15 @@ export const Topbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Drawer Body */}
+            {/* Drawer Body */}
       <div className="mobile-drawer-body">
-        {/* Section 1: Navigasi Utama */}
+        {/* Section 1: Navigasi Utama (Identik dengan Menu Bilah Atas PC) */}
         <div className="mobile-drawer-section">
           <span className="mobile-drawer-section-title">Navigasi Utama</span>
 
           {role === 'student' && (
             <>
+              {/* 1. Dashboard */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'dashboard' ? 'active' : ''}`}
@@ -1014,62 +1003,81 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><Home size={16} /></span>
-                  <span className="mobile-drawer-item-label">Dashboard Peneliti</span>
+                  <span className="mobile-drawer-item-label">Dashboard</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'workspace' ? 'active' : ''}`}
-                onClick={() => {
-                  setCurrentPage('workspace');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><Laptop size={16} /></span>
-                  <span className="mobile-drawer-item-label">Ruang Kerja Tim (Workspace)</span>
-                </div>
-                <ChevronRight size={14} style={{ opacity: 0.4 }} />
-              </button>
+              {/* 2. Riset dan Proyek (Dropdown Group identik PC) */}
+              <div className="mobile-drawer-group">
+                <button
+                  type="button"
+                  className="mobile-drawer-group-header"
+                  onClick={() => setMobileProjectsOpen(prev => !prev)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FolderGit2 size={15} style={{ color: 'var(--primary)' }} />
+                    <span>Riset dan Proyek</span>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    style={{
+                      transform: mobileProjectsOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s',
+                      opacity: 0.6
+                    }}
+                  />
+                </button>
 
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
-                onClick={() => {
-                  setProjectCatalogTab('myProjects');
-                  setCurrentPage('projects');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><FolderGit2 size={16} /></span>
-                  <span className="mobile-drawer-item-label">Proyek Riset Saya</span>
-                </div>
-                {myProjectsCount > 0 && (
-                  <span className="badge badge-teal" style={{ fontSize: '10px', padding: '1px 6px' }}>
-                    {myProjectsCount}
-                  </span>
+                {mobileProjectsOpen && (
+                  <div className="mobile-drawer-group-content">
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'workspace' ? 'active' : ''}`}
+                      onClick={() => {
+                        setCurrentPage('workspace');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Laptop size={14} style={{ color: 'var(--primary)' }} />
+                      <span>Ruang Kerja Tim (Workspace)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
+                      onClick={() => {
+                        setProjectCatalogTab('myProjects');
+                        setCurrentPage('projects');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <FolderGit2 size={14} style={{ color: '#16a34a' }} />
+                      <span>Proyek Riset Saya</span>
+                      {myProjectsCount > 0 && (
+                        <span className="badge badge-teal" style={{ fontSize: '10px', padding: '1px 6px', marginLeft: 'auto' }}>
+                          {myProjectsCount}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
+                      onClick={() => {
+                        setProjectCatalogTab('all');
+                        setCurrentPage('projects');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Globe size={14} style={{ color: '#0284c7' }} />
+                      <span>Katalog &amp; Rekrutmen Riset</span>
+                    </button>
+                  </div>
                 )}
-              </button>
+              </div>
 
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
-                onClick={() => {
-                  setProjectCatalogTab('all');
-                  setCurrentPage('projects');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><Globe size={16} /></span>
-                  <span className="mobile-drawer-item-label">Katalog Riset & Rekrutmen</span>
-                </div>
-                <ChevronRight size={14} style={{ opacity: 0.4 }} />
-              </button>
-
+              {/* 3. Bimbingan */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'studentConsultations' ? 'active' : ''}`}
@@ -1081,13 +1089,15 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><MessageSquare size={16} /></span>
-                  <span className="mobile-drawer-item-label">Bimbingan Dosen</span>
+                  <span className="mobile-drawer-item-label">Bimbingan</span>
                 </div>
                 {pendingStudentConsults > 0 && (
                   <span className="mobile-drawer-badge">{pendingStudentConsults}</span>
                 )}
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
+              {/* 4. Fasilitas */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'studentResources' ? 'active' : ''}`}
@@ -1098,11 +1108,12 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><FlaskConical size={16} /></span>
-                  <span className="mobile-drawer-item-label">Fasilitas Laboratorium</span>
+                  <span className="mobile-drawer-item-label">Fasilitas</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
+              {/* 5. Portofolio */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'studentPortfolio' ? 'active' : ''}`}
@@ -1113,7 +1124,7 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><Trophy size={16} /></span>
-                  <span className="mobile-drawer-item-label">Portofolio Ilmiah STEAM</span>
+                  <span className="mobile-drawer-item-label">Portofolio</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
@@ -1122,6 +1133,7 @@ export const Topbar: React.FC = () => {
 
           {role === 'lecturer' && (
             <>
+              {/* 1. Supervisi */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'mission' ? 'active' : ''}`}
@@ -1132,64 +1144,84 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><Target size={16} /></span>
-                  <span className="mobile-drawer-item-label">Supervisi Riset Tim</span>
+                  <span className="mobile-drawer-item-label">Supervisi</span>
                 </div>
                 {blockerProjectsCount > 0 && (
                   <span className="mobile-drawer-badge warning">{blockerProjectsCount}</span>
                 )}
-              </button>
-
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'workspace' ? 'active' : ''}`}
-                onClick={() => {
-                  setCurrentPage('workspace');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><Laptop size={16} /></span>
-                  <span className="mobile-drawer-item-label">Ruang Kerja Tim (Workspace)</span>
-                </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
-                onClick={() => {
-                  setProjectCatalogTab('myProjects');
-                  setCurrentPage('projects');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><FolderGit2 size={16} /></span>
-                  <span className="mobile-drawer-item-label">Daftar Proyek Bimbingan</span>
-                </div>
-                {myProjectsCount > 0 && (
-                  <span className="badge badge-teal" style={{ fontSize: '10px', padding: '1px 6px' }}>
-                    {myProjectsCount}
-                  </span>
+              {/* 2. Riset dan Proyek (Dropdown Group identik PC) */}
+              <div className="mobile-drawer-group">
+                <button
+                  type="button"
+                  className="mobile-drawer-group-header"
+                  onClick={() => setMobileProjectsOpen(prev => !prev)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FolderGit2 size={15} style={{ color: 'var(--primary)' }} />
+                    <span>Riset dan Proyek</span>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    style={{
+                      transform: mobileProjectsOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s',
+                      opacity: 0.6
+                    }}
+                  />
+                </button>
+
+                {mobileProjectsOpen && (
+                  <div className="mobile-drawer-group-content">
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'workspace' ? 'active' : ''}`}
+                      onClick={() => {
+                        setCurrentPage('workspace');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Laptop size={14} style={{ color: 'var(--primary)' }} />
+                      <span>Ruang Kerja Tim (Workspace)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'projects' && projectCatalogTab === 'myProjects' ? 'active' : ''}`}
+                      onClick={() => {
+                        setProjectCatalogTab('myProjects');
+                        setCurrentPage('projects');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <FolderGit2 size={14} style={{ color: '#16a34a' }} />
+                      <span>Proyek Bimbingan</span>
+                      {myProjectsCount > 0 && (
+                        <span className="badge badge-teal" style={{ fontSize: '10px', padding: '1px 6px', marginLeft: 'auto' }}>
+                          {myProjectsCount}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
+                      onClick={() => {
+                        setProjectCatalogTab('all');
+                        setCurrentPage('projects');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Globe size={14} style={{ color: '#0284c7' }} />
+                      <span>Katalog &amp; Rekrutmen Riset</span>
+                    </button>
+                  </div>
                 )}
-              </button>
+              </div>
 
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'projects' && projectCatalogTab !== 'myProjects' ? 'active' : ''}`}
-                onClick={() => {
-                  setProjectCatalogTab('all');
-                  setCurrentPage('projects');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><Globe size={16} /></span>
-                  <span className="mobile-drawer-item-label">Katalog & Rekrutmen Riset</span>
-                </div>
-                <ChevronRight size={14} style={{ opacity: 0.4 }} />
-              </button>
-
+              {/* 3. Bimbingan */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'consultations' ? 'active' : ''}`}
@@ -1201,13 +1233,15 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><MessageSquare size={16} /></span>
-                  <span className="mobile-drawer-item-label">Bimbingan & Konsultasi</span>
+                  <span className="mobile-drawer-item-label">Bimbingan</span>
                 </div>
                 {pendingLecturerConsults > 0 && (
                   <span className="mobile-drawer-badge">{pendingLecturerConsults}</span>
                 )}
+                <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
+              {/* 4. Fasilitas */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'resources' ? 'active' : ''}`}
@@ -1218,11 +1252,12 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><FlaskConical size={16} /></span>
-                  <span className="mobile-drawer-item-label">Fasilitas Laboratorium</span>
+                  <span className="mobile-drawer-item-label">Fasilitas</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
+              {/* 5. Analitik */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'analytics' ? 'active' : ''}`}
@@ -1233,7 +1268,7 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><BarChart3 size={16} /></span>
-                  <span className="mobile-drawer-item-label">Analitik & Evaluasi STEAM</span>
+                  <span className="mobile-drawer-item-label">Analitik</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
@@ -1242,6 +1277,7 @@ export const Topbar: React.FC = () => {
 
           {role === 'admin' && (
             <>
+              {/* 1. Dashboard */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'dashboard' ? 'active' : ''}`}
@@ -1252,11 +1288,63 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><Home size={16} /></span>
-                  <span className="mobile-drawer-item-label">Dashboard Sistem</span>
+                  <span className="mobile-drawer-item-label">Dashboard</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
+              {/* 2. Riset dan Proyek */}
+              <div className="mobile-drawer-group">
+                <button
+                  type="button"
+                  className="mobile-drawer-group-header"
+                  onClick={() => setMobileProjectsOpen(prev => !prev)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FolderGit2 size={15} style={{ color: 'var(--primary)' }} />
+                    <span>Riset dan Proyek</span>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    style={{
+                      transform: mobileProjectsOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s',
+                      opacity: 0.6
+                    }}
+                  />
+                </button>
+
+                {mobileProjectsOpen && (
+                  <div className="mobile-drawer-group-content">
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'workspace' ? 'active' : ''}`}
+                      onClick={() => {
+                        setCurrentPage('workspace');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Laptop size={14} style={{ color: 'var(--primary)' }} />
+                      <span>Ruang Kerja Tim (Workspace)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`mobile-drawer-subitem ${currentPage === 'projects' ? 'active' : ''}`}
+                      onClick={() => {
+                        setProjectCatalogTab('all');
+                        setCurrentPage('projects');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Globe size={14} style={{ color: '#0284c7' }} />
+                      <span>Katalog Riset</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Supervisi */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'mission' ? 'active' : ''}`}
@@ -1267,11 +1355,12 @@ export const Topbar: React.FC = () => {
               >
                 <div className="mobile-drawer-item-left">
                   <span className="mobile-drawer-item-icon"><Target size={16} /></span>
-                  <span className="mobile-drawer-item-label">Supervisi Riset</span>
+                  <span className="mobile-drawer-item-label">Supervisi</span>
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.4 }} />
               </button>
 
+              {/* 4. Admin Console */}
               <button
                 type="button"
                 className={`mobile-drawer-item ${currentPage === 'admin' ? 'active' : ''}`}
@@ -1287,42 +1376,11 @@ export const Topbar: React.FC = () => {
                 </div>
                 <ChevronRight size={14} style={{ opacity: 0.7 }} />
               </button>
-
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'workspace' ? 'active' : ''}`}
-                onClick={() => {
-                  setCurrentPage('workspace');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><Laptop size={16} /></span>
-                  <span className="mobile-drawer-item-label">Ruang Kerja Tim</span>
-                </div>
-                <ChevronRight size={14} style={{ opacity: 0.4 }} />
-              </button>
-
-              <button
-                type="button"
-                className={`mobile-drawer-item ${currentPage === 'projects' ? 'active' : ''}`}
-                onClick={() => {
-                  setProjectCatalogTab('all');
-                  setCurrentPage('projects');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="mobile-drawer-item-left">
-                  <span className="mobile-drawer-item-icon"><Globe size={16} /></span>
-                  <span className="mobile-drawer-item-label">Katalog Riset</span>
-                </div>
-                <ChevronRight size={14} style={{ opacity: 0.4 }} />
-              </button>
             </>
           )}
         </div>
 
-        {/* Section 2: Instrumen STEAM */}
+        {/* Section 2: Instrumen STEAM (Identik dengan Dropdown Instrumen PC) */}
         <div className="mobile-drawer-section">
           <span className="mobile-drawer-section-title">Instrumen STEAM</span>
 
@@ -1380,7 +1438,7 @@ export const Topbar: React.FC = () => {
             <ChevronRight size={14} style={{ opacity: 0.4 }} />
           </button>
 
-          {/* VeriLab AI Engine Integration Pill in Hamburger Menu */}
+          {/* VeriLab AI Engine */}
           <a
             href="https://verilab.steamcraft.online"
             target="_blank"
@@ -1401,18 +1459,148 @@ export const Topbar: React.FC = () => {
               <div>
                 <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontWeight: 700, color: '#0369a1' }}>VeriLab AI Engine</span>
-                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#0284c7', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>LIVE</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#0284c7', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>AI LIVE</span>
                 </div>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Audit Integritas Data &amp; Kalibrasi GPR</small>
               </div>
             </div>
             <ExternalLink size={14} style={{ color: '#0284c7', opacity: 0.8 }} />
           </a>
+
+          {/* Sub-Header: Ekosistem Spesialis (v1.0 MAX) */}
+          <div style={{ margin: '8px 4px 4px 4px', borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
+            <span style={{ fontSize: '9.5px', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+              Ekosistem Spesialis (v1.0 MAX)
+            </span>
+          </div>
+
+          <a
+            href="https://scholar.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mobile-drawer-item"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#6366f1' }}><BookOpen size={16} /></span>
+              <div>
+                <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>PaperCraft AI</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#6366f1', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>SCHOLAR</span>
+                </div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Audit Struktur IMRaD &amp; Klaim Statistik</small>
+              </div>
+            </div>
+            <ExternalLink size={14} style={{ color: '#6366f1', opacity: 0.7 }} />
+          </a>
+
+          <a
+            href="https://sim.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mobile-drawer-item"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#06b6d4' }}><FlaskConical size={16} /></span>
+              <div>
+                <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>SteamSim Lab</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#06b6d4', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>60 FPS</span>
+                </div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Simulasi Fisika, Kinetika &amp; Chaos</small>
+              </div>
+            </div>
+            <ExternalLink size={14} style={{ color: '#06b6d4', opacity: 0.7 }} />
+          </a>
+
+          <a
+            href="https://maker.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mobile-drawer-item"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#ec4899' }}><Box size={16} /></span>
+              <div>
+                <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>MakerCraft 3D</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#ec4899', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>WEBGL</span>
+                </div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Parametric 3D Surfaces &amp; Ekspor .OBJ</small>
+              </div>
+            </div>
+            <ExternalLink size={14} style={{ color: '#ec4899', opacity: 0.7 }} />
+          </a>
+
+          <a
+            href="https://geo.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mobile-drawer-item"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#10b981' }}><MapPin size={16} /></span>
+              <div>
+                <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>SteamGeo Intelligence</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#10b981', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>GIS AI</span>
+                </div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Sains Data Spasial GWR &amp; Mitigasi</small>
+              </div>
+            </div>
+            <ExternalLink size={14} style={{ color: '#10b981', opacity: 0.7 }} />
+          </a>
+
+          <a
+            href="https://arena.steamcraft.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mobile-drawer-item"
+            style={{ textDecoration: 'none' }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: '#f59e0b' }}><Trophy size={16} /></span>
+              <div>
+                <div className="mobile-drawer-item-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>SteamArena</span>
+                  <span style={{ fontSize: '9px', fontWeight: 800, background: '#f59e0b', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>HACKATHON</span>
+                </div>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>STEAM Radar Matrix &amp; Peer-Review</small>
+              </div>
+            </div>
+            <ExternalLink size={14} style={{ color: '#f59e0b', opacity: 0.7 }} />
+          </a>
         </div>
 
-        {/* Section 3: Akun & Bantuan */}
+        {/* Section 3: Bantuan & Akun (Identik dengan Kontrol Akun PC) */}
         <div className="mobile-drawer-section">
-          <span className="mobile-drawer-section-title">Akun &amp; Bantuan</span>
+          <span className="mobile-drawer-section-title">Bantuan &amp; Akun</span>
+
+          <button
+            type="button"
+            className="mobile-drawer-item"
+            onClick={() => {
+              openModal('quickTour');
+              setMobileMenuOpen(false);
+            }}
+          >
+            <div className="mobile-drawer-item-left">
+              <span className="mobile-drawer-item-icon" style={{ color: 'var(--primary)' }}><Sparkles size={16} /></span>
+              <div>
+                <span className="mobile-drawer-item-label" style={{ fontWeight: 700 }}>Panduan Riset (Quick Tour)</span>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Tur alur riset ilmiah STEAM-Craft</small>
+              </div>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.4 }} />
+          </button>
 
           <button
             type="button"
@@ -1424,22 +1612,10 @@ export const Topbar: React.FC = () => {
           >
             <div className="mobile-drawer-item-left">
               <span className="mobile-drawer-item-icon"><User size={16} /></span>
-              <span className="mobile-drawer-item-label">Profil Peneliti</span>
-            </div>
-            <ChevronRight size={14} style={{ opacity: 0.4 }} />
-          </button>
-
-          <button
-            type="button"
-            className="mobile-drawer-item"
-            onClick={() => {
-              openModal('quickTour');
-              setMobileMenuOpen(false);
-            }}
-          >
-            <div className="mobile-drawer-item-left">
-              <span className="mobile-drawer-item-icon"><Sparkles size={16} /></span>
-              <span className="mobile-drawer-item-label">Panduan Cepat (Quick Tour)</span>
+              <div>
+                <span className="mobile-drawer-item-label" style={{ fontWeight: 700 }}>Profil Peneliti</span>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>{currentUser.name}</small>
+              </div>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.4 }} />
           </button>
@@ -1451,13 +1627,13 @@ export const Topbar: React.FC = () => {
               setMobileMenuOpen(false);
               logout();
             }}
-            style={{ color: '#e11d48' }}
+            style={{ color: '#e11d48', marginTop: '4px' }}
           >
             <div className="mobile-drawer-item-left">
               <span className="mobile-drawer-item-icon" style={{ color: '#e11d48' }}>
                 <LogOut size={16} />
               </span>
-              <span className="mobile-drawer-item-label">Keluar dari Akun</span>
+              <span className="mobile-drawer-item-label" style={{ fontWeight: 700 }}>Keluar dari Akun</span>
             </div>
           </button>
         </div>
