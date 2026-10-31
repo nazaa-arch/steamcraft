@@ -102,12 +102,22 @@ export const App: React.FC = () => {
   // 2. Main Team Project Hub Domain: steamcraft.online / www.steamcraft.online (Showcase Projek Tim Bersama)
   // When visitor opens steamcraft.online, show the Team Collaborative Projects Showcase & Multi-Project Gateway!
   // When visitor opens app.steamcraft.online, beta.steamcraft.online or ?view=app, show the full STEAM-Craft Application!
+  const hasBypassParam =
+    Boolean(searchParams.get('preview')) ||
+    Boolean(searchParams.get('page')) ||
+    Boolean(searchParams.get('role')) ||
+    Boolean(searchParams.get('user')) ||
+    Boolean(searchParams.get('bypass')) ||
+    Boolean(searchParams.get('demo')) ||
+    Boolean(searchParams.get('modal'));
+
   const isAppSubdomain =
     isBetaSubdomain ||
     hostname.startsWith('app.') ||
     hostname === 'app.steamcraft.online' ||
     searchParams.get('view') === 'app' ||
-    searchParams.get('app') === 'true';
+    searchParams.get('app') === 'true' ||
+    hasBypassParam;
 
   const isMainHub =
     !isAppSubdomain &&

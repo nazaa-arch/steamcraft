@@ -171,9 +171,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   });
 
+  // URL Bypass Resolver for Design & Direct Crawlers (e.g. html.to.design / Figma plugins)
+  const resolveBypassUser = (urlParams: URLSearchParams): User | null => {
+    const previewParam = (urlParams.get('preview') || urlParams.get('page') || urlParams.get('view') || '').toLowerCase();
+    const roleParam = (urlParams.get('role') || '').toLowerCase();
+    const userParam = (urlParams.get('user') || '').toLowerCase();
+    const hasBypass =
+      Boolean(urlParams.get('preview')) ||
+      Boolean(urlParams.get('page')) ||
+      Boolean(urlParams.get('role')) ||
+      Boolean(urlParams.get('user')) ||
+      Boolean(urlParams.get('bypass')) ||
+      Boolean(urlParams.get('demo')) ||
+      Boolean(urlParams.get('modal'));
+
+    if (!hasBypass) return null;
+
+    // 1. Explicit username matching
+    if (userParam) {
+      const matched = INITIAL_USERS.find(
+        u => u.username.toLowerCase() === userParam || u.name.toLowerCase().includes(userParam)
+      );
+      if (matched) return matched;
+    }
+
+    // 2. Explicit role matching
+    if (roleParam === 'lecturer' || roleParam === 'dosen') {
+      return INITIAL_USERS.find(u => u.role === 'lecturer') || INITIAL_USERS[4];
+    }
+    if (roleParam === 'admin') {
+      return INITIAL_USERS.find(u => u.role === 'admin') || INITIAL_USERS[7];
+    }
+    if (roleParam === 'student' || roleParam === 'mahasiswa') {
+      return INITIAL_USERS.find(u => u.role === 'student') || INITIAL_USERS[0];
+    }
+
+    // 3. Infer from preview page
+    if (['mission', 'supervisi', 'analytics', 'analitik', 'consultations'].includes(previewParam)) {
+      return INITIAL_USERS.find(u => u.role === 'lecturer') || INITIAL_USERS[4];
+    }
+    if (['admin', 'adminconsole', 'konsol-admin'].includes(previewParam)) {
+      return INITIAL_USERS.find(u => u.role === 'admin') || INITIAL_USERS[7];
+    }
+
+    // Default demo fallback: Student Budi Santoso
+    return INITIAL_USERS.find(u => u.role === 'student') || INITIAL_USERS[0];
+  };
+
+  const resolveBypassPage = (urlParams: URLSearchParams, resolvedRole?: string): PageName => {
+    if (urlParams.get('portal') === 'adm' || (typeof window !== 'undefined' && window.location.hostname.startsWith('adm.'))) {
+      return 'adminDev';
+    }
+
+    const prev = (urlParams.get('preview') || urlParams.get('page') || urlParams.get('view') || '').toLowerCase();
+    const roleParam = (urlParams.get('role') || resolvedRole || '').toLowerCase();
+    const isLecturer = roleParam === 'lecturer' || roleParam === 'dosen';
+
+    if (!prev) return 'dashboard';
+
+    if (['dashboard', 'beranda'].includes(prev)) return 'dashboard';
+    if (['workspace', 'ruang-kerja'].includes(prev)) return 'workspace';
+    if (['projects', 'proyek', 'katalog', 'myprojects', 'proyek-saya'].includes(prev)) return 'projects';
+    if (['recruitment', 'rekrutmen'].includes(prev)) return 'recruitment';
+    if (['consultation', 'consultations', 'studentconsultations', 'bimbingan'].includes(prev)) {
+      return isLecturer ? 'consultations' : 'studentConsultations';
+    }
+    if (['facilities', 'resources', 'studentresources', 'fasilitas'].includes(prev)) {
+      return isLecturer ? 'resources' : 'studentResources';
+    }
+    if (['portfolio', 'studentportfolio', 'portofolio'].includes(prev)) return 'studentPortfolio';
+    if (['mission', 'supervisi'].includes(prev)) return 'mission';
+    if (['analytics', 'analitik'].includes(prev)) return 'analytics';
+    if (['announcements', 'pengumuman'].includes(prev)) return 'announcements';
+    if (['admin', 'adminconsole', 'konsol-admin'].includes(prev)) return 'admin';
+    if (['radar', 'steamradar'].includes(prev)) return 'radar';
+    if (['logbook'].includes(prev)) return 'logbook';
+    if (['datarepo', 'repository'].includes(prev)) return 'dataRepo';
+    if (['maintenance'].includes(prev)) return 'maintenance';
+    if (['hub'].includes(prev)) return 'hub';
+
+    return 'dashboard';
+  };
+
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    // Sesi baru selalu dimulai dari Halaman Login
-    // Sesi aktif hanya disimpan dalam sessionStorage selama tab browser terbuka
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const bypassUser = resolveBypassUser(urlParams);
+      if (bypassUser) return bypassUser;
+    }
+
+    // Sesi aktif disimpan dalam sessionStorage selama tab browser terbuka
     const savedSession = sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     if (savedSession) {
       try {
@@ -199,9 +286,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentPage, setCurrentPageState] = useState<PageName>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('portal') === 'adm' || window.location.hostname.startsWith('adm.')) {
-        return 'adminDev';
-      }
+      const bypassUser = resolveBypassUser(urlParams);
+      return resolveBypassPage(urlParams, bypassUser?.role);
     }
     return 'dashboard';
   });
@@ -210,8 +296,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentPageState(page);
     trackPageView(page);
   };
-  const [selectedProjectId, setSelectedProjectId] = useState<number>(1);
-  const [projectCatalogTab, setProjectCatalogTab] = useState<'myProjects' | 'all' | 'recruitment'>('all');
+  const [selectedProjectId, setSelectedProjectId] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pid = parseInt(urlParams.get('project') || urlParams.get('projectId') || '1', 10);
+      if (!isNaN(pid) && pid > 0) return pid;
+    }
+    return 1;
+  });
+
+  const [projectCatalogTab, setProjectCatalogTab] = useState<'myProjects' | 'all' | 'recruitment'>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = (urlParams.get('tab') || '').toLowerCase();
+      const prev = (urlParams.get('preview') || urlParams.get('page') || '').toLowerCase();
+      if (tab === 'myprojects' || tab === 'proyek-saya' || prev === 'myprojects' || prev === 'proyek-saya') return 'myProjects';
+      if (tab === 'recruitment' || tab === 'rekrutmen' || prev === 'recruitment' || prev === 'rekrutmen') return 'recruitment';
+    }
+    return 'all';
+  });
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
@@ -354,7 +457,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setModalData(null);
   };
 
-  // Check URL query parameters for invitation links, maintenance overrides, etc.
+  // Check URL query parameters for invitation links, maintenance overrides, modal popups, etc.
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const inviteCode = urlParams.get('invite') || urlParams.get('join') || urlParams.get('code');
@@ -370,6 +473,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     if (urlParams.get('page') === 'maintenance') {
       setCurrentPage('maintenance');
+    }
+
+    // Modal popup bypass query param (e.g. ?modal=steamRadar, ?modal=logbook, ?modal=dataRepo)
+    const modalParam = urlParams.get('modal') || urlParams.get('popup');
+    if (modalParam) {
+      const m = modalParam.toLowerCase();
+      if (['steamradar', 'radar'].includes(m)) {
+        openModal('steamRadar');
+      } else if (['logbook'].includes(m)) {
+        openModal('logbook');
+      } else if (['datarepo', 'repo', 'repository'].includes(m)) {
+        openModal('dataRepo');
+      } else if (['quicktour', 'tour', 'panduan'].includes(m)) {
+        openModal('quickTour');
+      } else if (['profile', 'profil'].includes(m)) {
+        openModal('profile', currentUser);
+      } else if (['rubric', 'rubricguide'].includes(m)) {
+        openModal('rubricGuide');
+      } else if (['newproject', 'proyekbaru'].includes(m)) {
+        openModal('newProject');
+      }
     }
   }, [currentUser]);
 
@@ -514,6 +638,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setCurrentUser(null);
+    if (typeof window !== 'undefined' && window.location.search) {
+      const url = new URL(window.location.href);
+      url.search = '';
+      window.history.replaceState({}, '', url.toString());
+    }
     showToast('Anda telah keluar dari ruang kerja.');
   };
 
