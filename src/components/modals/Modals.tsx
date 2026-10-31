@@ -55,6 +55,9 @@ import {
   Settings
 } from 'lucide-react';
 import { User, Project, UserRole } from '../../types';
+import { SteamRadarMatrix } from '../pages/SteamRadarMatrix';
+import { ResearchLogbook } from '../pages/ResearchLogbook';
+import { DataRepository } from '../pages/DataRepository';
 
 export const Modals: React.FC = () => {
   const {
@@ -91,7 +94,17 @@ export const Modals: React.FC = () => {
 
   return (
     <div className="modal-overlay active" onClick={closeModal}>
-      <div className={`modal-box ${activeModal === 'profile' || activeModal === 'quickTour' ? 'modal-box-xl' : ''}`} onClick={e => e.stopPropagation()}>
+      <div
+        className={`modal-box ${
+          ['profile', 'quickTour', 'steamRadar', 'logbook', 'dataRepo'].includes(activeModal) ? 'modal-box-xl' : ''
+        }`}
+        style={
+          ['steamRadar', 'logbook', 'dataRepo'].includes(activeModal)
+            ? { width: 'min(96vw, 1200px)', maxWidth: '1200px', maxHeight: '92vh', padding: '24px 20px', overflow: 'hidden' }
+            : undefined
+        }
+        onClick={e => e.stopPropagation()}
+      >
         <button className="modal-close" onClick={closeModal}>
           &times;
         </button>
@@ -111,6 +124,21 @@ export const Modals: React.FC = () => {
         {activeModal === 'quickTour' && <QuickTourModalContent onClose={closeModal} />}
         {activeModal === 'projectDetail' && <ProjectDetailModalContent project={modalData} onClose={closeModal} />}
         {activeModal === 'registerBuild' && <RegisterBuildModalContent data={modalData} onClose={closeModal} />}
+        {activeModal === 'steamRadar' && (
+          <div style={{ maxHeight: '85vh', overflowY: 'auto', padding: '10px 4px' }}>
+            <SteamRadarMatrix />
+          </div>
+        )}
+        {activeModal === 'logbook' && (
+          <div style={{ maxHeight: '85vh', overflowY: 'auto', padding: '10px 4px' }}>
+            <ResearchLogbook />
+          </div>
+        )}
+        {activeModal === 'dataRepo' && (
+          <div style={{ maxHeight: '85vh', overflowY: 'auto', padding: '10px 4px' }}>
+            <DataRepository />
+          </div>
+        )}
       </div>
     </div>
   );

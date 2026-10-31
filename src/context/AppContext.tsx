@@ -373,7 +373,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // UI state
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const modalParam = urlParams.get('modal') || urlParams.get('popup');
+      if (modalParam) {
+        const m = modalParam.toLowerCase();
+        if (['steamradar', 'radar'].includes(m)) return 'steamRadar';
+        if (['logbook'].includes(m)) return 'logbook';
+        if (['datarepo', 'repo', 'repository'].includes(m)) return 'dataRepo';
+        if (['quicktour', 'tour', 'panduan'].includes(m)) return 'quickTour';
+        if (['profile', 'profil'].includes(m)) return 'profile';
+        if (['rubric', 'rubricguide'].includes(m)) return 'rubricGuide';
+        if (['newproject', 'proyekbaru'].includes(m)) return 'newProject';
+      }
+    }
+    return null;
+  });
   const [modalData, setModalData] = useState<any>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
